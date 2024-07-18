@@ -1,0 +1,62 @@
+.my-colleges-container {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  max-width: 1400px;
+  margin: 20px auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.my-colleges-container h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.colleges-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.colleges-table th, .colleges-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.colleges-table th {
+  background-color: #f2f2f2;
+}
+
+.colleges-table td {
+  background-color: #fff;
+}
+
+.table-header-wrap {
+    white-space: normal; /* Allow text to wrap */
+    word-wrap: break-word; /* Break words to fit the container */
+    text-align: left; /* Center-align the text */
+  }
+
+.small-font {
+    font-size: 15px; /* Adjust the size as needed */
+  }
+  
+  .my-colleges-container {
+    padding: 20px;
+  }
+  
+  .table-controls {
+    margin-bottom: 10px;
+  }
+  
+  .filter-input {
+    padding: 5px;
+    font-size: 14px;
+    width: 200px;
+  }
+
+  .highlight-green {
+    background-color: #f9f9f9;
+  }
+  
+  

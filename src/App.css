@@ -14,8 +14,8 @@
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+  background-color: #dce4aa;
+  min-height: 10vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,9 +24,41 @@
   color: white;
 }
 
+.App-header {
+  background-color: #dce4aa;
+  min-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-body {
+  display: flex;
+  justify-content: flex-start; /* Align items to the start */
+  align-items: center;
+}
+
+.component {
+  margin: 10px;
+}
+
 .App-link {
   color: #61dafb;
 }
+
+.MySchools-header {
+  font-size: 1.8rem; /* Adjust this value to make the "My Schools" header larger */
+  color: rgb(0, 0, 0); /* Change this to the desired color */
+  text-align: left; /* Align the text to the left */
+  margin-left: 60px; 
+}
+
+
+
+
 
 @keyframes App-logo-spin {
   from {

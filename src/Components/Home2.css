@@ -1,0 +1,390 @@
+
+
+
+.row {
+    display: flex;
+    justify-content: flex-end; 
+  }
+  
+  .column-right {
+    flex: 70%;;
+
+  }
+  
+  .column-left {
+    flex: 30%;
+    background-color: #fcfeff;
+    
+  }
+
+.css-16ld5u0 {
+    background-color: #fcfeff; 
+    -webkit-margin-start: auto;
+    margin-inline-start: auto;
+    -webkit-margin-end: auto;
+    margin-inline-end: auto;
+    padding: 20px;
+    -webkit-padding-end: 20px;
+    padding-inline-end: 20px;
+    min-height: 100vh;
+    width: 900px;
+}
+
+
+.css-1k6m9o {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    width: 100%;
+    padding-top: 45px;
+    position: relative;
+}
+
+.css-1799jpi {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -webkit-margin-start: auto;
+    margin-inline-start: auto;
+    -webkit-margin-end: auto;
+    margin-inline-end: auto;
+    width: 100%;
+    min-height: 75vh;
+    max-width: 1000px;
+
+}
+
+
+.css-6n9yju {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-margin-start: 0px;
+    margin-inline-start: 0px;
+    margin-top: 20px;
+    justify-self: flex-end;
+}
+
+
+
+.css-1pgcnou {
+    width: 100%;
+    min-width: 0px;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    position: relative;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    transition-property: var(--chakra-transition-property-common);
+    transition-duration: var(--chakra-transition-duration-normal);
+    font-weight: 500;
+    border-radius: 45px;
+    font-size: var(--chakra-fontSizes-sm);
+    -webkit-padding-start: var(--chakra-space-4);
+    padding-inline-start: var(--chakra-space-4);
+    -webkit-padding-end: var(--chakra-space-4);
+    padding-inline-end: var(--chakra-space-4);
+    height: 100%;
+    border: 1px solid;
+    border-color: var(--chakra-colors-gray-200);
+    background: inherit;
+    min-height: 54px;
+    padding: 15px 20px;
+    -webkit-margin-end: 10px;
+    margin-inline-end: 10px;
+    color: var(--chakra-colors-navy-700);
+}
+
+
+.css-gllksg {
+    display: inline-flex;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    position: relative;
+    white-space: nowrap;
+    vertical-align: middle;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    line-height: 1.2;
+    border-radius: 45px;
+    font-weight: var(--chakra-fontWeights-semibold);
+    box-shadow: var(--chakra-shadows-none);
+    transition: .25s all ease;
+    box-sizing: border-box;
+    height: 54px;
+    min-width: var(--chakra-sizes-10);
+    font-size: var(--chakra-fontSizes-sm);
+    -webkit-padding-start: 16px;
+    padding-inline-start: 16px;
+    -webkit-padding-end: 16px;
+    padding-inline-end: 16px;
+    background: linear-gradient(to top, #4a25e0, #7a5aff);
+
+
+
+    color: white;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin-inline-start: auto;
+}
+
+
+
+
+
+.css-1h62d89 {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    border-radius: var(--chakra-radii-full);
+    background: var(--chakra-colors-transparent);
+    border: 1px solid;
+    border-color: var(--chakra-colors-gray-200);
+    margin-inline-end: 20px;
+    height: 40px;
+    min-height: 40px;
+    min-width: 40px;
+}
+
+.css-9bephp {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.css-cyklgb {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-inline: auto;
+    margin-bottom: auto;
+}
+
+.css-1ie6an7 {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    line-height: 1em;
+    -webkit-flex-shrink: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    color: var(--chakra-colors-brand-500);
+}
+
+.css-uuq0e0 {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    line-height: 1em;
+    -webkit-flex-shrink: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    color: var(--chakra-colors-gray-500);
+    cursor: pointer;
+    -webkit-margin-start: auto;
+    margin-inline-start: auto;
+}
+
+.css-wybkwz {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    padding: 22px;
+    border: 1px solid;
+    border-color: var(--chakra-colors-gray-200);
+    border-radius: 14px;
+    width: 100%;
+    z-index: 2;
+}
+
+
+
+
+/*RETUREND TEXT*/
+
+.css-hboir5 {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    width: 100%;
+}
+
+.css-1oo0gu1 {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    border-radius: var(--chakra-radii-full);
+    background: linear-gradient(to bottom, #4a25e0, #7a5aff);
+    -webkit-margin-end: 20px;
+    margin-inline-end: 20px;
+    height: 40px;
+    min-height: 40px;
+    min-width: 40px;
+}
+
+.css-1rgvbqi {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    line-height: 1em;
+    -webkit-flex-shrink: 0;
+    -ms-flex-negative: 0;
+    flex-shrink: 0;
+    color: white;
+}
+
+/*Organization or Response*/
+
+.css-adkx0o {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* Adjust the width as needed */
+    max-width: 100%; /* Prevent the container from expanding beyond its parent */
+    position: relative;
+    max-width: 800px;
+    overflow-wrap: break-word; /* Ensure text wraps within the container */
+    word-wrap: break-word; /* Ensure text wraps within the container */
+    word-break: break-all; /* Ensure text breaks at the end of container */
+    box-shadow: rgba(112, 144, 176, 0.1) 14px 17px 40px 4px;
+    color: var(--chakra-colors-navy-700);
+    height: 450px;
+    font-size: var(--chakra-fontSizes-sm);
+    line-height: 24px;
+    font-weight: 500;
+    padding-inline-start: 22px !important;
+    padding-inline-end: 22px !important;
+    padding: 20px 20px 20px;
+    border-radius: 14px;
+    background: rgb(255, 255, 255);
+    background-clip: border-box; /* Corrected background property */
+    background: #fff;
+
+}
+
+
+.prompts-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .css-1hngipw {
+    transition-property: var(--chakra-transition-property-common);
+    transition-duration: var(--chakra-transition-duration-fast);
+    transition-timing-function: var(--chakra-transition-easing-ease-out);
+    cursor: pointer;
+    text-decoration: none;
+    outline: transparent solid 2px;
+    outline-offset: 2px;
+    color: var(--chakra-colors-navy-700);
+    box-shadow: var(--chakra-shadows-none);
+    background: inherit;
+    border-radius: inherit;
+    font-weight: var(--chakra-fontWeights-bold);
+    font-size: 34px;
+    padding: 0px;
+    flex: center;
+    
+}
+
+.font-medium {
+    white-space: normal; /* Ensure that text wraps normally */
+    overflow-wrap: break-word; /* Ensure long words break and wrap */
+    word-wrap: break-word; /* Ensure text wraps within the container */
+    word-break: break-word; /* Ensure text breaks at the end of the container */
+  }
+  
+
+/* src/components/Chatbot.css */
+.message {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: 16px;
+    white-space: pre-wrap; /* Preserve line breaks */
+    max-width: 80%; /* Prevent messages from being too wide */
+    text-align: center; /* Center the text */
+  }
+  
+
+  
+  .school-container {
+    max-height: 500px; /* Adjust the height as needed */
+    display: flex;
+    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: #fcfeff;
+    padding: 10px; /* Add some padding for better spacing */
+    border-radius: 5px; /* Optional: add rounded corners */
+    white-space: nowrap; /* Prevent wrapping */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Proper box shadow syntax */
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 100%;
+    width: 500px;
+  }
+
+
+
+ 
+
+
+  
+  .school-item {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    max-width: 85%; /* Make sure it takes the full width of its parent */
+    }
+    
+
+    .school-item:first-child {
+        border-top-width:0px;
+      }
+      
+      .school-item:last-child {
+        border-bottom: none;
+      }
+  

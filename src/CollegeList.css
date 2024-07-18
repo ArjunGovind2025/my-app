@@ -1,0 +1,48 @@
+/* src/CollegeList.css */
+.college-list {
+    padding: 20px;
+    width: 30%;
+    background-color: #f0f0f0;
+    border-right: 1px solid #ccc;
+    margin-left: 20px;
+
+  }
+  
+  .college-list h2 {
+    margin-bottom: 10px;
+  }
+  
+  .college-list input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .college-list button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  
+  .college-list button:hover {
+    background-color: #0056b3;
+  }
+  
+  .college-list ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .college-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ccc;
+  }
+
+
+  

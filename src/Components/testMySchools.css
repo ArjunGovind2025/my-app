@@ -1,0 +1,43 @@
+.css-e9uokm {
+    grid-template-columns: repeat(2, 1fr);
+    display: block;
+    gap: 20px;
+}
+
+.css-i625um {
+    display: flex;
+    grid-area: 1 / 1 / 2 / 3;
+}
+
+.css-11t14l {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+    box-shadow: rgba(112, 144, 176, 0.08) 14px 17px 40px 4px;
+    min-width: 0px;
+    overflow-wrap: break-word;
+    -webkit-box-pack: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 20px;
+    background: border-box rgb(255, 255, 255);
+}
+
+.css-v9fxl0 {
+    display: flex;
+    -webkit-box-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.css-1lbzx44 {
+    color: var(--chakra-colors-secondaryGray-900);
+    font-size: var(--chakra-fontSizes-md);
+    margin-inline-end: 6px;
+    font-weight: 700;
+}

@@ -1,0 +1,107 @@
+.css-r4ua5r {
+    grid-template-rows: repeat(2, 1fr);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.css-5h3jk2 {
+    margin-inline-end: 0px;
+    margin-bottom: 20px;
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+.css-bcbi7i {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+    box-shadow: rgba(112, 144, 176, 0.08) 14px 17px 40px 4px;
+    min-width: 0px;
+    overflow-wrap: break-word;
+    margin-bottom: 20px;
+    border-radius: 20px;
+    background: border-box rgb(255, 255, 255);
+    padding: 30px 20px;
+}
+
+.css-col4ly {
+    color: var(--chakra-colors-secondaryGray-900);
+    font-size: var(--chakra-fontSizes-lg);
+    font-weight: 700;
+    margin-bottom: 10px;
+    margin-inline: auto;
+}
+
+.css-16ont44 {
+    display: flex;
+    width: 100%;
+    position: relative;
+    box-shadow: rgba(112, 144, 176, 0.08) 14px 17px 40px 4px;
+    min-width: 0px;
+    overflow-wrap: break-word;
+    -webkit-box-align: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px 20px 30px;
+    border-radius: 20px;
+    background: border-box rgb(255, 255, 255);
+}
+
+.css-g4yn1g {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    position: relative;
+    box-shadow: rgba(112, 144, 176, 0.08) 14px 17px 40px 4px;
+    min-width: 0px;
+    overflow-wrap: break-word;
+    margin-bottom: 20px;
+    padding: 20px 20px 30px;
+    border-radius: 20px;
+    background: border-box rgb(255, 255, 255);
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+.css-u6kgca {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    unicode-bidi: isolate;
+    border-color: inherit;
+}
+
+.css-1ymzhfb {
+    font-family: var(--chakra-fonts-heading);
+    font-weight: var(--chakra-fontWeights-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--chakra-letterSpacings-wider);
+    text-align: start;
+    padding-inline-start: var(--chakra-space-6);
+    padding-inline-end: 10px;
+    padding-top: var(--chakra-space-3);
+    padding-bottom: var(--chakra-space-3);
+    line-height: var(--chakra-lineHeights-4);
+    font-size: var(--chakra-fontSizes-xs);
+    color: var(--chakra-colors-gray-600);
+  
+    border-color: var(--chakra-colors-gray-200);
+}
+
+.css-1w7gwv1 {
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    color: var(--chakra-colors-gray-400);
+}

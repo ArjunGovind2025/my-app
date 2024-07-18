@@ -1,0 +1,70 @@
+.schools-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.school-item {
+  margin-bottom: 10px;
+  padding: 5px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+
+.column-left {
+  flex: 1;
+}
+
+.column-right {
+  flex: 1;
+  text-align: right;
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.my-price {
+  color: black; /* Example color */
+  font-weight: bold; /* Optional: make the text bold */
+}
+
+.school-link {
+  display: inline-block;
+  background-color: #fff; /* Change the background color */
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-decoration: none; /* Remove underline */
+  color: #000; /* Text color */
+  transition: background-color 0.3s ease; /* Smooth transition for background color change */
+}
+
+.school-link:hover {
+  background-color: #e0e0e0; /* Background color on hover */
+}
+
+.css-y5xvhi {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+  padding-inline-start: var(--chakra-space-1);
+  padding-inline-end: var(--chakra-space-1);
+  text-transform: uppercase;
+  border-radius: 10px;
+  background: var(--badge-bg);
+  box-shadow: var(--badge-shadow);
+  line-height: 100%;
+  padding: 7px 12px;
+  --badge-bg: white;
+  --badge-color: white;
+  color: black;
+  font-size: var(--chakra-fontSizes-sm);
+  font-weight: 600;
+}
+
+
+
+.school-checkbox {
+  margin-top: 8px; /* Space between checkbox and label */
+
+  cursor: pointer; 
+  /* Change cursor to pointer when hovering over the checkbox */
+  
+}
