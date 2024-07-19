@@ -1,24 +1,17 @@
+"use client"
+
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig'; // Adjust the import path as needed
 import { useCombined } from './CollegeContext';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/table.jsx'; // Import the custom table components
-import {
-  useReactTable,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-} from '@tanstack/react-table';
-import './CollegeSpreadsheet.css';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
+import { Badge } from "./ui/badge";
+import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./ui/dropdown-menu"
+import { Button } from "./ui/button"
+import { File } from "lucide-react"
+import '../global.css';
 
 const CollegeSpreadsheet = () => {
   const { user, myColleges } = useCombined();
@@ -61,44 +54,54 @@ const CollegeSpreadsheet = () => {
       {
         accessorKey: 'Name',
         header: 'Name',
+        enableSorting: true,
       },
       {
         accessorKey: 'Total price for out-of-state students 2022-23',
         header: 'Cost of Attendance',
+        enableSorting: true,
       },
       {
         accessorKey: 'myPrice',
         header: 'My Estimated Net Cost',
+        enableSorting: true,
       },
       {
         accessorKey: '% Admitted-Total',
         header: 'Acceptance Rate',
-        cell: info => `${info.getValue()}%`
+        cell: info => `${info.getValue()}%`,
+        enableSorting: true,
       },
       {
         accessorKey: 'meritQualified',
         header: 'Qualified for Merit Aid',
         cell: info => info.getValue() ? 'Yes' : 'No',
+        enableSorting: true,
       },
       {
         accessorKey: 'Avg merit award for Freshman w/out need',
-        header: 'Avg Merit Aid Award'
+        header: 'Avg Merit Aid Award',
+        enableSorting: true,
       },
       {
         accessorKey: 'SAT/ACT Required',
         header: 'SAT/ACT Required',
+        enableSorting: true,
       },
       {
         accessorKey: '1st Early Decision Deadline',
         header: 'ED Deadline',
+        enableSorting: true,
       },
       {
         accessorKey: 'Early Decision Acceptance Rate',
         header: 'ED Acceptance',
+        enableSorting: true,
       },
       {
         accessorKey: 'Early Action Deadline',
         header: 'EA Deadline',
+        enableSorting: true,
       },
       // Add more columns as needed
     ],
@@ -126,52 +129,74 @@ const CollegeSpreadsheet = () => {
   }
 
   return (
-    <div className="my-colleges-container">
-      <h1>My Colleges</h1>
-      <div className="table-controls">
-        <input
-          placeholder="Filter by name..."
-          value={table.getColumn('Name')?.getFilterValue() || ''}
-          onChange={e => table.getColumn('Name')?.setFilterValue(e.target.value)}
-          className="filter-input"
-        />
-      </div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <TableHead
-                  key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
-                  className={header.column.id === 'myPrice' ? 'highlight-green table-header-wrap' : 'table-header-wrap'}
-                >
-                  {flexRender(header.column.columnDef.header, header.getContext())}
-                  {{
-                    asc: ' 🔼',
-                    desc: ' 🔽'
-                  }[header.column.getIsSorted()] ?? null}
-                </TableHead>
+    <Card>
+      <CardHeader className="px-7 flex justify-between items-center">
+        <CardTitle>My Spreadsheet</CardTitle>
+        <CardDescription>A list of colleges you are interested in.</CardDescription>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 gap-1 text-sm"
+            >
+              <File className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only">Export</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Export Options</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Export as CSV</DropdownMenuItem>
+            <DropdownMenuItem>Export as PDF</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </CardHeader>
+      <CardContent>
+        <div className="table-controls">
+          <input
+            placeholder="Filter by name..."
+            value={table.getColumn('Name')?.getFilterValue() || ''}
+            onChange={e => table.getColumn('Name')?.setFilterValue(e.target.value)}
+            className="filter-input"
+          />
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {table.getHeaderGroups().map(headerGroup => (
+                <React.Fragment key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <TableHead
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className={header.column.getCanSort() ? 'cursor-pointer' : ''}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: ' 🔼',
+                        desc: ' 🔽'
+                      }[header.column.getIsSorted()] ?? null}
+                    </TableHead>
+                  ))}
+                </React.Fragment>
               ))}
             </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows.map(row => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map(cell => (
-                <TableCell
-                  key={cell.id}
-                  className={cell.column.id === 'myPrice' ? 'highlight-green small-font' : 'small-font'}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map(row => (
+              <TableRow key={row.id} className={row.index % 2 === 0 ? "bg-accent" : ""}>
+                {row.getVisibleCells().map(cell => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 };
 

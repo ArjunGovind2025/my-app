@@ -4,19 +4,23 @@ import { db, auth } from '../firebaseConfig';
 import { Link } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import './MySchools.css';
+import SmallerPieChartComponent from './SmallerPieChartComponent';
+import { useCombined } from './CollegeContext';
+
+
 
 const MySchools = () => {
-  const [user, setUser] = useState(null);
+  const { user, myColleges } = useCombined(); // Destructure myColleges from the context
   const [mySchools, setMySchools] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        setUser(currentUser);
+        
         subscribeToMySchools(currentUser.uid);
       } else {
-        setUser(null);
+        
         setMySchools([]);
         setLoading(false);
       }

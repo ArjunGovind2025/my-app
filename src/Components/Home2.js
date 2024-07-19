@@ -8,16 +8,19 @@ import Header from '../Header.js';
 import MySchools from './MySchools.js';
 import testMySchools from './testMySchools.js';
 import ProgressTracker from './ProgressTracker.js';
-import { getChatResponse } from './API'; // Import the API logic
+import StepTracker from './StepTracker';
+import { getChatResponse, getShortChatResponse } from './API'; // Import the API logic
 import { useCombined } from './CollegeContext'; // Import the custom hook to access context
 import WorkflowsBot from './WorkflowsBot';
 import { calculateMeritAidEligibilityScore, fetchMeritAidData } from './meritAidCalculator'; // Import the functions
 import { db } from '../firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
+import { Typewriter } from 'react-simple-typewriter';
+
 
 
 const Home2 = () => {
-  const { user, myColleges, addCollegeByIpedsId } = useCombined(); // Destructure myColleges from the context
+  const { user, userDoc, myColleges, fetchUserDoc, addCollegeByIpedsId } = useCombined(); // Destructure myColleges from the context
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [botMessage, setBotMessage] = useState('');
@@ -27,12 +30,53 @@ const Home2 = () => {
   const [gpa, setGpa] = useState(''); // State for GPA
   const [testScores, setTestScores] = useState({}); // State for test scores
 
+  const steps = [
+    'Welcome',
+    'Add College',
+    'Qualify for Financial Aid',
+    //'SAI',
+    //'income',
+    'Calculate SAI',
+    //'completeSAI',
+    //'submitFAFSA',
+    //'reviewAidOffers',
+    'Qualify for Merit Aid',
+    //'applyMeritAid',
+    //'otherScholarships',
+    //'complete',
+    'Ask Questions',
+  ];
+
+  const stepMessages = {
+    'Welcome': `Welcome to [Website Name]!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat state are you from? List state abreviation(ie NY)`,
+    'Add College': `The first step is to add at least one college to your college list. Which colleges are you interested in?`,
+    'Qualify for Financial Aid': `Do you think you qualify for financial aid? (Yes, No, Not Sure)`,
+    'SAI': `Do you know your Student Aid Index? (Yes, No)`,
+    'income': `Let's determine if you might qualify for financial aid. What is your family's approximate annual income?`,
+    'Calculate SAI': `Please provide the following information to calculate your SAI: 1. Income 2. Assets 3. Family Size 4. Student Income`,
+    'completeSAI': `Here is how much money you can expect to receive from your schools:\n`,
+    'submitFAFSA': `Please submit your FAFSA and state-specific financial aid applications. Once done, review your financial aid offers and deduct the aid from your college list costs.`,
+    'reviewAidOffers': `Review your financial aid offers and deduct the aid from your college list costs. Have you reviewed your offers yet? (Yes, No)`,
+    'Qualify for Merit Aid': `Enter your GPA and SAT/ACT scores to calculate merit aid eligibility (ie GPA: 3.5 SAT: 1400 ).`,
+    'applyMeritAid': `Great! Based on your academic achievements, let's explore other scholarships you might qualify for.`,
+    'otherScholarships': `You have some other scholarships left to explore. Let's find more opportunities.`,
+    'complete': `You've completed all the steps! Now you can ask me any questions you have.`,
+    'Ask Questions': `You've completed all the steps! Now you can ask me any questions you have.`
+  };
+
+
   useEffect(() => {
     // Initial message from the chatbot
     const welcomeMessage = `Welcome to [Website Name]!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
     setMessages([{ role: 'bot', content: welcomeMessage }]);
+    {handleResetMessages()}
   }, []);
 
+  const handleStepClick = (step) => {
+    setCurrentStep(step);
+    setBotMessage(stepMessages[step]); // Update bot message to reflect the step change
+  };
+  
   const calculateMeritAidEligibilityScore = (gpa, testScore, testType = 'SAT') => {
     // Normalize GPA
     const normalizedGpa = (gpa - 2.5) / (4.0 - 2.5);
@@ -46,11 +90,41 @@ const Home2 = () => {
     } else {
       throw new Error("Invalid test type. Please use 'SAT' or 'ACT'.");
     }
+    
 
     // Calculate combined score
     const combinedScore = (normalizedGpa + normalizedTestScore) / 2;
 
     return combinedScore;
+  };
+
+  const storeUserData = async (gpa, testScore, testType) => {
+    try {
+      const userDocRef = doc(db, 'userData', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      console.log("Firestore document snapshot:", userDocSnap.exists() ? "Document exists" : "Document does not exist");
+  
+      if (userDocSnap.exists()) {
+        // Update the existing document
+        console.log("Updating existing document with GPA and Test Score");
+   
+        await updateDoc(userDocRef, {
+          GPA: gpa,
+          [testType]: testScore,
+        });
+        console.log("Document updated successfully");
+      } else {
+        // Create a new document if it doesn't exist
+        console.log("Creating a new document with GPA and Test Score");
+        await setDoc(userDocRef, {
+          GPA: gpa,
+          [testType]: testScore,
+        });
+        console.log("Document created successfully");
+      }
+    } catch (error) {
+      console.error("Error storing user data:", error);
+    }
   };
 
   const findCollegeIdByName = async (collegeName) => {
@@ -214,12 +288,13 @@ const Home2 = () => {
     let botResponse = '';
 
     try {
-      if (currentStep === 'finalStep') {
+      if (currentStep === 'Ask Questions') {
         // Call OpenAI API to handle user questions in the final step
-        botResponse = await getChatResponse(message, myColleges);
+
+        botResponse = await getShortChatResponse(message, userDoc, myColleges, 'Provide short and concise answers.');
       } else {
         switch (currentStep) {
-          case 'welcome':
+          case 'Welcome':
           setUserData({ ...userData, name: message });
           const updatedCollegesState = await handleStateAbbreviation(message);
           botResponse = ''
@@ -229,9 +304,9 @@ const Home2 = () => {
           botResponse += `\nThe first step is to add at least one college to your college list. Which colleges are you interested in?`;
 
 
-          setCurrentStep('addCollege');
+          setCurrentStep('Add College');
           break;
-          case 'addCollege':
+          case 'Add College':
               const collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
               const addedColleges = [];
               console.log('College names extracted from user input:', collegeNames);
@@ -251,13 +326,13 @@ const Home2 = () => {
     
               if (addedColleges.length > 0) {
                 botResponse += `Great! ${addedColleges.join(', ')} ha${addedColleges.length > 1 ? 've' : 's'} been added to your list. Do you think you qualify for financial aid? (Yes, No, Not Sure)`;
-                setCurrentStep('financialAidQualification');
+                setCurrentStep('Qualify for Financial Aid');
               } else {
                 botResponse += `Please try adding colleges again.`;
-                setCurrentStep('addCollege');
+                setCurrentStep('Add College');
               }
           break;
-          case 'financialAidQualification':
+          case 'Qualify for Financial Aid':
             setUserData({ ...userData, financialAidQualification: message });
             if (message.toLowerCase() === 'yes') {
               botResponse = "Great! Do you know you Student Aid Index? (Yes, No)";
@@ -286,12 +361,12 @@ const Home2 = () => {
             break;
           case 'income':
             setUserData({ ...userData, income: message });
-            if (parseInt(message) < 60000) {
-              botResponse = "Based on your income, you likely qualify for financial aid. Please complete the simplified FAFSA form to determine your SAI. [Link to FAFSA tool]";
+            if (parseInt(message) < 300000) {
+              botResponse = "Based on your income, you likely qualify for financial aid. Would you like to complete the simplified FAFSA form to determine how much aid?";
               setCurrentStep('SAI');
             } else {
-              botResponse = "Based on your income, you may not qualify for need-based financial aid, but it's still worth applying.";
-              setCurrentStep('meritAid');
+              botResponse = "Based on your income, you may not qualify for need-based financial aid, but it's still worth applying. Would you like to see if you qualify for merit aid?";
+              setCurrentStep('Qualify for Merit Aid');
             }
             break;
             case 'calculateSAI':
@@ -349,7 +424,7 @@ const Home2 = () => {
                       botResponse = "There was an error updating your college prices. Please try again.";
                   }
 
-                  setCurrentStep('submitFAFSA');
+                  setCurrentStep('Qualify for Merit Aid');
               } catch (error) {
                   console.error('Error in calculateSAI:', error);
                   botResponse = "It looks like some information is missing or incorrect. Please provide the following information:\n";
@@ -357,7 +432,7 @@ const Home2 = () => {
                   botResponse += "2. Assets: (e.g., Assets: $60,000)\n";
                   botResponse += "3. Family Size: (e.g., Family Size: 5)\n";
                   botResponse += "4. Student Income: (e.g., Student Income: $200)\n";
-                  setCurrentStep('calculateSAI');
+                  setCurrentStep('Calculate SAI');
               }
               break;
           case 'completeSAI':
@@ -397,10 +472,12 @@ const Home2 = () => {
               setCurrentStep('reviewAidOffers');
             }
             break;
-            case 'meritAid':
+            case 'Qualify for Merit Aid':
               const gpaMatch = message.match(/GPA:\s*([\d.]+)/i);
               const satMatch = message.match(/SAT:\s*(\d+)/i);
               const actMatch = message.match(/ACT:\s*(\d+)/i);
+
+              console.log('gpaMatch: ', gpaMatch)
 
               if (gpaMatch) {
                 setGpa(gpaMatch[1]);
@@ -418,21 +495,31 @@ const Home2 = () => {
                   satMatch ? 'SAT' : 'ACT'
                 );
 
+
                 const userDocRef = doc(db, 'userData', user.uid);
                 const userDoc = await getDoc(userDocRef);
+
+                console.log('GPA: ', parseFloat(gpaMatch[1]),)
+                console.log('TEST SCORE: ', satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]))
 
                 if (userDoc.exists()) {
                   const userData = userDoc.data();
                   const myColleges = userData.myColleges || {};
                   const ipedsIds = Object.keys(myColleges);
+                  await updateDoc(userDocRef, {
+                    ['GPA']: parseFloat(gpaMatch[1]),
+                    ['Test Score']: satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]),
+                  });
+
 
                   console.log(`IPED IDs: ${ipedsIds}`);
 
                   const meritAidResults = await fetchMeritAidData(user.uid, score, ipedsIds); // Pass ipedsIds as an array
 
                   if (meritAidResults) {
+                    fetchUserDoc(user);
                     botResponse = `Great! Based on your academic achievements, your merit aid eligibility score is ${score.toFixed(2)}.\n` + meritAidResults.join('\n');
-                    setCurrentStep('applyMeritAid');
+                    setCurrentStep('Ask Questions');
                   } else {
                     botResponse = "There was an error updating your college prices. Please try again.";
                   }
@@ -453,7 +540,7 @@ const Home2 = () => {
             break;
           case 'complete':
             botResponse = "You've completed all the steps! Now you can ask me any questions you have.";
-            setCurrentStep('finalStep');
+            setCurrentStep('Ask Questions');
             break;
           default:
             botResponse = "Something went wrong. Please try again.";
@@ -498,7 +585,7 @@ const Home2 = () => {
     setBotMessage(welcomeMessage);
     setInput('');
     setUserData({});
-    setCurrentStep('welcome');
+    setCurrentStep('Welcome');
   };
 
   return (
@@ -507,15 +594,10 @@ const Home2 = () => {
         <div className="column-left">
           <a className="chakra-link css-1hngipw" href="#">My Schools</a>
           <CollegeSearch />
-          
           <div className="school-container">
-          
             <MySchools />
-
           </div>
-
         </div>
-
         <div className="column-right">
           <div className="css-16ld5u0">
             <div className="css-1k6m9o">
@@ -576,17 +658,23 @@ const Home2 = () => {
                     </svg>
                   </div>
                   <div className="css-adkx0o">
-
+                  <StepTracker currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
                     <div className="font-medium">
-                      <p>
-                        <strong>{botMessage}</strong> &nbsp;
+                      <div className="text-container"> {/* Apply the new class here */}
+                      <p style={{ textAlign: 'left', width: '100%' }}>
+                        <Typewriter
+                          key={botMessage} // This ensures the component remounts and re-runs the animation
+                          words={[botMessage]}
+                          loop={1}
+                          typeSpeed={20}
+                          deleteSpeed={50}
+                          delaySpeed={1000}
+                        />
                       </p>
+                      </div>
                     </div>
                     <div className="prompts-container">
-                      <Prompts
-                        handleMeritAidClick={handleMeritAidClick}
-                        handleNeedAidClick={handleNeedAidClick}
-                      />
+                      
                     </div>
                   </div>
                 </div>

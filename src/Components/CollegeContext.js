@@ -11,6 +11,7 @@ export const useCombined = () => useContext(CombinedContext);
 export const CombinedProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [myColleges, setMyColleges] = useState({});
+  const [userDoc, setUserDoc] = useState({});
 
   useEffect(() => {
     onAuthStateChanged(auth, async (currentUser) => {
@@ -20,6 +21,7 @@ export const CombinedProvider = ({ children }) => {
         const userDocRef = doc(db, 'userData', currentUser.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
+          setUserDoc(userDocSnap.data())
           setMyColleges(userDocSnap.data().myColleges || {});
         }
       } else {
@@ -27,6 +29,18 @@ export const CombinedProvider = ({ children }) => {
       }
     });
   }, []);
+
+  const fetchUserDoc = async (currentUser) => {
+    if (currentUser) {
+      const userDocRef = doc(db, 'userData', currentUser.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        setUserDoc(userData);
+        setMyColleges(userData.myColleges || {});
+      }
+    }
+  };
 
   const handleLogin = async () => {
     try {
@@ -63,6 +77,7 @@ export const CombinedProvider = ({ children }) => {
       };
   
       if (userDocSnap.exists()) {
+
         await updateDoc(userDocRef, {
           [`myColleges.${college['IPEDS ID']}`]: collegeData
         });
@@ -159,7 +174,7 @@ export const CombinedProvider = ({ children }) => {
 
 
   return (
-    <CombinedContext.Provider value={{ user, myColleges, addCollegeToUser, handleLogin, addCollegeByIpedsId, addCollegeToUser}}>
+    <CombinedContext.Provider value={{ user, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId, addCollegeToUser}}>
       {children}
     </CombinedContext.Provider>
   );

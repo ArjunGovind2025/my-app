@@ -6,10 +6,12 @@ import Header from './Header';
 import CollegeList from './CollegeList';
 import MessageBox from './MessageBox';
 import Home2 from './Components/Home2';
-import './App.css';
+import './global.css';
+//import './App.css';
 import Auth from './Auth';
 import { CombinedProvider } from './Components/CollegeContext'; 
 import CollegeSpreadsheet from './Components/CollegeSpreadsheet'
+
 
 
 function App() {

@@ -8,6 +8,16 @@
   overflow: hidden; /* Prevent horizontal scroll */
 }
 
+.school-details-content {
+  display: flex;
+  justify-content: space-between;
+  max-height: 20;
+}
+
+.school-details {
+  flex: 1;
+}
+
 h1 {
   font-size: 24px;
   margin-bottom: 10px;
@@ -27,18 +37,18 @@ p {
   max-width: 100%;
 }
 
+.chat-container-wrapper {
+  flex: 1;
+  margin-top: -220px; /* Adjust this value to move the Messages card higher */
+}
+
+.chat-container2-wrapper {
+  width: 35%;
+  max-width: 35%;
+}
+
+.chat-container,
 .chat-container2 {
-width: 35%;
-max-width: 35%;
-}
-
-.chat-container {
-  flex: 1; /* Allow containers to grow and shrink equally */
-  min-width: 0; /* Prevent overflow */
-
-}
-
-.chat-box {
   background-color: white;
   border-radius: 8px;
   padding: 20px;
@@ -100,24 +110,4 @@ max-width: 35%;
 .submit-button:hover,
 .reset-button:hover {
   opacity: 0.9;
-}
-
-/* Add styles for the scholarship table */
-.scholarship-table {
-  width: 100%; /* Set the width of the table to 100% of its container */
-  margin-bottom: 20px;
-  border-collapse: collapse;
-  font-size: 12px;
-}
-
-.scholarship-table th,
-.scholarship-table td {
-  border-bottom: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
-}
-
-.scholarship-table th {
-  background-color: #f2f2f2;
-  border-bottom: 2px solid #ddd;
 }

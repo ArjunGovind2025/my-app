@@ -1,0 +1,26 @@
+.step-tracker {
+    display: flex;
+    justify-content: center; /* Center the steps horizontally */
+    gap: 10px;
+    margin-bottom: 30px;
+
+  }
+  
+  .step {
+    padding: 8px 16px; /* Make the buttons smaller */
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 12px; /* Adjust the font size as needed */
+  }
+  
+  .step.active {
+    background: linear-gradient(to top, #4a25e0, #7a5aff);
+    color: white;
+    border-color: #4a25e0;
+  }
+  
+  .step:hover {
+    opacity: 0.8;
+  }
+  

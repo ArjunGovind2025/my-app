@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import Header from '../Header';
-import Prompts from './Prompts';
 import { useCombined } from './CollegeContext'; // Import the custom hook to access context
 import { getChatResponse } from './API'; // Import the API logic
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./ui/card";
+import { Button } from "./ui/button";
+import { Typewriter } from 'react-simple-typewriter';
 import './SchoolDetails.css';
+import '../global.css';
 import ScholarshipTable from './ScholarshipTable';
+import PieChartComponent from './PieChartComponent';
 
 const SchoolDetails = () => {
   const { ipedsId } = useParams();
@@ -150,48 +153,71 @@ const SchoolDetails = () => {
   }
 
   return (
-    <>
-      <div className="school-details-container">
-        <h1>{school.Name}</h1>
-        <p>IPEDS ID: {school['IPEDS ID']}</p>
-        <p>Total price for in-state students 2022-23: {school['Total price for in-state students 2022-23']}</p>
-        <p>Total price for out-of-state students 2022-23: {school['Total price for out-of-state students 2022-23']}</p>
-        <p>Merit Aid Cutoff Score: {school['Merit Aid Cutoff Score']}</p>
-        <p>Avg merit award for Freshman w/out need: {school['Avg merit award for Freshman w/out need']}</p>
-        {/* Add more details as needed */}
-
-        <button onClick={() => fetchMeritData(false)} className="submit-button">
-          Fetch Merit Aid Information
-        </button>
-        <button onClick={() => fetchMeritData(true)} className="submit-button">
-          Refresh Merit Aid Information
-        </button>
-
-        <button onClick={() => fetchScholarshipData(false)} className="submit-button">
-          Fetch Scholarship Information
-        </button>
-        <button onClick={() => fetchScholarshipData(true)} className="submit-button">
-          Refresh Scholarship Information
-        </button>
-
-        <div className="screen-container">
-          <div className="chat-container">
-            <div className="chat-box">
+    <div className="school-details-container">
+      <div className="school-details-content">
+        
+        <Card className="school-details h-[200px]">
+          <CardHeader>
+            <CardTitle>{school.Name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>IPEDS ID: {school['IPEDS ID']}</p>
+            <p>Total price for in-state students 2022-23: {school['Total price for in-state students 2022-23']}</p>
+            <p>Total price for out-of-state students 2022-23: {school['Total price for out-of-state students 2022-23']}</p>
+            <p>Merit Aid Cutoff Score: {school['Merit Aid Cutoff Score']}</p>
+            <p>Avg merit award for Freshman w/out need: {school['Avg merit award for Freshman w/out need']}</p>
+          </CardContent>
+        </Card>
+        
+        <Card className="school-chart w-[400px]">
+          <CardHeader>
+            <CardTitle>Financial Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PieChartComponent ipedsId={ipedsId} myColleges={myColleges} />
+          </CardContent>
+        </Card>
+  
+      </div>
+  
+      <div className="screen-container">
+        <div className="chat-container-wrapper">
+          <Card className="chat-container">
+            <CardHeader>
+              <CardTitle>School Scholarships</CardTitle>
+            </CardHeader>
+            <CardContent className="chat-box">
               <div className="messages">
                 {loading && <div>Loading...</div>}
                 {error && <div>{error}</div>}
                 {scholarshipData && <ScholarshipTable data={scholarshipData} />}
               </div>
-            </div>
-          </div>
-          
-          <div className="chat-container2">
-            <div className="chat-box">
+              <div className="button-container">
+                <Button onClick={() => fetchMeritData(false)} variant="secondary">Fetch Merit Aid Information</Button>
+                <Button onClick={() => fetchMeritData(true)} variant="secondary">Refresh Merit Aid Information</Button>
+                <Button onClick={() => fetchScholarshipData(false)} variant="secondary">Fetch Scholarship Information</Button>
+                <Button onClick={() => fetchScholarshipData(true)} variant="secondary">Refresh Scholarship Information</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="chat-container2-wrapper">
+          <Card className="chat-container2">
+            <CardHeader>
+              <CardTitle>Assistant</CardTitle>
+            </CardHeader>
+            <CardContent className="chat-box">
               <div className="messages">
                 {loading2 && <div>Loading...</div>}
                 {messages.map((msg, index) => (
                   <div key={index} className={`message ${msg.role}`}>
-                    {msg.content}
+                    <Typewriter
+                      words={[msg.content]}
+                      loop={1}
+                      typeSpeed={20}
+                      deleteSpeed={50}
+                      delaySpeed={1000}
+                    />
                   </div>
                 ))}
               </div>
@@ -203,21 +229,16 @@ const SchoolDetails = () => {
                   onChange={(e) => setInput(e.target.value)}
                   mr={2}
                 />
-                <button type="button" onClick={() => handleSubmitWithPrompt(`Be confident and concise in questions asked, you are an advisor for ${school.Name}`)} className="chakra-button css-gllksg">
-                  Submit
-                </button>
-                <button type="button" onClick={() => handleResetMessages(setMessages)} className="chakra-button css-reset">
-                  Reset Messages
-                </button>
+                <Button type="button" onClick={() => handleSubmitWithPrompt(`Be confident and concise in questions asked, you are an advisor for ${school.Name}`)}>Submit</Button>
+                <Button type="button" onClick={() => handleResetMessages(setMessages)}>Reset Messages</Button>
               </div>
-              <div className="button-container">
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-    </>
+    </div>
   );
+  
 };
 
 export default SchoolDetails;

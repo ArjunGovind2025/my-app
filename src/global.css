@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+    --color-chrome: #4285F4;
+    --color-safari: #1E90FF;
+    --color-firefox: #FF7139;
+    --color-edge: #0078D7;
+    --color-other: #888888;
+  
+    --chart-1: 217, 83, 79;
+    --chart-2: 91, 192, 222;
+    --chart-3: 240, 173, 78;
+    --chart-4: 92, 184, 92;
+    --chart-5: 41, 43, 44;
+  }
