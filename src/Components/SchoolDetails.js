@@ -53,7 +53,7 @@ const SchoolDetails = () => {
     let botResponse = '';
 
     try {
-      botResponse = await getChatResponse(instruction, myColleges);
+      botResponse = await getChatResponse(user.uid, instruction);
     } catch (error) {
       botResponse = 'Something went wrong. Please try again.';
     } finally {
@@ -87,7 +87,7 @@ const SchoolDetails = () => {
         if (schoolDetails?.meritDataTable && !refresh) {
           setScholarshipData(schoolDetails.meritDataTable);
         } else {
-          const response = await getChatResponse(`Give me merit aid scholarship information name, criteria, deadlines, amount,and more for ${school.Name} in a CSV string but instead of commas to seperate values use semicolons, dont say sure here it is just give relevant table!and more (NOT MERIT AID RELATED) I can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed `);
+          const response = await getChatResponse(user.uid, `Give me info on merit scholarships (non need) i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, and additional info`);
           console.log('GPT response: ', response);
           setScholarshipData(response);
           await updateDoc(schoolDocRef, {
@@ -114,7 +114,7 @@ const SchoolDetails = () => {
         if (schoolDetails?.scholarshipDataTable && !refresh) {
           setScholarshipData(schoolDetails.scholarshipDataTable);
         } else {
-          const response = await getChatResponse(`Give me information on other scholarships, name, criteria, deadlines, amount,and more (NOT MERIT AID RELATED) I can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed`);
+          const response = await getChatResponse(user.uid, `Give me info on other scholarships i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, seperate applciation required, need based, and additional info `);
           console.log('GPT response: ', response);
           setScholarshipData(response);
           await updateDoc(schoolDocRef, {
@@ -134,7 +134,7 @@ const SchoolDetails = () => {
     try {
       const fullPrompt = `${prompt} ${input}`;
       console.log('Full prompt to API:', fullPrompt);
-      const response = await getChatResponse(fullPrompt, myColleges);
+      const response = await getChatResponse(user.uid, fullPrompt);
       console.log('GPT response: ', response);
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -190,7 +190,7 @@ const SchoolDetails = () => {
               <div className="messages">
                 {loading && <div>Loading...</div>}
                 {error && <div>{error}</div>}
-                {scholarshipData && <ScholarshipTable data={scholarshipData} />}
+                {scholarshipData && <ScholarshipTable data={scholarshipData} ipedsId={ipedsId} />}
               </div>
               <div className="button-container">
                 <Button onClick={() => fetchMeritData(false)} variant="secondary">Fetch Merit Aid Information</Button>

@@ -1,5 +1,64 @@
-import { getDoc, doc, updateDoc } from 'firebase/firestore';
+import { getDoc, setDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+
+export const calculateMeritAidEligibilityScore = async (userId, gpa, testScore, testType = 'SAT') => {
+  // Normalize GPA
+     // Normalize GPA
+     const normalizedGpa = (gpa - 2.5) / (4.0 - 2.5);
+
+     // Normalize test score based on the test type
+     let normalizedTestScore;
+     if (testType === 'SAT') {
+       normalizedTestScore = testScore / 1600;
+     } else if (testType === 'ACT') {
+       normalizedTestScore = testScore / 36;
+     } else {
+       throw new Error("Invalid test type. Please use 'SAT' or 'ACT'.");
+     }
+     
+ 
+     // Calculate combined score
+     const combinedScore = (normalizedGpa + normalizedTestScore) / 2;
+
+     try {
+      // Ensure userId is a string
+      userId = String(userId); // Convert userId to string if it's not
+  
+      // Log userId to ensure it's correct
+      console.log(`Updating meritScore for userId: ${userId}`);
+  
+      // Get the user's document reference
+      const userDocRef = doc(db, 'userData', userId);
+      console.log(`Document reference created: ${userDocRef.path}`);
+  
+      // Fetch the user document
+      const userDocSnap = await getDoc(userDocRef);
+      console.log(`Document snapshot obtained: ${userDocSnap.exists()}`);
+  
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+  
+        // Log current userData
+        console.log('Current userData:', userData);
+  
+        // Update or create the meritScore field
+        await updateDoc(userDocRef, { meritScore: combinedScore });
+        console.log('meritScore updated or created successfully.');
+  
+        // Fetch the document again to verify the update
+        const updatedDocSnap = await getDoc(userDocRef);
+        console.log('Updated userData:', updatedDocSnap.data());
+      } else {
+        console.error('User document does not exist.');
+      }
+    } catch (error) {
+      console.error('Error updating meritScore:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+  
+    return combinedScore;
+  };
+  
 
 export const updateUserCollegePrice = async (userId, ipedsId, name, myPrice) => {
   try {
@@ -52,7 +111,7 @@ export const updateUserCollegePrice = async (userId, ipedsId, name, myPrice) => 
 export const fetchMeritAidData = async (userId, userScore, ipedsIds) => {
   console.log(`Fetching merit aid data for User ID: ${userId}, User Score: ${userScore}`);
   const results = [];
-  
+
   try {
     const userDocRef = doc(db, 'userData', userId);
     console.log(`User doc reference created: ${userDocRef.path}`);
@@ -71,63 +130,100 @@ export const fetchMeritAidData = async (userId, userScore, ipedsIds) => {
         }
 
         const college = myColleges[ipedsId];
-        const collegeData = college;
+        if (!college) {
+          results.push(`No data available for IPEDS ID: ${ipedsId}`);
+          continue;
+        }
 
-        if (collegeData) {
-          const name = collegeData["Name"];
-          const cutoffScore = collegeData['Merit Aid Cutoff Score'];
-          const avgMeritAward = collegeData['Avg merit award for Freshman w/out need'];
-          const outOfStateCost = parseFloat(collegeData['Total price for out-of-state students 2022-23'].replace(/[^0-9.-]+/g,""));
-          const myPriceCurr = parseFloat(collegeData.myPrice.replace(/[^0-9.-]+/g,""));
+        const name = college["Name"];
+        const cutoffScore = college['Merit Aid Cutoff Score'];
+        const avgMeritAward = college['Avg merit award for Freshman w/out need'];
+        const outOfStateCostStr = college['Total price for out-of-state students 2022-23'];
+        const myPriceCurrStr = college.myPrice;
+        const myPrice_needStr = college.myPrice_need;
+        const meritQualified = college["meritQualified"];
 
-          console.log(`College Name: ${name}`);
-          console.log(`User Score: ${userScore}, Cutoff Score: ${cutoffScore}`);
-          console.log(`avgMeritAward Type: ${typeof avgMeritAward}, Value: ${avgMeritAward}`);
+        if (!name || cutoffScore === undefined || avgMeritAward === undefined || !outOfStateCostStr || !myPriceCurrStr || !myPrice_needStr) {
+          console.error(`Invalid data for college: ${name}`);
+          results.push(`${name}: Invalid data.`);
+          continue;
+        }
 
-          console.log("cutoffScore is a number:", !isNaN(cutoffScore), "Value:", cutoffScore);
-          console.log("outOfStateCost is a number:", !isNaN(outOfStateCost), "Value:", outOfStateCost);
-          console.log("myPriceCurr is a number:", !isNaN(myPriceCurr), "Value:", myPriceCurr);
+        const outOfStateCost = parseFloat(outOfStateCostStr.replace(/[^0-9.-]+/g,""));
+        const myPriceCurr = parseFloat(myPriceCurrStr.replace(/[^0-9.-]+/g,""));
+        const myPrice_need = parseFloat(myPrice_needStr.replace(/[^0-9.-]+/g,""));
 
-          if (!isNaN(cutoffScore) && !isNaN(outOfStateCost) && !isNaN(myPriceCurr)) {
-            if (userScore >= cutoffScore) {
-              results.push(`${name}: You qualify for merit aid. Average merit award: ${avgMeritAward}`);
+        console.log(`College Name: ${name}`);
+        console.log(`User Score: ${userScore}, Cutoff Score: ${cutoffScore}`);
+        console.log(`avgMeritAward Type: ${typeof avgMeritAward}, Value: ${avgMeritAward}`);
+        console.log("cutoffScore is a number:", !isNaN(cutoffScore), "Value:", cutoffScore);
+        console.log("outOfStateCost is a number:", !isNaN(outOfStateCost), "Value:", outOfStateCost);
+        console.log("myPriceCurr is a number:", !isNaN(myPriceCurr), "Value:", myPriceCurr);
+        console.log("myPrice_need is a number:", !isNaN(myPrice_need), "Value:", myPrice_need);
 
-              // Ensure avgMeritAward is a string before replacing
-              if (typeof avgMeritAward === 'string') {
-                const avgMeritAwardValue = parseFloat(avgMeritAward.replace(/[^0-9.-]+/g,""));
-                console.log(`Parsed avgMeritAward Value: ${avgMeritAwardValue}`);
+        if (!isNaN(cutoffScore) && !isNaN(outOfStateCost) && !isNaN(myPriceCurr) && !isNaN(myPrice_need)) {
+          if (userScore >= cutoffScore) {
+            results.push(`${name}: You qualify for merit aid. Average merit award: ${avgMeritAward}`);
 
-                if (!isNaN(avgMeritAwardValue)) {
-                  const myPrice = myPriceCurr - avgMeritAwardValue;
+            if (typeof avgMeritAward === 'string') {
+              const avgMeritAwardValue = parseFloat(avgMeritAward.replace(/[^0-9.-]+/g,""));
+              console.log(`Parsed avgMeritAward Value: ${avgMeritAwardValue}`);
 
-                  console.log(`myPriceCurr: ${myPriceCurr}, avgMeritAwardValue: ${avgMeritAwardValue}, Calculated myPrice: ${myPrice}`);
+              if (!isNaN(avgMeritAwardValue)) {
+                let myPrice = myPriceCurr;
 
-                  // Update user's document in Firestore using the new function
-                  await updateUserCollegePrice(userId, ipedsId, name, myPrice);
+                if (meritQualified) {
+                  console.log("I ENDED UP HERE 1");
+                  myPrice = myPrice_need - avgMeritAwardValue;
                 } else {
-                  console.error(`Invalid avgMeritAward value for college: ${name}`);
+                  console.log("I ENDED UP HERE 2");
+                  myPrice = myPriceCurr - avgMeritAwardValue;
                 }
+
+                console.log(`myPriceCurr: ${myPriceCurr}, avgMeritAwardValue: ${avgMeritAwardValue}, Calculated myPrice: ${myPrice}`);
+
+                // Update user's document in Firestore using the new function
+                await updateUserCollegePrice(userId, ipedsId, name, myPrice);
               } else {
-                console.error(`avgMeritAward is not a string for college: ${name}`);
+                console.error(`Invalid avgMeritAward value for college: ${name}`);
+              }
+            } else if (typeof avgMeritAward === 'number') {
+              let myPrice = myPriceCurr;
+
+              if (!isNaN(avgMeritAward)) {
+                if (meritQualified) {
+                  console.log("I ENDED UP HERE 1");
+                  myPrice = myPrice_need - avgMeritAward;
+                } else {
+                  console.log("I ENDED UP HERE 2");
+                  myPrice = myPriceCurr - avgMeritAward;
+                }
+
+                console.log(`myPriceCurr: ${myPriceCurr}, avgMeritAward: ${avgMeritAward}, Calculated myPrice: ${myPrice}`);
+
+                // Update user's document in Firestore using the new function
+                await updateUserCollegePrice(userId, ipedsId, name, myPrice);
+              } else {
+                console.error(`avgMeritAward is NaN for college: ${name}`);
               }
             } else {
-              results.push(`${name}: You do not qualify for merit aid.`);
+              console.error(`avgMeritAward is neither a string nor a number for college: ${name}`);
             }
           } else {
-            console.error(`Invalid data for college: ${name}`);
-            results.push(`${name}: Invalid data.`);
+            //results.push(`${name}: You do not qualify for merit aid.`);
           }
         } else {
-          results.push(`No data available for IPEDS ID: ${ipedsId}`);
+          console.error(`Invalid data for college: ${name}`);
+          //results.push(`${name}: Invalid data.`);
         }
       }
     } else {
-      results.push('No user data available.');
+      //results.push('No user data available.');
     }
   } catch (error) {
     console.error('Error fetching merit aid data:', error);
-    results.push('Error fetching merit aid data.');
+    //results.push('Error fetching merit aid data.');
   }
-  
+
   return results;
 };

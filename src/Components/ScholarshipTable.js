@@ -1,4 +1,10 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
+import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
+import { db, auth, } from '../firebaseConfig'; // Update the path as necessary
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import '../global.css';
 
 const parseCSV = (data) => {
   const lines = data.split('\n');
@@ -14,49 +20,131 @@ const parseCSV = (data) => {
   return { headers, rows };
 };
 
-const tableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  marginBottom: '20px',
-  fontSize: '12px'
-};
+const ScholarshipTable = ({ data, ipedsId }) => {
+  const { headers, rows } = useMemo(() => parseCSV(data), [data]);
 
-const thStyle = {
-  borderBottom: '2px solid #ddd',
-  padding: '10px',
-  textAlign: 'left',
-  backgroundColor: '#f2f2f2',
-  fontSize: '12px'
-};
+  const [sorting, setSorting] = useState([]);
+  const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({});
+  const [selectedScholarships, setSelectedScholarships] = useState([]);
 
-const tdStyle = {
-  borderBottom: '1px solid #ddd',
-  padding: '10px',
-  fontSize: '12px'
-};
+  const columns = useMemo(
+    () => headers.map(header => ({
+      accessorKey: header,
+      header: header,
+      enableSorting: true,
+    })),
+    [headers]
+  );
 
-const ScholarshipTable = ({ data }) => {
-  const { headers, rows } = parseCSV(data);
+  const table = useReactTable({
+    data: rows,
+    columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+  });
+
+  const addScholarship = async (scholarship) => {
+    const user = auth.currentUser;
+
+    if (user) {
+      const userDocRef = doc(db, "userScholarships", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        const existingData = userDoc.data();
+        const updatedScholarships = existingData.scholarships || {};
+        
+        if (updatedScholarships[ipedsId]) {
+          updatedScholarships[ipedsId] = [...updatedScholarships[ipedsId], scholarship];
+        } else {
+          updatedScholarships[ipedsId] = [scholarship];
+        }
+
+        await updateDoc(userDocRef, {
+          scholarships: updatedScholarships
+        });
+      } else {
+        await setDoc(userDocRef, {
+          scholarships: {
+            [ipedsId]: [scholarship]
+          }
+        });
+      }
+
+      setSelectedScholarships((prev) => [...prev, scholarship]);
+    } else {
+      console.error("No user is signed in");
+    }
+  };
+  
 
   return (
-    <table style={tableStyle}>
-      <thead>
-        <tr>
-          {headers.map((header, index) => (
-            <th key={index} style={thStyle}>{header}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, rowIndex) => (
-          <tr key={rowIndex}>
-            {headers.map((header, colIndex) => (
-              <td key={colIndex} style={tdStyle}>{row[header]}</td>
+    <Card>
+      <CardHeader className="px-7 flex justify-between items-center">
+        <CardTitle>Scholarship Data</CardTitle>
+        <CardDescription>A table displaying scholarship information.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Add</TableHead>
+              {table.getHeaderGroups().map(headerGroup => (
+                <React.Fragment key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <TableHead
+                      key={header.id}
+                      onClick={header.column.getToggleSortingHandler()}
+                      className={header.column.getCanSort() ? 'cursor-pointer' : ''}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: ' 🔼',
+                        desc: ' 🔽'
+                      }[header.column.getIsSorted()] ?? null}
+                    </TableHead>
+                  ))}
+                </React.Fragment>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map(row => (
+              <TableRow key={row.id} className={row.index % 2 === 0 ? "bg-accent" : ""}>
+                <TableCell>
+              <button className="add-scholarship-button" onClick={() => addScholarship(row.original)}>Add</button>  
+            </TableCell>
+                {row.getVisibleCells().map(cell => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
             ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+          </TableBody>
+        </Table>
+      </CardContent>
+      {selectedScholarships.length > 0 && (
+        <div className="p-4">
+          <h2>Selected Scholarships</h2>
+          <ul>
+            {selectedScholarships.map((scholarship, index) => (
+              <li key={index}>{JSON.stringify(scholarship)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Card>
   );
 };
 

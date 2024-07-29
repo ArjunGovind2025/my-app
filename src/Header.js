@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import Auth from './Auth'; // Import the Auth component
 
+
 const HeaderContainer = styled.header`
   display: flex;
   justify-content: space-between;
@@ -44,8 +45,10 @@ const Header = () => {
       <Nav>
         <NavLink to="/">Home</NavLink>
         <NavLink to="/about">About</NavLink>
-        <NavLink to="/my-colleges-spreadsheet">College Details</NavLink> {/* Add the new link */}
-        <NavLink to="/my-colleges-spreadsheet">Spreadsheet</NavLink> {/* Add the new link */}
+        <NavLink to="/my-colleges-spreadsheet">College Spreadsheet</NavLink> {/* Add the new link */}
+        <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink> {/* Add the new link */}
+        <NavLink to="/upgrade">Upgrade</NavLink> {/* Add the new link */}
+        
       </Nav>
       <Auth /> {/* Add the Auth component for the Google Sign-In button */}
     </HeaderContainer>

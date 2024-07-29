@@ -12,10 +12,11 @@ import StepTracker from './StepTracker';
 import { getChatResponse, getShortChatResponse } from './API'; // Import the API logic
 import { useCombined } from './CollegeContext'; // Import the custom hook to access context
 import WorkflowsBot from './WorkflowsBot';
-import { calculateMeritAidEligibilityScore, fetchMeritAidData } from './meritAidCalculator'; // Import the functions
+import { calculateMeritAidEligibilityScore, fetchMeritAidData} from './meritAidCalculator'; // Import the functions
 import { db } from '../firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
 import { Typewriter } from 'react-simple-typewriter';
+import { updateSAI } from './SAI'; // Update the import path accordingly
 
 
 
@@ -77,26 +78,6 @@ const Home2 = () => {
     setBotMessage(stepMessages[step]); // Update bot message to reflect the step change
   };
   
-  const calculateMeritAidEligibilityScore = (gpa, testScore, testType = 'SAT') => {
-    // Normalize GPA
-    const normalizedGpa = (gpa - 2.5) / (4.0 - 2.5);
-
-    // Normalize test score based on the test type
-    let normalizedTestScore;
-    if (testType === 'SAT') {
-      normalizedTestScore = testScore / 1600;
-    } else if (testType === 'ACT') {
-      normalizedTestScore = testScore / 36;
-    } else {
-      throw new Error("Invalid test type. Please use 'SAT' or 'ACT'.");
-    }
-    
-
-    // Calculate combined score
-    const combinedScore = (normalizedGpa + normalizedTestScore) / 2;
-
-    return combinedScore;
-  };
 
   const storeUserData = async (gpa, testScore, testType) => {
     try {
@@ -216,6 +197,7 @@ const Home2 = () => {
             const collegeFieldPath = `myColleges.${collegeId}.myPrice`;
             await updateDoc(userDocRef, { [collegeFieldPathNeed]: String(formattedPrice)});
             await updateDoc(userDocRef, { [collegeFieldPath]: String(formattedPrice)});
+            await updateSAI(user.uid, parsedSAI); // Update the import path accordingly
 
           } else {
             console.log(`Skipping college ID: ${collegeId} - Missing myPrice or Avg % of Need met for Freshman`);
@@ -274,9 +256,6 @@ const Home2 = () => {
   
   
 
-
-  
-
   const handleMessageSubmit = async (message) => {
     if (message.trim() === '') return;
 
@@ -291,7 +270,7 @@ const Home2 = () => {
       if (currentStep === 'Ask Questions') {
         // Call OpenAI API to handle user questions in the final step
 
-        botResponse = await getShortChatResponse(message, userDoc, myColleges, 'Provide short and concise answers.');
+        botResponse = await getShortChatResponse(user.uid, message, userDoc, myColleges, 'Provide short and concise answers.');
       } else {
         switch (currentStep) {
           case 'Welcome':
@@ -356,20 +335,20 @@ const Home2 = () => {
                 botResponse += "2. Assets: (e.g., Assets: $60,000)\n";
                 botResponse += "3. Family Size: (e.g., Family Size: 5)\n";
                 botResponse += "4. Student Income: (e.g., Student Income: $200)\n";
-                setCurrentStep('calculateSAI');
+                setCurrentStep('Calculate SAI');
               }
             break;
           case 'income':
             setUserData({ ...userData, income: message });
             if (parseInt(message) < 300000) {
               botResponse = "Based on your income, you likely qualify for financial aid. Would you like to complete the simplified FAFSA form to determine how much aid?";
-              setCurrentStep('SAI');
+              setCurrentStep('Calculate SAI');
             } else {
               botResponse = "Based on your income, you may not qualify for need-based financial aid, but it's still worth applying. Would you like to see if you qualify for merit aid?";
               setCurrentStep('Qualify for Merit Aid');
             }
             break;
-            case 'calculateSAI':
+            case 'Calculate SAI':
               try {
                 const incomeMatch = message.match(/Income:\s*\$?([\d,.]+)/i);
                 const assetsMatch = message.match(/Assets:\s*\$?([\d,.]+)/i);
@@ -427,7 +406,7 @@ const Home2 = () => {
                   setCurrentStep('Qualify for Merit Aid');
               } catch (error) {
                   console.error('Error in calculateSAI:', error);
-                  botResponse = "It looks like some information is missing or incorrect. Please provide the following information:\n";
+                  botResponse = "Please provide the following information:\n";
                   botResponse += "1. Income: (e.g., Income: $150,000)\n";
                   botResponse += "2. Assets: (e.g., Assets: $60,000)\n";
                   botResponse += "3. Family Size: (e.g., Family Size: 5)\n";
@@ -452,7 +431,7 @@ const Home2 = () => {
                   botResponse = "There was an error updating your college prices. Please try again.";
                 }
               
-                setCurrentStep('submitFAFSA');
+                setCurrentStep('Qualify for Merit Aid');
               break;              
           case 'submitFAFSA':
             if (message.toLowerCase() === 'yes') {
@@ -489,7 +468,8 @@ const Home2 = () => {
               }
 
               if (gpaMatch && (satMatch || actMatch)) {
-                const score = calculateMeritAidEligibilityScore(
+                const score = await calculateMeritAidEligibilityScore(
+                  user.uid,
                   parseFloat(gpaMatch[1]),
                   satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]),
                   satMatch ? 'SAT' : 'ACT'
@@ -518,7 +498,7 @@ const Home2 = () => {
 
                   if (meritAidResults) {
                     fetchUserDoc(user);
-                    botResponse = `Great! Based on your academic achievements, your merit aid eligibility score is ${score.toFixed(2)}.\n` + meritAidResults.join('\n');
+                    botResponse = `Great! Based on your academic achievements,your merit aid eligibility score is ${score.toFixed(2)}.\n` + meritAidResults.join('\n');
                     setCurrentStep('Ask Questions');
                   } else {
                     botResponse = "There was an error updating your college prices. Please try again.";

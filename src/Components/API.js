@@ -1,18 +1,53 @@
 import axios from 'axios';
 import { useCombined } from './CollegeContext.js'; // Import the custom hook to access context
+import { doc, updateDoc, getDoc, increment } from 'firebase/firestore'; // Import necessary Firebase functions
+import { db } from '../firebaseConfig'; 
 import config from '../config.json';
+import { checkApiCallCount } from './Access'; // Ensure this path is correct
+
 
 const OPENAI_API_KEY = config.OPENAI_API_KEY;
 
-export const getChatResponse = async (input, myColleges, customMessage = '') => {
-  // Ensure myColleges is an array, or default to an empty array
-  const collegesArray = Array.isArray(myColleges) ? myColleges : [];
-  const mySchools = collegesArray.map(college => college.Name).join(', '); // Convert myColleges to a string of school names
+const incrementApiCallCount = async (userDocId) => {
 
-  console.log('mySchools:', mySchools); // Log mySchools to check its value
+  const userDocRef = doc(db, 'userData', userDocId);
+  try {
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (userDocSnap.exists()) {
+      const userData = userDocSnap.data();
+
+      if (!userData.apiCallCount) {
+        // Initialize the field if it doesn't exist
+        await updateDoc(userDocRef, { apiCallCount: 1 });
+      } else {
+        // Increment the existing field
+        await updateDoc(userDocRef, { apiCallCount: increment(1) });
+      }
+    } else {
+      console.error('User document does not exist!');
+    }
+  } catch (error) {
+    console.error('Error incrementing API call count:', error);
+  }
+};
+
+export const getChatResponse = async (userDocId, input, customMessage = '') => {
+  // Ensure myColleges is an array, or default to an empty array
+  //const collegesArray = Array.isArray(myColleges) ? myColleges : [];
+  //const mySchools = collegesArray.map(college => college.Name).join(', '); // Convert myColleges to a string of school names
+
+ //console.log('mySchools:', mySchools); // Log mySchools to check its value
+ 
   console.log('input: ', input)
   console.log('custom message: ', customMessage)
   try {
+    const hasExceededLimit = await checkApiCallCount(userDocId);
+
+    if (hasExceededLimit) {
+      throw new Error('API call limit exceeded.');
+    }
+
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -30,6 +65,8 @@ export const getChatResponse = async (input, myColleges, customMessage = '') => 
       }
     );
 
+    await incrementApiCallCount(userDocId);
+
     return response.data.choices[0].message.content.trim();
   } catch (error) {
     console.error('Error:', error.response ? error.response.data : error.message);
@@ -37,7 +74,8 @@ export const getChatResponse = async (input, myColleges, customMessage = '') => 
   }
 };
 
-export const getShortChatResponse = async (input, userDoc, myColleges, customMessage = '') => {
+export const getShortChatResponse = async (userDocId, input, userDoc, myColleges, customMessage = '') => {
+
   // Ensure myColleges is an object, or default to an empty object
   const collegesObject = typeof myColleges === 'object' && myColleges !== null ? myColleges : {};
   console.log('User Object: ', userDoc);
@@ -52,15 +90,21 @@ export const getShortChatResponse = async (input, userDoc, myColleges, customMes
   console.log('custom message: ', customMessage);
 
   try {
+    const hasExceededLimit = await checkApiCallCount(userDocId);
+
+    if (hasExceededLimit) {
+      throw new Error('API call limit exceeded.');
+    }
+
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}.Here is the students GPA:${userDoc.GPA} and test score:${userDoc['Test Score']} . ${customMessage}` }, // Different system message
+          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. ${customMessage}` }, // Different system message
           { role: 'user', content: input }
         ],
-        max_tokens: 300, // Limit of 500 tokens
+        max_tokens: 300, // Limit of 300 tokens
       },
       {
         headers: {
@@ -68,6 +112,8 @@ export const getShortChatResponse = async (input, userDoc, myColleges, customMes
         },
       }
     );
+
+    await incrementApiCallCount(userDocId);
 
     return response.data.choices[0].message.content.trim();
   } catch (error) {

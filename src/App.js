@@ -11,6 +11,9 @@ import './global.css';
 import Auth from './Auth';
 import { CombinedProvider } from './Components/CollegeContext'; 
 import CollegeSpreadsheet from './Components/CollegeSpreadsheet'
+import ScholarshipSpreadsheet from './Components/ScholarshipSpreadsheet'; 
+import Checkout from './Components/Checkout'; // Adjust the import path accordingly
+
 
 
 
@@ -22,6 +25,8 @@ function App() {
         <Routes>
           <Route path="/school/:ipedsId" element={<SchoolDetails />} />
           <Route path="/my-colleges-spreadsheet" element={<CollegeSpreadsheet />} /> {/* Corrected route */}
+          <Route path="/my-scholarships-spreadsheet" element={<ScholarshipSpreadsheet />} /> {/* Add the new link */}
+          <Route path="/Upgrade" element={<Checkout/>} /> {/* Add the new link */}
           <Route path="/" element={<Home2 />} />
         </Routes>
       </Router>

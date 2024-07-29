@@ -1,0 +1,16 @@
+.add-scholarship-button {
+    background: linear-gradient(to top, #4a25e0, #7a5aff);
+    border: none;
+    color: white;
+    padding: 7px 12px;
+    font-size: 11px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease;
+  }
+  
+  .add-scholarship-button:hover {
+    background: linear-gradient(to top, #3b1fb8, #6845d4);
+  }
+  
