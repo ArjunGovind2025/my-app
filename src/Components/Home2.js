@@ -336,7 +336,7 @@ useEffect(() => {
               botResponse = "Let's determine if you might qualify for financial aid. What is your family's approximate annual income?";
               setCurrentStep('income');
             } else {
-              botResponse = "No problem. Let's focus on merit aid to help you pay for college. Enter your GPA and SAT/ACT scores.";
+              botResponse = "No problem. Let's focus on merit aid to help you pay for college. Enter your GPA and SAT/ACT scores (ie GPA: 3.7 ACT: 34)";
               setCurrentStep('Qualify for Merit Aid');
             }
             break;
@@ -464,7 +464,7 @@ useEffect(() => {
             break;
           case 'reviewAidOffers':
             if (message.toLowerCase() === 'yes') {
-              botResponse = "Excellent! Let's move on to merit aid. Enter your GPA and SAT/ACT scores.";
+              botResponse = "Excellent! Let's move on to merit aid. Enter your GPA and SAT/ACT scores (ie GPA: 3.7 ACT: 34).";
               setCurrentStep('meritAid');
             } else {
               botResponse = "Please review your financial aid offers and deduct the aid from your college list costs. Have you reviewed your offers yet? (Yes, No)";
