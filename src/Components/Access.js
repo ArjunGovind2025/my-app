@@ -8,7 +8,18 @@ export const checkApiCallCount = async (userId) => {
   
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        return userData.apiCallCount >= 10;
+        const access = userData.access
+        let limit = 10
+        if (access == 'Standard'){
+          limit = 20
+        }
+
+        if (access == 'Premium'){
+          limit = 50
+        }
+        console.log("limit: ", limit)
+        return userData.apiCallCount >= limit;
+
       } else {
         console.error("User document does not exist");
         return false;

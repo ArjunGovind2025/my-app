@@ -37,7 +37,7 @@ const Checkout = () => {
         },
       ],
       mode: 'subscription',
-      successUrl: `http://localhost:3000/success?tier=${tierTitle}`, // Pass the tier title in the success URL
+      successUrl: `https://ai-d-ce511.web.app/success?tier=${tierTitle}`, // Pass the tier title in the success URL
       cancelUrl: `http://localhost:3000/cancel`,
       customerEmail: 'customer@email.com',
     });
