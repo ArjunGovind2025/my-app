@@ -1,7 +1,7 @@
 .college-search {
   width: 100%;
-  max-width: 510px;
-  padding: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
   align-items: flex-start; /* Align items to the left */
 }
   

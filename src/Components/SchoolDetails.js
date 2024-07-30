@@ -156,18 +156,24 @@ const SchoolDetails = () => {
     <div className="school-details-container">
       <div className="school-details-content">
         
-        <Card className="school-details h-[200px]">
-          <CardHeader>
-            <CardTitle>{school.Name}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>IPEDS ID: {school['IPEDS ID']}</p>
-            <p>Total price for in-state students 2022-23: {school['Total price for in-state students 2022-23']}</p>
-            <p>Total price for out-of-state students 2022-23: {school['Total price for out-of-state students 2022-23']}</p>
-            <p>Merit Aid Cutoff Score: {school['Merit Aid Cutoff Score']}</p>
-            <p>Avg merit award for Freshman w/out need: {school['Avg merit award for Freshman w/out need']}</p>
-          </CardContent>
-        </Card>
+      <Card className="school-details h-[200px]">
+        <CardHeader>
+          <CardTitle>{school.Name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <span className="badge badge-pill badge-college">In-state: {school['Total price for in-state students 2022-23']}</span>
+            <span className="badge badge-pill badge-college">Out-of-state: {school['Total price for out-of-state students 2022-23']}</span>
+            <span className="badge badge-pill badge-college">Percent recieving merit award: {school['% Fresh w/out need Receiving Merit Aid']}%</span>
+            <span className="badge badge-pill badge-college">Avg merit award: {school['Avg merit award for Freshman w/out need']}</span>
+            <span className="badge badge-pill badge-college">4 yr Graduation Rate: {school['4 yr Graduation Rate']}%</span>
+            <span className="badge badge-pill badge-college">Total Students: {school['Size (all students)']}</span>
+            <span className="badge badge-pill badge-college">Mean Earnings After 10 Years: {school['Mean Earnings of Students Working After 10 Years']}</span>
+
+          </div>
+        </CardContent>
+      </Card>
+
         
         <Card className="school-chart w-[400px]">
           <CardHeader>
@@ -204,7 +210,7 @@ const SchoolDetails = () => {
         <div className="chat-container2-wrapper">
           <Card className="chat-container2">
             <CardHeader>
-              <CardTitle>Assistant</CardTitle>
+              <CardTitle>{school.Name} AI Advisor</CardTitle>
             </CardHeader>
             <CardContent className="chat-box">
               <div className="messages">

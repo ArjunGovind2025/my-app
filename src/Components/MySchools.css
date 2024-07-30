@@ -1,18 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
 .schools-list {
   list-style-type: none;
   padding: 0;
 }
 
 .school-item {
+  margin-top: 10px;
   margin-bottom: 10px;
-  padding: 5px;
-  margin-left: 20px;
-  margin-right: 20px;
 }
+
+.school-container2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fcfeff;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 500px;
+  min-height: 70px ; /* Force min-height to be applied */
+  max-height: 500px;
+}
+
 
 
 .column-left {
   flex: 1;
+}
+
+.column-left2{
+  max-width: 60%;
+  flex: 1;
+}
+
+.column-right2 {
+  flex: 1;
+  text-align: right;
+  white-space: nowrap; /* Prevent wrapping */
 }
 
 .column-right {
@@ -34,6 +67,9 @@
   text-decoration: none; /* Remove underline */
   color: #000; /* Text color */
   transition: background-color 0.3s ease; /* Smooth transition for background color change */
+  white-space: normal; /* Allow text to wrap */
+  width: auto; /* Adjust width to content */
+  max-width: 100%; /* Ensure it does not exceed the container */
 }
 
 .school-link:hover {
@@ -67,4 +103,25 @@
   cursor: pointer; 
   /* Change cursor to pointer when hovering over the checkbox */
   
+}
+
+.ThreeDotsMenu{
+  padding-left: 30px;
+}
+
+
+@media (max-width: 912px) {
+  
+
+
+
+  .school-link {
+    font-size: 12px; /* Adjust font size for .school-link on mobile */
+  }
+
+  .css-y5xvhi {
+    font-size: 12px; /* Adjust font size for .css-y5xvhi on mobile */
+  }
+
+
 }

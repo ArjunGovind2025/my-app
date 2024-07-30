@@ -17,6 +17,11 @@ import { db } from '../firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
 import { Typewriter } from 'react-simple-typewriter';
 import { updateSAI } from './SAI'; // Update the import path accordingly
+import retrieveCurrentStep from './retrieving';
+import { updateCurrentStep } from './updating';
+import Modal from './Modal';
+
+
 
 
 
@@ -30,6 +35,7 @@ const Home2 = () => {
   const [loading, setLoading] = useState(false); // Add loading state
   const [gpa, setGpa] = useState(''); // State for GPA
   const [testScores, setTestScores] = useState({}); // State for test scores
+  const [showModal, setShowModal] = useState(false);
 
   const steps = [
     'Welcome',
@@ -67,11 +73,16 @@ const Home2 = () => {
 
 
   useEffect(() => {
+    if (user && user.uid) {
+        handleResetMessages();
+    }
+}, [user]); // Run the effect only when `user` changes
+
+useEffect(() => {
     // Initial message from the chatbot
     const welcomeMessage = `Welcome to [Website Name]!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
     setMessages([{ role: 'bot', content: welcomeMessage }]);
-    {handleResetMessages()}
-  }, []);
+}, []);
 
   const handleStepClick = (step) => {
     setCurrentStep(step);
@@ -258,6 +269,7 @@ const Home2 = () => {
 
   const handleMessageSubmit = async (message) => {
     if (message.trim() === '') return;
+    
 
     const userMessage = { role: 'user', content: message };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
@@ -268,14 +280,16 @@ const Home2 = () => {
 
     try {
       if (currentStep === 'Ask Questions') {
+        updateCurrentStep(user, "Ask Questions")
         // Call OpenAI API to handle user questions in the final step
 
-        botResponse = await getShortChatResponse(user.uid, message, userDoc, myColleges, 'Provide short and concise answers.');
+        botResponse = await getShortChatResponse(user.uid, message, userDoc, myColleges, 'Provide short and concise answers.', setShowModal);
       } else {
         switch (currentStep) {
           case 'Welcome':
+          updateCurrentStep(user, "Welcome")
           setUserData({ ...userData, name: message });
-          const updatedCollegesState = await handleStateAbbreviation(message);
+          const updatedCollegesState = await handleStateAbbreviation(message.toUpperCase());
           botResponse = ''
           if (updatedCollegesState.length > 0) {
             botResponse += `The following colleges have updated to in-state prices: ${updatedCollegesState.join(', ')}\n\n`;
@@ -286,6 +300,7 @@ const Home2 = () => {
           setCurrentStep('Add College');
           break;
           case 'Add College':
+              updateCurrentStep(user, "Add College")
               const collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
               const addedColleges = [];
               console.log('College names extracted from user input:', collegeNames);
@@ -312,6 +327,7 @@ const Home2 = () => {
               }
           break;
           case 'Qualify for Financial Aid':
+            updateCurrentStep(user, "Qualify for Financial Aid")
             setUserData({ ...userData, financialAidQualification: message });
             if (message.toLowerCase() === 'yes') {
               botResponse = "Great! Do you know you Student Aid Index? (Yes, No)";
@@ -321,10 +337,11 @@ const Home2 = () => {
               setCurrentStep('income');
             } else {
               botResponse = "No problem. Let's focus on merit aid to help you pay for college. Enter your GPA and SAT/ACT scores.";
-              setCurrentStep('meritAid');
+              setCurrentStep('Qualify for Merit Aid');
             }
             break;
           case 'SAI':
+              updateCurrentStep(user, "SAI")
               setUserData({ ...userData, income: message });
               if (message.toLowerCase() === 'yes') {
                 botResponse = "What is your Student Aid Index? (ie 60,000)";
@@ -339,6 +356,7 @@ const Home2 = () => {
               }
             break;
           case 'income':
+            updateCurrentStep(user, "income")
             setUserData({ ...userData, income: message });
             if (parseInt(message) < 300000) {
               botResponse = "Based on your income, you likely qualify for financial aid. Would you like to complete the simplified FAFSA form to determine how much aid?";
@@ -349,6 +367,7 @@ const Home2 = () => {
             }
             break;
             case 'Calculate SAI':
+              updateCurrentStep(user, "Calculate SAI")
               try {
                 const incomeMatch = message.match(/Income:\s*\$?([\d,.]+)/i);
                 const assetsMatch = message.match(/Assets:\s*\$?([\d,.]+)/i);
@@ -415,6 +434,7 @@ const Home2 = () => {
               }
               break;
           case 'completeSAI':
+                updateCurrentStep(user, "completeSAI")
                 setUserData({ ...userData, SAI: message });
                 const updatedColleges = await updateCollegePricesWithNeedAid(parseFloat(message));
               
@@ -452,6 +472,7 @@ const Home2 = () => {
             }
             break;
             case 'Qualify for Merit Aid':
+              updateCurrentStep(user, "Qualify for Merit Aid")
               const gpaMatch = message.match(/GPA:\s*([\d.]+)/i);
               const satMatch = message.match(/SAT:\s*(\d+)/i);
               const actMatch = message.match(/ACT:\s*(\d+)/i);
@@ -498,7 +519,7 @@ const Home2 = () => {
 
                   if (meritAidResults) {
                     fetchUserDoc(user);
-                    botResponse = `Great! Based on your academic achievements,your merit aid eligibility score is ${score.toFixed(2)}.\n` + meritAidResults.join('\n');
+                    botResponse = `Based on your academic achievements, you qualfiy for aid at the following schools: ` + meritAidResults.join('\n') + ' Feel free to ask me any questions! ';
                     setCurrentStep('Ask Questions');
                   } else {
                     botResponse = "There was an error updating your college prices. Please try again.";
@@ -519,6 +540,7 @@ const Home2 = () => {
             setCurrentStep('complete');
             break;
           case 'complete':
+            updateCurrentStep(user, "complete")
             botResponse = "You've completed all the steps! Now you can ask me any questions you have.";
             setCurrentStep('Ask Questions');
             break;
@@ -559,14 +581,37 @@ const Home2 = () => {
     handleMessageSubmit(otherMessage);
   };
 
-  const handleResetMessages = () => {
-    const welcomeMessage = `Welcome to aiD!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat state are you from?`;
-    setMessages([{ role: 'bot', content: welcomeMessage }]);
-    setBotMessage(welcomeMessage);
-    setInput('');
-    setUserData({});
-    setCurrentStep('Welcome');
-  };
+  const handleResetMessages = async () => {
+    if (!user || !user.uid) {
+        console.error('User is null or undefined!!!!');
+        return;
+    }
+
+    try {
+        const currStep = await retrieveCurrentStep(user); // Await the asynchronous function
+        console.log('currStep: ', currStep);
+        setCurrentStep(currStep);
+
+        if (currStep === 'Ask Questions') {
+            const message = 'Feel free to ask me any questions you have!';
+            setMessages([{ role: 'bot', content: message }]);
+            setBotMessage(message);
+            setInput('');
+            setUserData({});
+            setCurrentStep('Ask Questions');
+        } else {
+            const welcomeMessage = `Welcome to aiD!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat state are you from?`;
+            setMessages([{ role: 'bot', content: welcomeMessage }]);
+            setBotMessage(welcomeMessage);
+            setInput('');
+            setUserData({});
+            setCurrentStep('Welcome');
+        }
+    } catch (error) {
+        console.error('Error retrieving current step:', error);
+    }
+};
+
 
   return (
     <>
@@ -582,6 +627,7 @@ const Home2 = () => {
           <div className="css-16ld5u0">
             <div className="css-1k6m9o">
               <div className="css-1799jpi">
+                {/* 
                 <div className="css-cyklgb">
                   <div className="css-9bephp">
                     <div className="css-1h62d89">
@@ -619,8 +665,10 @@ const Home2 = () => {
                     </div>
                   </div>
                 </div>
+                */}
 
                 <div className="css-hboir5">
+                  {/* 
                   <div className="css-1oo0gu1">
                     <svg
                       stroke="currentColor"
@@ -634,9 +682,10 @@ const Home2 = () => {
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path fill="none" d="M0 0h24v24H0z"></path>
-                      <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"></path>
+                         <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"></path> 
                     </svg>
                   </div>
+                  */}
                   <div className="css-adkx0o">
                   <StepTracker currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
                     <div className="font-medium">
@@ -669,10 +718,13 @@ const Home2 = () => {
                   />
                   <button type="button" onClick={handleSubmit} className="chakra-button css-gllksg">
                     Submit
+                    {showModal && <Modal message="API call limit exceeded. Please upgrade your plan." onClose={() => setShowModal(false)} />}
+
                   </button>
-                  <button type="button" onClick={handleResetMessages} className="chakra-button css-reset">
-                    Reset Messages
-                  </button>
+                  {/* <button type="button" onClick={handleResetMessages} className="chakra-button css-reset">
+  Reset Messages
+</button> */}
+
                 </div>
               </div>
             </div>

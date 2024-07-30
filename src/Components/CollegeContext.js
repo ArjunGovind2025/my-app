@@ -63,6 +63,7 @@ export const CombinedProvider = ({ children }) => {
     try {
       const userDocRef = doc(db, 'userData', user.uid);
       const userDocSnap = await getDoc(userDocRef);
+
   
       const collegeData = {
         "Name": college.Name,
@@ -77,6 +78,8 @@ export const CombinedProvider = ({ children }) => {
         "Merit Aid Cutoff Score": college['Merit Aid Cutoff Score'],
         // Add other relevant data here
       };
+
+    
   
       if (!userDocSnap.exists()) {
         // User document doesn't exist, create a new one
@@ -101,9 +104,24 @@ export const CombinedProvider = ({ children }) => {
         [college['IPEDS ID']]: collegeData
       }));
       console.log('College added to existing user document:', college.Name);
-  
-      // Apply need-based aid if applicable
+
       const userData = userDocSnap.data();
+
+
+      const updatedUserDocSnap = await getDoc(userDocRef);
+          if (updatedUserDocSnap.exists()) {
+            if (userData.stateAbbr && userData.stateAbbr === collegeData['State Abbr']) {
+              collegeData['myPrice'] = collegeData['Total price for in-state students 2022-23'];
+              collegeData.myPrice_need = collegeData['Total price for in-state students 2022-23'];
+            }
+      }
+            
+
+ 
+
+
+      // Apply need-based aid if applicable
+     
       if (userData && typeof userData.SAI === 'number') {
         const myPrice = parseFloat(collegeData['myPrice'].replace(/[^0-9.]/g, ''));
         if (!isNaN(myPrice) && userData.SAI < myPrice) {
@@ -112,6 +130,12 @@ export const CombinedProvider = ({ children }) => {
           // Refresh the user document after updating prices with need aid
           const updatedUserDocSnap = await getDoc(userDocRef);
           if (updatedUserDocSnap.exists()) {
+            // Apply in-state tuition if applicable
+            console.log('USERSTATE: ', userData.stateAbbr)
+            console.log('SCHOOLSTATE: ', collegeData['State Abbr'])
+
+            
+
             const updatedUserData = updatedUserDocSnap.data();
             const updatedCollegeData = updatedUserData.myColleges[college['IPEDS ID']];
             collegeData['myPrice'] = updatedCollegeData['myPrice']; // Use the updated myPrice

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, deleteField } from 'firebase/firestore';
 import { db, auth } from '../firebaseConfig';
 import { Link } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import './MySchools.css';
 import SmallerPieChartComponent from './SmallerPieChartComponent';
 import { useCombined } from './CollegeContext';
+import ThreeDotsMenu from './ThreeDotsMenu';
 
 
 
@@ -82,6 +83,25 @@ const MySchools = () => {
       console.error('Error resetting myPrice and myPrice_need:', error);
     }
   };
+
+  const removeSchool = async (ipedsId) => {
+    if (!user) {
+      console.log('User is not signed in.');
+      return;
+    }
+
+    try {
+      const userDocRef = doc(db, 'userData', user.uid);
+      await updateDoc(userDocRef, {
+        [`myColleges.${ipedsId}`]: deleteField() // Removes the specific college entry
+      });
+
+      setMySchools(prevSchools => prevSchools.filter(school => school['IPEDS ID'] !== ipedsId));
+      console.log('Removed college with IPEDS ID:', ipedsId);
+    } catch (error) {
+      console.error('Error removing school:', error);
+    }
+  };
   
 
   if (loading) {
@@ -89,18 +109,19 @@ const MySchools = () => {
   }
 
   return (
-    <div>
       <ul className="schools-list">
         {mySchools.length > 0 ? (
           mySchools.map((school, index) => (
             <li key={index} className="school-item">
-              <div className="school-container">
+              <div className="school-container2">
                 <div className="column-left2">
                   <Link to={`/school/${school['IPEDS ID']}`} className="school-link">
                     <strong>{school.Name}</strong>
                   </Link>
                 </div>
-                <div className="column-right">
+                  {/* <SmallerPieChartComponent ipedsId={school['IPEDS ID']} myColleges={myColleges} /> */}
+                  
+                <div className="column-right2">
                   <span
                     className="chakra-badge css-y5xvhi"
                     style={{
@@ -110,12 +131,12 @@ const MySchools = () => {
                   >
                     {school.myPrice}
                   </span>
-                  <button
-                    onClick={() => resetMyPrice(school['IPEDS ID'], school['Total price for out-of-state students 2022-23'])}
-                    className="reset-button"
-                  >
-                    --R
-                  </button>
+                    <ThreeDotsMenu
+                      onEdit={() => console.log('Edit clicked')}
+                      onExport={() => console.log('Export clicked')}
+                      onRemove={() => removeSchool(school['IPEDS ID'])}
+                      onReset={() => resetMyPrice(school['IPEDS ID'], school['Total price for out-of-state students 2022-23'])}
+                    />
                   <br />
                 </div>
               </div>
@@ -125,7 +146,6 @@ const MySchools = () => {
           <li>No schools added yet.</li>
         )}
       </ul>
-    </div>
   );
 };
 

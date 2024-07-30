@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
-import { db, auth, } from '../firebaseConfig'; // Update the path as necessary
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import { db, auth } from '../firebaseConfig'; // Update the path as necessary
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import '../global.css';
 
 const parseCSV = (data) => {
@@ -27,6 +27,23 @@ const ScholarshipTable = ({ data, ipedsId }) => {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [selectedScholarships, setSelectedScholarships] = useState([]);
+  const [idToSchoolNames, setIdToSchoolNames] = useState({});
+
+  // Fetch the reverse mapping once when the component mounts
+  useEffect(() => {
+    const fetchReverseMapping = async () => {
+      const idToNameRef = doc(db, 'nameToID', 'IPEDSIDToCollegeName');
+      const idToNameDoc = await getDoc(idToNameRef);
+
+      if (idToNameDoc.exists()) {
+        setIdToSchoolNames(idToNameDoc.data());
+      } else {
+        console.error('No reverse mapping document found!');
+      }
+    };
+
+    fetchReverseMapping();
+  }, []);
 
   const columns = useMemo(
     () => headers.map(header => ({
@@ -57,17 +74,24 @@ const ScholarshipTable = ({ data, ipedsId }) => {
     const user = auth.currentUser;
 
     if (user) {
+      const collegeName = idToSchoolNames[ipedsId];
+
+      if (!collegeName) {
+        console.error(`No college name found for IPEDS ID: ${ipedsId}`);
+        return;
+      }
+
       const userDocRef = doc(db, "userScholarships", user.uid);
       const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
         const existingData = userDoc.data();
         const updatedScholarships = existingData.scholarships || {};
-        
-        if (updatedScholarships[ipedsId]) {
-          updatedScholarships[ipedsId] = [...updatedScholarships[ipedsId], scholarship];
+
+        if (updatedScholarships[collegeName]) {
+          updatedScholarships[collegeName] = [...updatedScholarships[collegeName], scholarship];
         } else {
-          updatedScholarships[ipedsId] = [scholarship];
+          updatedScholarships[collegeName] = [scholarship];
         }
 
         await updateDoc(userDocRef, {
@@ -76,7 +100,7 @@ const ScholarshipTable = ({ data, ipedsId }) => {
       } else {
         await setDoc(userDocRef, {
           scholarships: {
-            [ipedsId]: [scholarship]
+            [collegeName]: [scholarship]
           }
         });
       }
@@ -86,7 +110,6 @@ const ScholarshipTable = ({ data, ipedsId }) => {
       console.error("No user is signed in");
     }
   };
-  
 
   return (
     <Card>
@@ -122,8 +145,8 @@ const ScholarshipTable = ({ data, ipedsId }) => {
             {table.getRowModel().rows.map(row => (
               <TableRow key={row.id} className={row.index % 2 === 0 ? "bg-accent" : ""}>
                 <TableCell>
-              <button className="add-scholarship-button" onClick={() => addScholarship(row.original)}>Add</button>  
-            </TableCell>
+                  <button className="add-scholarship-button" onClick={() => addScholarship(row.original)}>Add</button>
+                </TableCell>
                 {row.getVisibleCells().map(cell => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

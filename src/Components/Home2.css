@@ -4,6 +4,7 @@
 
 
 .row {
+    padding: 10px;
     display: flex;
     justify-content: flex-end; 
   }
@@ -16,6 +17,7 @@
   .column-left {
     flex: 30%;
     background-color: #fcfeff;
+    padding-left: 30px;
     
   }
 
@@ -58,6 +60,7 @@
     margin-inline-start: auto;
     -webkit-margin-end: auto;
     margin-inline-end: auto;
+    padding-right: 20px;
     width: 100%;
     min-height: 75vh;
     max-width: 1000px;
@@ -242,6 +245,7 @@
     display: -ms-flexbox;
     display: flex;
     width: 100%;
+    padding: 0px;
 }
 
 .css-1oo0gu1 {
@@ -286,7 +290,7 @@
     width: 100%; /* Adjust the width as needed */
     max-width: 100%; /* Prevent the container from expanding beyond its parent */
     position: relative;
-    max-width: 800px;
+
     overflow-wrap: break-word; /* Ensure text wraps within the container */
     word-wrap: break-word; /* Ensure text wraps within the container */
     word-break: break-all; /* Ensure text breaks at the end of container */
@@ -332,7 +336,9 @@
     border-radius: inherit;
     font-weight: var(--chakra-fontWeights-bold);
     font-size: 34px;
-    padding: 0px;
+    padding-left: 10px;
+    margin-bottom: 20px;
+
     flex: center;
     
 }
@@ -365,7 +371,7 @@
     justify-content: space-between;
     align-items: flex-start;
     background: #fcfeff;
-    padding: 10px; /* Add some padding for better spacing */
+    padding: 20px; /* Add some padding for better spacing */
     border-radius: 5px; /* Optional: add rounded corners */
     white-space: nowrap; /* Prevent wrapping */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Proper box shadow syntax */
@@ -388,13 +394,7 @@
  
 
 
-  
-  .school-item {
-    padding: 10px;
-    border-bottom: 1px solid #e0e0e0;
-    max-width: 85%; /* Make sure it takes the full width of its parent */
-    }
-    
+ 
 
  .school-item:first-child {
         border-top-width:0px;
@@ -408,4 +408,210 @@
     text-align: left;
 }
 
+
+
+
+.schools-list{
+  width: 100%;
+    max-width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+    align-items: center; 
+
+}
+
   
+@media (max-width: 912px) {
+  .row {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-start; /* Adjust to start to ensure columns stack properly */
+    width: 100%;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+
+  .column-right {
+    max-height: 500px;
+    margin-bottom: 20px; /* Add margin to push .column-left down */
+    width: 100%; /* Ensure full width */
+    box-sizing: border-box;
+  }
+
+  .column-left {
+    flex: 1 0 100%;
+    width: 100%;
+    margin: 0; /* Reset margin */
+    box-sizing: border-box;
+  }
+
+  .css-16ld5u0 {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .css-1k6m9o {
+    padding-top: 20px;
+    box-sizing: border-box;
+  }
+
+  .css-1799jpi {
+    width: 100%;
+    max-width: none;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .css-6n9yju {
+    margin-top: 10px;
+    justify-self: center;
+    box-sizing: border-box;
+  }
+
+  .css-1pgcnou {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  .css-gllksg {
+    height: 40px;
+    min-width: 100%;
+    font-size: var(--chakra-fontSizes-xs);
+    padding: 10px;
+    margin-inline-start: 0;
+    box-sizing: border-box;
+  }
+
+  .css-1h62d89 {
+    margin-inline-end: 10px;
+    height: 30px;
+    min-height: 30px;
+    min-width: 30px;
+    box-sizing: border-box;
+  }
+
+  .css-9bephp {
+    margin-bottom: 5px;
+    box-sizing: border-box;
+  }
+
+  .css-cyklgb {
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+
+  .css-adkx0o {
+    max-width: 100%;
+    min-height: 300px;
+    max-height: 300px;
+    height: auto;
+    padding: 10px;
+    overflow-y: auto; /* Enable vertical scrolling */
+    box-sizing: border-box;
+  }
+
+  .step-tracker {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .prompts-container {
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  .css-1hngipw {
+    font-size: 24px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .font-medium {
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .text-container p {
+    font-size: 12px; /* Adjust the font size for mobile screens */
+    box-sizing: border-box;
+  }
+
+  .message {
+    max-width: 90%;
+    padding: 5px 10px;
+    box-sizing: border-box;
+  }
+
+
+
+  .text-container {
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+
+  .css-6n9yju {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: 10px;
+    box-sizing: border-box;
+  }
+
+  .chakra-input.css-1pgcnou {
+    padding: 12px 16px;
+    font-size: var(--chakra-fontSizes-xs);
+    border-radius: 10px;
+    box-sizing: border-box;
+  }
+
+  .chakra-button.css-gllksg,
+  .chakra-button.css-reset {
+    height: 40px;
+    font-size: var(--chakra-fontSizes-xs);
+    padding: 0 12px;
+    border-radius: 10px;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .school-container2 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fcfeff;
+    padding: 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 100%; /* Ensure it doesn't exceed parent width */
+    width: 100%; /* Take up entire width of parent container */
+    min-height: 70px; /* Force min-height to be applied */
+  }
+
+  .colum-left{
+    padding: 0px;
+    margin: 0px;
+  }
+  
+
+
+  .school-container {
+  max-height: 100%; /* Adjust the height as needed */
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: #fcfeff;
+  padding: 20px; /* Add some padding for better spacing */
+  border-radius: 5px; /* Optional: add rounded corners */
+  white-space: nowrap; /* Prevent wrapping */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Proper box shadow syntax */
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%; /* Ensure it takes full width */
+}
+}

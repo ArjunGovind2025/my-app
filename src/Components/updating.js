@@ -88,4 +88,31 @@ export const updateCollegePricesWithNeedAid = async (SAI, user) => {
     return null; // Return null if something goes wrong
 };
 
+export const updateCurrentStep = async (user, currentStep) => {
+    try {
+        const userDocRef = doc(db, 'userData', user.uid); // Replace 'user.uid' with your user identifier logic if different
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            console.log('User data retrieved:', userData); // Log the entire user data
+
+            // Check if the 'currentStep' field exists
+            if (userData.currentStep === undefined) {
+                console.log('currentStep field does not exist, adding it.');
+            } else {
+                console.log('currentStep field exists, updating it.');
+            }
+
+            // Update or add the 'currentStep' field
+            await updateDoc(userDocRef, { currentStep });
+            console.log('Updated currentStep successfully:', currentStep);
+        } else {
+            console.log('No such document!');
+        }
+    } catch (error) {
+        console.error('Error updating currentStep:', error);
+    }
+};
+
 export default updateCollegePricesWithNeedAid;
