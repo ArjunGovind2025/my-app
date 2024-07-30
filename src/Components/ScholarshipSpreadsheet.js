@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
 import stringSimilarity from 'string-similarity';
-import './ScholarshipTable.css'
+import './ScholarshipTable.css';
 import '../global.css';
 
 const normalizeHeader = (header) => {
@@ -89,16 +89,29 @@ const ScholarshipSpreadsheet = () => {
     fetchScholarshipData();
   }, [user]);
 
-  // Generate columns dynamically based on the keys in the data
+  // Define the specific order of columns
+  const desiredOrder = ['schoolid', 'scholarshipname', 'aidamount', 'criteria', 'needbased', 'separateapplicationrequired', 'deadline', 'additionalinfo', 'linktoscholarship'];
+
   const columns = useMemo(() => {
     if (scholarships.length === 0) return [];
     const allKeys = Array.from(new Set(scholarships.flatMap(Object.keys)));
     const mergedKeys = mergeSimilarColumns(allKeys);
-    return mergedKeys.map(key => ({
+
+    // Create columns based on the desired order
+    const orderedColumns = desiredOrder.filter(key => mergedKeys.includes(key)).map(key => ({
       accessorKey: key,
       header: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
       enableSorting: true,
     }));
+
+    // Add any additional columns that are not in the desired order
+    const additionalColumns = mergedKeys.filter(key => !desiredOrder.includes(key)).map(key => ({
+      accessorKey: key,
+      header: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
+      enableSorting: true,
+    }));
+
+    return [...orderedColumns, ...additionalColumns];
   }, [scholarships]);
 
   const table = useReactTable({
@@ -137,7 +150,10 @@ const ScholarshipSpreadsheet = () => {
                     <TableHead
                       key={header.id}
                       onClick={header.column.getToggleSortingHandler()}
-                      className={header.column.getCanSort() ? 'cursor-pointer' : ''}
+                      style={{
+                        whiteSpace: 'nowrap', // Prevent breaking words in headers
+                        cursor: header.column.getCanSort() ? 'pointer' : 'default'
+                      }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {{
@@ -154,7 +170,12 @@ const ScholarshipSpreadsheet = () => {
             {table.getRowModel().rows.map((row, rowIndex) => (
               <TableRow key={row.id} className={rowIndex % 2 === 0 ? "bg-accent" : ""}>
                 {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    style={{
+                      wordBreak: 'break-word' // Allow breaking words in cells
+                    }}
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}

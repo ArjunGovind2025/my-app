@@ -1,4 +1,11 @@
+.no-outline {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
 .school-details-container {
+  display: flex; /* Ensure the parent is using flexbox */
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
@@ -6,17 +13,28 @@
   margin: 20px auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden; /* Prevent horizontal scroll */
+
 }
 
 .school-details-content {
-  display: flex;
-  justify-content: space-between;
-  max-height: 20;
+  flex: 3; /* Take up more space */
+  margin-right: 20px; /* Add some space between the content and screen */
+}
+
+.screen-container {
+    flex: 1;
+    flex-direction: column; /* Stack the containers vertically */
+    gap: 20px; /* Add some space between the two chat containers */
+    width: 35%; /* Allocate width for the screen container */
+    height: 100%; /* Ensure it takes the full height */
+  
 }
 
 .school-details {
   flex: 1;
 }
+
+
 
 h1 {
   font-size: 24px;
@@ -30,21 +48,19 @@ p {
 
 .screen-container {
   display: flex;
-  justify-content: space-between;
-  width: 100%; /* Fit within container */
+  flex-direction: column; /* Stack the containers vertically */
   gap: 20px; /* Add some space between the two chat containers */
-  margin-top: 20px;
-  max-width: 100%;
+  width: 35%; /* Allocate width for the screen container */
 }
 
 .chat-container-wrapper {
   flex: 1;
-  margin-top: -220px; /* Adjust this value to move the Messages card higher */
+  margin-top: 20px;
 }
 
 .chat-container2-wrapper {
-  width: 35%;
-  max-width: 35%;
+  flex: 1;
+  height: auto;
 }
 
 .chat-container,
@@ -61,6 +77,7 @@ p {
 .messages {
   flex: 1; /* Allow messages to take up remaining space */
   max-height: 500px;
+  height: 100%;
   overflow-y: auto;
   margin-bottom: 20px;
   border: 1px solid #ddd;
@@ -124,4 +141,91 @@ p {
 
 .badge-pill {
   margin-right: 0.5rem;
+}
+
+.custom-flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Equivalent to gap-2 in Tailwind CSS */
+}
+
+
+@media (max-width: 768px) {
+  .school-details-container {
+    flex-direction: column; /* Stack the columns vertically on smaller screens */
+  }
+
+  .school-details-content {
+    order: -1; /* Move school-details-content to the top */
+    width: 100%;
+    margin-right: 0;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .screen-container {
+    order: 0; /* Ensure screen-container comes after school-details-content */
+    gap: 10px;
+    width: 100%;
+  }
+
+  .chat-container-wrapper {
+    order: 1; /* Ensure chat-container-wrapper comes after screen-container */
+    width: 100%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding:0px;
+
+  }
+
+  .chat-container,
+  .chat-container2 {
+    padding: 10px;
+    box-shadow: none; /* Remove box shadow on smaller screens */
+  }
+
+  .messages {
+    max-height: 300px; /* Reduce the height for smaller screens */
+    width: 100%;
+  }
+
+  .custom-flex-wrap {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px; /* Adjust the gap as needed */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    padding: 10px; /* Optional: add some padding */
+  }
+  
+  .custom-flex-wrap::-webkit-scrollbar {
+    height: 8px; /* Adjust the height of the scrollbar */
+  }
+  
+  .custom-flex-wrap::-webkit-scrollbar-thumb {
+    background-color: #cccccc; /* Customize the scrollbar thumb color */
+    border-radius: 10px;
+  }
+  
+  .custom-flex-wrap::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Customize the scrollbar track color */
+  }
+  
+  .badge-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 10px 0; /* Optional: add padding for better spacing */
+  }
+  
+  .badge-pill {
+    display: inline-block;
+    padding: 0.5em 1em;
+    border-radius: 9999px;
+    background-color: #f3f4f6;
+    color: #111827;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap; /* Prevent badges from wrapping to the next line */
+  }
 }

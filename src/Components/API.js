@@ -81,8 +81,8 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
       {
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. ${customMessage}` },
-          { role: 'user', content: input }
+          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. Here is the students financial situation, Student Aid Index(SAI)/EFC: ${userDoc.SAI}. ${customMessage}` },
+          { role: 'user', content: 'based on my details ' + input }
         ],
         max_tokens: 300,
       },

@@ -7,6 +7,7 @@ import './MySchools.css';
 import SmallerPieChartComponent from './SmallerPieChartComponent';
 import { useCombined } from './CollegeContext';
 import ThreeDotsMenu from './ThreeDotsMenu';
+import { fetchUserAccessLevel } from './retrieving';
 
 
 
@@ -14,12 +15,15 @@ const MySchools = () => {
   const { user, myColleges } = useCombined(); // Destructure myColleges from the context
   const [mySchools, setMySchools] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [accessLevel, setAccessLevel] = useState('Free'); // Default to 'Free'
+
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        
         subscribeToMySchools(currentUser.uid);
+        const level = await fetchUserAccessLevel(currentUser.uid); // Fetch the access level
+        setAccessLevel(level);
       } else {
         
         setMySchools([]);
@@ -123,7 +127,8 @@ const MySchools = () => {
                   
                 <div className="column-right2">
                   <span
-                    className="chakra-badge css-y5xvhi"
+                    className={`chakra-badge css-y5xvhi ${accessLevel === 'Free' && index >= 5 ? 'blur' : ''} ${accessLevel === 'Standard' && index >= 15 ? 'blur' : ''}`}
+
                     style={{
                       backgroundColor: school.priceChanged ? '#e7f9f6' : '', // Red background if price changed
                       color: school.priceChanged ? '#00b473' : '',

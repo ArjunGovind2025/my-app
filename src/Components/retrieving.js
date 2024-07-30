@@ -27,4 +27,23 @@ export const retrieveCurrentStep = async (user) => {
     }
 };
 
+export const fetchUserAccessLevel = async (uid) => {
+    try {
+      const userDocRef = doc(db, 'userData', uid);
+      const userDocSnap = await getDoc(userDocRef);
+  
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        const access = userData.access || 'Free';
+        return access;
+      } else {
+        console.error('No such document!');
+        return 'Free'; // Default to 'Free' if no document exists
+      }
+    } catch (error) {
+      console.error('Error fetching user access level:', error);
+      return 'Free'; // Default to 'Free' in case of an error
+    }
+  };
+
 export default retrieveCurrentStep;

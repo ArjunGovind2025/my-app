@@ -33,10 +33,13 @@ const SchoolDetails = () => {
     const fetchSchoolDetails = async () => {
       const schoolDocRef = doc(db, 'collegeData', ipedsId);
       const schoolDocSnap = await getDoc(schoolDocRef);
+      fetchMeritData(false)
 
       if (schoolDocSnap.exists()) {
         const schoolDetails = schoolDocSnap.data();
         setSchool(schoolDetails);
+        const welcomeMessage = `Hi, I am an advisor for ${schoolDetails.Name}. Ask me any questions you have!`;
+        setMessages([{ role: 'bot', content: welcomeMessage }]);
       }
     };
 
@@ -90,7 +93,7 @@ const SchoolDetails = () => {
         if (schoolDetails?.meritDataTable && !refresh) {
           setScholarshipData(schoolDetails.meritDataTable);
         } else {
-          const response = await getChatResponse(user.uid, `Give me info on merit scholarships (non need) i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, and additional info`, "", setShowModal);
+          const response = await getChatResponse(user.uid, `Give me info on merit scholarships (non need) i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, link to scholarship, and additional info`, "", setShowModal);
           console.log('GPT response: ', response);
           setScholarshipData(response);
           await updateDoc(schoolDocRef, {
@@ -117,7 +120,7 @@ const SchoolDetails = () => {
         if (schoolDetails?.scholarshipDataTable && !refresh) {
           setScholarshipData(schoolDetails.scholarshipDataTable);
         } else {
-          const response = await getChatResponse(user.uid, `Give me info on other scholarships i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, seperate applciation required, need based, and additional info `, "", setShowModal);
+          const response = await getChatResponse(user.uid, `Give me info on other scholarships i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, seperate applciation required, need based, link to scholarship, and additional info `, "", setShowModal);
           console.log('GPT response: ', response);
           setScholarshipData(response);
           await updateDoc(schoolDocRef, {
@@ -166,7 +169,7 @@ const SchoolDetails = () => {
           <CardTitle>{school.Name}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
+          <div className="custom-flex-wrap">
             <span className="badge badge-pill badge-college">In-state: {school['Total price for in-state students 2022-23']}</span>
             <span className="badge badge-pill badge-college">Out-of-state: {school['Total price for out-of-state students 2022-23']}</span>
             <span className="badge badge-pill badge-college">Percent recieving merit award: {school['% Fresh w/out need Receiving Merit Aid']}%</span>
@@ -179,24 +182,14 @@ const SchoolDetails = () => {
         </CardContent>
       </Card>
 
-        
-        <Card className="school-chart w-[400px]">
-          <CardHeader>
-            <CardTitle>Financial Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PieChartComponent ipedsId={ipedsId} myColleges={myColleges} />
-          </CardContent>
-        </Card>
-  
-      </div>
-  
-      <div className="screen-container">
-        <div className="chat-container-wrapper">
+
+      <div className="chat-container-wrapper">
           <Card className="chat-container">
-            <CardHeader>
-              <CardTitle>School Scholarships</CardTitle>
-            </CardHeader>
+            {/*
+              <CardHeader>
+                <CardTitle>School Scholarships</CardTitle>
+              </CardHeader>
+              */}
             <CardContent className="chat-box">
               <div className="messages">
                 {loading && <div>Loading...</div>}
@@ -212,6 +205,24 @@ const SchoolDetails = () => {
             </CardContent>
           </Card>
         </div>
+
+        
+        
+  
+      </div>
+  
+      <div className="screen-container">
+      <Card className="school-chart w-[400px]">
+       {/*
+          <CardHeader>
+            <CardTitle>Financial Breakdown</CardTitle>
+          </CardHeader>
+          */}
+          <CardContent className="p-0 no-outline">
+            <PieChartComponent ipedsId={ipedsId} myColleges={myColleges} className="p-0"/>
+          </CardContent>
+        </Card>
+        
         <div className="chat-container2-wrapper">
           <Card className="chat-container2">
             <CardHeader>
@@ -240,8 +251,9 @@ const SchoolDetails = () => {
                   onChange={(e) => setInput(e.target.value)}
                   mr={2}
                 />
+                
                 <Button type="button" onClick={() => handleSubmitWithPrompt(`Be confident and concise in questions asked, you are an advisor for ${school.Name}`)}>Submit</Button>
-                <Button type="button" onClick={() => handleResetMessages(setMessages)}>Reset Messages</Button>
+                {/* <Button type="button" onClick={() => handleResetMessages(setMessages)}>Reset Messages</Button>*/}
               </div>
             </CardContent>
           </Card>

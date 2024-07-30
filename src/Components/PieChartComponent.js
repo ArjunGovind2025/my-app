@@ -109,10 +109,11 @@ const PieChartComponent = ({ ipedsId, myColleges }) => {
   }
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col no-outline">
       <CardHeader className="items-center pb-0">
    
-        <CardDescription>Cost breakdown for the selected school.</CardDescription>
+            <CardTitle>Financial Breakdown</CardTitle>
+   
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer className="mx-auto aspect-square max-h-[250px]" config={{ styles: chartData.length ? chartData : {} }}>
