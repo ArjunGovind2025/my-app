@@ -14,6 +14,7 @@ export const CombinedProvider = ({ children }) => {
   const [myColleges, setMyColleges] = useState({});
   const [userDoc, setUserDoc] = useState({});
 
+
   useEffect(() => {
     onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);

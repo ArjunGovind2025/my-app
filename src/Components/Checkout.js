@@ -3,30 +3,31 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card'
 import { Button } from './ui/button';
 import getStripe from './server';
 import config from '../config';
+import { updateAccessField } from './Access';
 
 const tiers = [
   {
     title: 'Free',
     price: '$0/month',
-    features: ['Feature 1', 'Feature 2', 'Feature 3'],
+    features: ['See 5 Schools', 'Ask 10 Questions a Week '],
     priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_FREE, // Adjust accordingly
   },
   {
     title: 'Standard',
     price: '$6.99/month',
-    features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4'],
+    features: ['See 15 Schools', 'Ask 20 Questions a Week ', 'See School Specific Scholarships'],
     priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_STANDARD, // Adjust accordingly
   },
   {
     title: 'Premium',
     price: '$14.99/month',
-    features: ['Feature 1', 'Feature 2', 'Feature 3', 'Feature 4', 'Feature 5'],
+    features: ['Unlimited Schools', 'Unlimited Questions','See School Specific Scholarships', 'Export Spreadsheet'],
     priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM, // Adjust accordingly
   },
 ];
 
 const Checkout = () => {
-  async function handleCheckout(priceId) {
+  async function handleCheckout(priceId, tierTitle) {
     const stripe = await getStripe();
     const { error } = await stripe.redirectToCheckout({
       lineItems: [
@@ -36,7 +37,7 @@ const Checkout = () => {
         },
       ],
       mode: 'subscription',
-      successUrl: `http://localhost:3000/success`,
+      successUrl: `http://localhost:3000/success?tier=${tierTitle}`, // Pass the tier title in the success URL
       cancelUrl: `http://localhost:3000/cancel`,
       customerEmail: 'customer@email.com',
     });
@@ -64,11 +65,13 @@ const Checkout = () => {
                 </ul>
               </CardContent>
             </div>
-            <CardFooter className="mt-auto">
-              <Button className="w-full" onClick={() => handleCheckout(tier.priceId)}>
-                Select {tier.title}
-              </Button>
-            </CardFooter>
+            {tier.title !== 'Free' && (
+              <CardFooter className="mt-auto">
+                <Button className="w-full" onClick={() => handleCheckout(tier.priceId, tier.title)}>
+                  Select {tier.title}
+                </Button>
+              </CardFooter>
+            )}
           </Card>
         ))}
       </div>

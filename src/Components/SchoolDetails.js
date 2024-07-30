@@ -11,6 +11,7 @@ import './SchoolDetails.css';
 import '../global.css';
 import ScholarshipTable from './ScholarshipTable';
 import PieChartComponent from './PieChartComponent';
+import Modal from './Modal';
 
 const SchoolDetails = () => {
   const { ipedsId } = useParams();
@@ -25,6 +26,8 @@ const SchoolDetails = () => {
   const [scholarshipData, setScholarshipData] = useState('');
   const [error, setError] = useState(null);
   const [input, setInput] = useState(''); // Define input state
+  const [showModal, setShowModal] = useState(false);
+
 
   useEffect(() => {
     const fetchSchoolDetails = async () => {
@@ -53,7 +56,7 @@ const SchoolDetails = () => {
     let botResponse = '';
 
     try {
-      botResponse = await getChatResponse(user.uid, instruction);
+      botResponse = await getChatResponse(user.uid, instruction, "", setShowModal);
     } catch (error) {
       botResponse = 'Something went wrong. Please try again.';
     } finally {
@@ -87,7 +90,7 @@ const SchoolDetails = () => {
         if (schoolDetails?.meritDataTable && !refresh) {
           setScholarshipData(schoolDetails.meritDataTable);
         } else {
-          const response = await getChatResponse(user.uid, `Give me info on merit scholarships (non need) i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, and additional info`);
+          const response = await getChatResponse(user.uid, `Give me info on merit scholarships (non need) i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, and additional info`, "", setShowModal);
           console.log('GPT response: ', response);
           setScholarshipData(response);
           await updateDoc(schoolDocRef, {
@@ -114,7 +117,7 @@ const SchoolDetails = () => {
         if (schoolDetails?.scholarshipDataTable && !refresh) {
           setScholarshipData(schoolDetails.scholarshipDataTable);
         } else {
-          const response = await getChatResponse(user.uid, `Give me info on other scholarships i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, seperate applciation required, need based, and additional info `);
+          const response = await getChatResponse(user.uid, `Give me info on other scholarships i can apply for at ${school.Name} in a a CSV string but instead of commas to seperate values use semicolons. DONT SAY Sure, here is the requested information in CSV format! Just give string to be parsed and with headers The headers should be scholarship name, aid amount, criteria, deadline, seperate applciation required, need based, and additional info `, "", setShowModal);
           console.log('GPT response: ', response);
           setScholarshipData(response);
           await updateDoc(schoolDocRef, {
@@ -134,7 +137,7 @@ const SchoolDetails = () => {
     try {
       const fullPrompt = `${prompt} ${input}`;
       console.log('Full prompt to API:', fullPrompt);
-      const response = await getChatResponse(user.uid, fullPrompt);
+      const response = await getChatResponse(user.uid, fullPrompt,"", setShowModal);
       console.log('GPT response: ', response);
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -153,6 +156,8 @@ const SchoolDetails = () => {
   }
 
   return (
+    <>
+    {showModal && <Modal message="API call limit exceeded. Please upgrade your plan." onClose={() => setShowModal(false)} />}
     <div className="school-details-container">
       <div className="school-details-content">
         
@@ -243,6 +248,7 @@ const SchoolDetails = () => {
         </div>
       </div>
     </div>
+    </>
   );
   
 };
