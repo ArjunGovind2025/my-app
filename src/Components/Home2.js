@@ -36,6 +36,8 @@ const Home2 = () => {
   const [gpa, setGpa] = useState(''); // State for GPA
   const [testScores, setTestScores] = useState({}); // State for test scores
   const [showModal, setShowModal] = useState(false);
+  const [isTypewriterDone, setIsTypewriterDone] = useState(false);
+
 
   const steps = [
     'Welcome',
@@ -88,7 +90,25 @@ useEffect(() => {
     setCurrentStep(step);
     setBotMessage(stepMessages[step]); // Update bot message to reflect the step change
   };
-  
+
+  const handlePromptClick = async (prompt) => {
+    console.log('Prompt clicked:', prompt);
+    setLoading(true);
+    try {
+      const response = await getShortChatResponse(user.uid, prompt, userDoc, myColleges, 'Provide short and concise answers.', setShowModal);
+      console.log('API Response:', response);
+      const botMessage = {
+        role: 'bot',
+        content: response,
+      };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+      setBotMessage(response); // Update the botMessage state to trigger Typewriter
+    } catch (error) {
+      console.error('Error handling prompt click:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const storeUserData = async (gpa, testScore, testType) => {
     try {
@@ -699,14 +719,17 @@ useEffect(() => {
                           deleteSpeed={50}
                           delaySpeed={1000}
                         />
-                      </p>
+                      </p> 
                       </div>
                     </div>
-                    <div className="prompts-container">
-                      
-                    </div>
+                    
                   </div>
+                 
                 </div>
+                <div className="prompts-container">
+                  <Prompts onPromptClick={handlePromptClick} />
+
+                    </div>
                 
                 <div className="css-6n9yju">
                   <input

@@ -6,6 +6,12 @@ import { useCombined } from './CollegeContext'; // Import the custom hook to acc
 import { getChatResponse } from './API'; // Import the API logic
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from './ui/tabs';
 import { Typewriter } from 'react-simple-typewriter';
 import './SchoolDetails.css';
 import '../global.css';
@@ -72,6 +78,7 @@ const SchoolDetails = () => {
       setLoading(false);
     }
   };
+
 
   const handleResetMessages = (customMessage = '') => {
     const welcomeMessage = `You are an advisor for ${school?.Name}. ${customMessage}`;
@@ -191,17 +198,52 @@ const SchoolDetails = () => {
               </CardHeader>
               */}
             <CardContent className="chat-box">
+            <Tabs defaultValue="fetchMeritData" onValueChange={(value) => {
+            if (value === 'fetchMeritData') fetchMeritData(false);
+            else if (value === 'refreshMeritData') fetchMeritData(true);
+            else if (value === 'fetchScholarshipData') fetchScholarshipData(false);
+            else if (value === 'refreshScholarshipData') fetchScholarshipData(true);
+          }}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="fetchMeritData">Fetch Merit Aid Information</TabsTrigger>
+              <TabsTrigger value="refreshMeritData">Refresh Merit Aid Information</TabsTrigger>
+              <TabsTrigger value="fetchScholarshipData">Fetch Scholarship Information</TabsTrigger>
+              <TabsTrigger value="refreshScholarshipData">Refresh Scholarship Information</TabsTrigger>
+            </TabsList>
+
+        
+
+            <TabsContent value="refreshMeritData">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Refresh Merit Aid Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {/* Add any specific content or inputs for this tab here */}
+                  <Button onClick={() => fetchMeritData(true)}>Refresh</Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+         
+            <TabsContent value="refreshScholarshipData">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Refresh Scholarship Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {/* Add any specific content or inputs for this tab here */}
+                  <Button onClick={() => fetchScholarshipData(true)}>Refresh</Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
               <div className="messages">
                 {loading && <div>Loading...</div>}
                 {error && <div>{error}</div>}
                 {scholarshipData && <ScholarshipTable data={scholarshipData} ipedsId={ipedsId} />}
               </div>
-              <div className="button-container">
-                <Button onClick={() => fetchMeritData(false)} variant="secondary">Fetch Merit Aid Information</Button>
-                <Button onClick={() => fetchMeritData(true)} variant="secondary">Refresh Merit Aid Information</Button>
-                <Button onClick={() => fetchScholarshipData(false)} variant="secondary">Fetch Scholarship Information</Button>
-                <Button onClick={() => fetchScholarshipData(true)} variant="secondary">Refresh Scholarship Information</Button>
-              </div>
+              
             </CardContent>
           </Card>
         </div>

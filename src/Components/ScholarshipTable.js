@@ -126,16 +126,21 @@ const ScholarshipTable = ({ data, ipedsId }) => {
                 <React.Fragment key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
                     <TableHead
-                      key={header.id}
-                      onClick={header.column.getToggleSortingHandler()}
-                      className={header.column.getCanSort() ? 'cursor-pointer' : ''}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {{
-                        asc: ' 🔼',
-                        desc: ' 🔽'
-                      }[header.column.getIsSorted()] ?? null}
-                    </TableHead>
+                    key={header.id}
+                    onClick={header.column.getToggleSortingHandler()}
+                    className={header.column.getCanSort() ? 'cursor-pointer' : ''}
+                    style={{ 
+                      whiteSpace: 'normal', // Allow word wrapping
+                      wordBreak: 'keep-all', // Prevent breaking words mid-word
+                      maxWidth: '150px' // Set a max width for the headers
+                    }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {{
+                      asc: ' 🔼',
+                      desc: ' 🔽'
+                    }[header.column.getIsSorted()] ?? null}
+                  </TableHead>
                   ))}
                 </React.Fragment>
               ))}

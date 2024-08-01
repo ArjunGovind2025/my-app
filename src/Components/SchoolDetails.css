@@ -19,6 +19,9 @@
 .school-details-content {
   flex: 3; /* Take up more space */
   margin-right: 20px; /* Add some space between the content and screen */
+  width: 980px;
+  min-width: 980px;
+  max-width: 980px;
 }
 
 .screen-container {
@@ -107,7 +110,7 @@ p {
 
 .button-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 10px;
 }
 

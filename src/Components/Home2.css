@@ -75,7 +75,7 @@
     display: flex;
     -webkit-margin-start: 0px;
     margin-inline-start: 0px;
-    margin-top: 20px;
+    margin-top: 0px;
     justify-self: flex-end;
 }
 
@@ -316,11 +316,15 @@
     margin-bottom: 16px; /* Adjust spacing below the step tracker */
   }
 
-.prompts-container {
-    display: flex;
+  .prompts-container {
     justify-content: center;
     align-items: center;
+    width: 100%; /* Ensure the container takes full width */
+    padding-top: 10px;
+    padding-bottom:5px;
+    box-sizing: border-box; /* Include padding in the element's total width and height */
   }
+
 
   .css-1hngipw {
     transition-property: var(--chakra-transition-property-common);
@@ -388,8 +392,10 @@
     justify-content: flex-start;
     align-items: flex-start;
     width: 100%;
+    padding-left: 10px;
+    padding-right: 10px;
+    overflow-y: auto;
   }
-  
 
  
 
@@ -419,6 +425,8 @@
     align-items: center; 
 
 }
+
+
 
   
 @media (max-width: 912px) {
@@ -516,10 +524,7 @@
     box-sizing: border-box;
   }
 
-  .prompts-container {
-    flex-direction: column;
-    box-sizing: border-box;
-  }
+
 
   .css-1hngipw {
     font-size: 24px;

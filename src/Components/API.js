@@ -64,6 +64,12 @@ export const getChatResponse = async (userDocId, input, customMessage = '', setS
   }
 };
 
+const formatResponse = (response) => {
+  return response; // Markdown handles new lines and formatting natively
+};
+
+
+// Function to get the chat response
 export const getShortChatResponse = async (userDocId, input, userDoc, myColleges, customMessage = '', setShowModal) => {
   const collegesObject = typeof myColleges === 'object' && myColleges !== null ? myColleges : {};
   const mySchools = Object.values(collegesObject).map(college => college.Name).filter(name => name).join(', ');
@@ -81,8 +87,8 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
       {
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. Here is the students financial situation, Student Aid Index(SAI)/EFC: ${userDoc.SAI}. ${customMessage}` },
-          { role: 'user', content: 'based on my details ' + input }
+          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. Here is the student's financial situation, Student Aid Index (SAI)/EFC: ${userDoc.SAI}. Here is the state they are from: ${userDoc.stateAbbr}. ${customMessage}` },
+          { role: 'user', content: 'Based on my details ' + input }
         ],
         max_tokens: 300,
       },
@@ -95,7 +101,13 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
 
     await incrementApiCallCount(userDocId);
 
-    return response.data.choices[0].message.content.trim();
+    // Get the raw response text
+    const rawResponse = response.data.choices[0].message.content.trim();
+
+    // Format the response
+    const formattedResponse = formatResponse(rawResponse);
+
+    return formattedResponse;
   } catch (error) {
     console.error('Error:', error.response ? error.response.data : error.message);
     throw new Error('Sorry, I could not process your request at this time.');
