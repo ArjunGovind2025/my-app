@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { db, auth, provider, signInWithPopup } from '../firebaseConfig';
+import { db, auth, provider, signInWithPopup,signOut} from '../firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { updateCollegePricesWithNeedAid } from './updating'; // Update the import path accordingly
@@ -55,6 +55,18 @@ export const CombinedProvider = ({ children }) => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth); // This will sign out the user from Firebase Auth
+      setUser(null); // Clear the user state
+      setMyColleges({}); // Clear the user's colleges
+      setUserDoc({}); // Clear the user document
+      console.log("User signed out.");
+    } catch (error) {
+      console.error("Error signing out: ", error);
+    }
+  };
+
   const addCollegeToUser = async (college) => {
     if (!user) {
       console.log('User is not signed in.');
@@ -81,32 +93,61 @@ export const CombinedProvider = ({ children }) => {
       };
 
     
-  
       if (!userDocSnap.exists()) {
-        // User document doesn't exist, create a new one
+        const userData = userDocSnap.data();
+        const accessLevel = userData.access || 'Free';
+        // User document does n't exist, create a new one
+      
+        
+        const maxVisible = accessLevel === 'Free' ? 5 : accessLevel === 'Standard' ? 15 : 30;
+        const newVisibleColleges = [collegeData['IPEDS ID']]; // Initialize with the first college
+      
         await setDoc(userDocRef, {
           myColleges: {
-            [college['IPEDS ID']]: collegeData
-          }
+            [collegeData['IPEDS ID']]: collegeData
+          },
+          visibleColleges: newVisibleColleges,
+          access: "Free" // Set access level to "Free"
         });
+      
         setMyColleges({
-          [college['IPEDS ID']]: collegeData
+          [collegeData['IPEDS ID']]: collegeData
         });
-        console.log('College added to new user document:', college.Name);
+      
+        console.log('College added to new user document:', collegeData.Name);
         return; // Exit after creating a new document
       }
-  
+      
       // User document exists, proceed with adding the college
+      const userData = userDocSnap.data();
+      const currentVisibleColleges = userData.visibleColleges || [];
+      const currentMyColleges = userData.myColleges || {};
+      const accessLevel = userData.access || 'Free';
+      console.log('accessLevel:', accessLevel)
+
+      const maxVisible = accessLevel === 'Free' ? 5 : accessLevel === 'Standard' ? 15 : 30;
+      console.log('maxVisible:', maxVisible)
+
+      let newVisibleColleges = [...currentVisibleColleges];
+      console.log('newVisibleColleges:', newVisibleColleges)
+      
+      // Check if we can add the new college to visibleColleges
+      if (newVisibleColleges.length < maxVisible) {
+        newVisibleColleges.push(collegeData['IPEDS ID']);
+      }
+      
       await updateDoc(userDocRef, {
-        [`myColleges.${college['IPEDS ID']}`]: collegeData
+        [`myColleges.${collegeData['IPEDS ID']}`]: collegeData,
+        visibleColleges: newVisibleColleges
       });
+      
       setMyColleges(prev => ({
         ...prev,
-        [college['IPEDS ID']]: collegeData
+        [collegeData['IPEDS ID']]: collegeData
       }));
       console.log('College added to existing user document:', college.Name);
 
-      const userData = userDocSnap.data();
+      
 
 
       const updatedUserDocSnap = await getDoc(userDocRef);
@@ -201,6 +242,7 @@ export const CombinedProvider = ({ children }) => {
       if (docSnap.exists()) {
         const allData = docSnap.data();
         const collegeData = allData[ipedsId]; // Assuming IPEDS ID is the key
+        
 
         console.log('College data retrieved:', collegeData);
 
@@ -224,6 +266,13 @@ export const CombinedProvider = ({ children }) => {
 
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
+            const currentVisibleColleges = userData.visibleColleges || [];
+            const accessLevel = userData.access
+
+            let newVisibleColleges = currentVisibleColleges;
+            if (currentVisibleColleges.length < (accessLevel === 'Free' ? 5 : accessLevel === 'Standard' ? 15 : Infinity)) {
+              newVisibleColleges = [...currentVisibleColleges, collegeData['IPEDS ID']];
+            }
 
             // Check if meritScore exists and compare it to the Merit Aid Cutoff Score
             if (userData.meritScore && collegeToAdd['Merit Aid Cutoff Score']) {
@@ -238,22 +287,36 @@ export const CombinedProvider = ({ children }) => {
             }
 
             await updateDoc(userDocRef, {
-              [`myColleges.${collegeData['IPEDS ID']}`]: collegeToAdd
+              [`myColleges.${collegeData['IPEDS ID']}`]: collegeToAdd,
+              visibleColleges: newVisibleColleges,
+              access: "Free"
             });
+          
+            // Update the local state with the new college
             setMyColleges(prev => ({
               ...prev,
               [collegeData['IPEDS ID']]: collegeToAdd
             }));
+          
             console.log('College added to existing user document:', collegeData.Name);
           } else {
+            // If the document does not exist, create new visibleColleges array
+            const newVisibleColleges = [collegeData['IPEDS ID']];
+          
+            // Create the document with the new college and visibleColleges
             await setDoc(userDocRef, {
               myColleges: {
                 [collegeData['IPEDS ID']]: collegeToAdd
-              }
+              },
+              visibleColleges: newVisibleColleges,
+              access: "Free" 
             });
+          
+            // Update the local state with the new college
             setMyColleges({
               [collegeData['IPEDS ID']]: collegeToAdd
             });
+          
             console.log('College added to new user document:', collegeData.Name);
           }
 
@@ -278,7 +341,7 @@ export const CombinedProvider = ({ children }) => {
   };
 
   return (
-    <CombinedContext.Provider value={{ user, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId }}>
+    <CombinedContext.Provider value={{ user, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId, handleLogout }}>
       {children}
     </CombinedContext.Provider>
   );

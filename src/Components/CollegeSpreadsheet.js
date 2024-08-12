@@ -16,6 +16,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import Modal from "./Modal";
 import "../global.css";
+import { UpgradeTooltip } from "./UpgradeTooltip";
 
 const CollegeSpreadsheet = () => {
   const { user, myColleges } = useCombined();
@@ -25,10 +26,21 @@ const CollegeSpreadsheet = () => {
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [visibleColleges, setVisibleColleges] = useState([]);
 
   useEffect(() => {
     const fetchCollegeData = async () => {
-      if (myColleges) {
+      if (myColleges && user) {
+        const userDocRef = doc(db, 'userData', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const newVisibleColleges = userData.visibleColleges || [];
+          setVisibleColleges(newVisibleColleges);
+          console.log('Visible Colleges after update:', newVisibleColleges); // Logs the updated array directly
+        }
+
         const collegePromises = Object.keys(myColleges).map(async (ipedsId) => {
           const collegeDocRef = doc(db, "collegeData", ipedsId);
           const collegeDocSnap = await getDoc(collegeDocRef);
@@ -52,7 +64,32 @@ const CollegeSpreadsheet = () => {
     };
 
     fetchCollegeData();
-  }, [myColleges]);
+  }, [myColleges, user]);
+
+  useEffect(() => {
+    const handleContextMenu = (e) => e.preventDefault();
+    const handleSelectStart = (e) => e.preventDefault();
+    const handleKeyDown = (e) => {
+      if (
+        (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) || // Prevent Ctrl+C, Ctrl+U, Ctrl+S
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || // Prevent Ctrl+Shift+I (DevTools)
+        (e.metaKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) || // Prevent Cmd+C, Cmd+U, Cmd+S (Mac)
+        (e.metaKey && e.shiftKey && e.key === 'I') // Prevent Cmd+Shift+I (DevTools on Mac)
+      ) {
+        e.preventDefault();
+      }
+    };
+  
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('selectstart', handleSelectStart);
+    document.addEventListener('keydown', handleKeyDown);
+  
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('selectstart', handleSelectStart);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const checkUserAccess = async (userId) => {
     try {
@@ -111,20 +148,38 @@ const CollegeSpreadsheet = () => {
     XLSX.writeFile(workbook, "colleges.xlsx");
   };
 
+  
+
   const columns = React.useMemo(
     () => [
+
       { accessorKey: "Name", header: "Name", enableSorting: true },
       { accessorKey: "Total price for out-of-state students 2022-23", header: "Cost of Attendance", enableSorting: true },
-      { accessorKey: "myPrice", header: "My Estimated Net Cost", enableSorting: true },
+      {
+        accessorKey: "myPrice",
+        header: "My Estimated Net Cost",
+        enableSorting: true,
+        cell: ({ row }) => {
+          const ipedsId = row.original.ipedsId;
+          const isVisible = visibleColleges.includes(ipedsId);
+  
+          console.log('Processing row for IPEDS ID:', ipedsId);
+          console.log('Is Visible:', isVisible);
+          console.log('Row Data:', row.original);
+  
+          
+        },
+      },
       { accessorKey: "% Admitted-Total", header: "Acceptance Rate", cell: (info) => `${info.getValue()}%`, enableSorting: true },
       { accessorKey: "meritQualified", header: "Qualified for Merit Aid", cell: (info) => (info.getValue() ? "Yes" : "No"), enableSorting: true },
       { accessorKey: "Avg merit award for Freshman w/out need", header: "Avg Merit Aid Award", enableSorting: true },
+      { accessorKey: "% Fresh w/out need Receiving Merit Aid", header: "% Receiving Merit Aid", enableSorting: true },
       { accessorKey: "SAT/ACT Required", header: "SAT/ACT Required", enableSorting: true },
       { accessorKey: "1st Early Decision Deadline", header: "ED Deadline", enableSorting: true },
       { accessorKey: "Early Decision Acceptance Rate", header: "ED Acceptance", enableSorting: true },
       { accessorKey: "Early Action Deadline", header: "EA Deadline", enableSorting: true },
     ],
-    []
+    [visibleColleges] // Ensure columns re-render when visibleColleges changes
   );
 
   const table = useReactTable({
@@ -139,9 +194,10 @@ const CollegeSpreadsheet = () => {
     getFilteredRowModel: getFilteredRowModel(),
   });
 
-  if (loading) {
+  if (loading || !visibleColleges.length) {
     return <div>Loading...</div>;
   }
+
 
   return (
     <>
@@ -198,8 +254,20 @@ const CollegeSpreadsheet = () => {
                 <TableRow key={row.id} className={row.index % 2 === 0 ? "bg-accent" : ""}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} style={{ wordBreak: "break-word" }}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
+                    {["myPrice", "Avg merit award for Freshman w/out need", "meritQualified","% Fresh w/out need Receiving Merit Aid"].includes(cell.column.id)
+                      ? (
+                        visibleColleges.includes(Number(row.original.ipedsId)) 
+                        ? <span>{cell.getValue()}</span>
+                        : (
+                          <UpgradeTooltip>
+                            <span>{cell.getValue()}</span>
+                          </UpgradeTooltip>
+                        )
+                      )
+                      : flexRender(cell.column.columnDef.cell, cell.getContext())
+                    }
+                  </TableCell>
+
                   ))}
                 </TableRow>
               ))}
@@ -209,6 +277,8 @@ const CollegeSpreadsheet = () => {
       </Card>
     </>
   );
+  
+  
 };
 
 export default CollegeSpreadsheet;

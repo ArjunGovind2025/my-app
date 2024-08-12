@@ -43,9 +43,10 @@
 }
 
 .column-right2 {
-  flex: 1;
-  text-align: right;
-  white-space: nowrap; /* Prevent wrapping */
+  display: flex;
+  align-items: center;
+
+  
 }
 
 .column-right {
@@ -107,6 +108,10 @@
 
 .ThreeDotsMenu{
   padding-left: 30px;
+}
+
+.lock{
+    flex: 1 1;
 }
 
 

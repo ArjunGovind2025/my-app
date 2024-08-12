@@ -1,10 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { handleLogin } from './Auth'; // Import the handleLogin function
 import { Button } from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/button.jsx';
 import { Sheet, SheetTrigger, SheetContent } from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/sheet.jsx';
-import { Package2 } from 'lucide-react'; // Import the icon
+import { Package2, User } from 'lucide-react'; // Import the icons
+
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -32,7 +33,7 @@ const Nav = styled.nav`
   display: none;
   align-items: center;
   gap: 1.5rem;
-    padding-right: 25px;
+  padding-right: 25px;
 
   @media (min-width: 768px) {
     display: flex;
@@ -44,7 +45,6 @@ const NavLink = styled(Link)`
   font-weight: 500;
   color: inherit;
   text-decoration: none;
-  
 
   &:hover {
     text-decoration: underline;
@@ -56,13 +56,18 @@ const MobileNav = styled.div`
   display: flex;
   align-items: center;
 
-  
   @media (min-width: 768px) {
     display: none;
   }
 `;
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const handleProfileClick = () => {
+    navigate('/ProfileScreen');
+  };
+
   return (
     <HeaderContainer>
       <Logo to="/">
@@ -76,8 +81,9 @@ const Header = () => {
         <NavLink to="/upgrade">Upgrade</NavLink>
         <Button variant="outline" className="flex items-center gap-2" onClick={handleLogin}>
           <ChromeIcon className="h-4 w-4" />
-            Sign in with Google
+          Sign in with Google
         </Button>
+        <User className="h-5 w-5 cursor-pointer" onClick={handleProfileClick} />
       </Nav>
       <MobileNav>
         <Sheet>
@@ -107,7 +113,6 @@ const Header = () => {
           </SheetContent>
         </Sheet>
       </MobileNav>
-    {/* Add the Auth component for the Google Sign-In button */}
     </HeaderContainer>
   );
 };

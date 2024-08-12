@@ -1,48 +1,51 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui/card';
 import { Button } from './ui/button';
-import getStripe from './server';
+import getStripe from './getStripe';
+import { useCombined } from './CollegeContext';
 import config from '../config';
-import { updateAccessField } from './Access';
 
 const tiers = [
   {
     title: 'Free',
     price: '$0/month',
-    features: ['See 5 Schools', 'Ask 10 Questions a Week '],
-    priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_FREE, // Adjust accordingly
+    features: ['See 5 Schools', 'Ask 10 Questions a Week'],
+    priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_FREE,
   },
   {
     title: 'Standard',
     price: '$6.99/month',
-    features: ['See 15 Schools', 'Ask 20 Questions a Week ', 'See School Specific Scholarships'],
-    priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_STANDARD, // Adjust accordingly
+    features: ['See 15 Schools', 'Ask 20 Questions a Week', 'See School Specific Scholarships'],
+    priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_STANDARD,
   },
   {
     title: 'Premium',
     price: '$14.99/month',
-    features: ['Unlimited Schools', 'Unlimited Questions','See School Specific Scholarships', 'Export Spreadsheet'],
-    priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM, // Adjust accordingly
+    features: ['Unlimited Schools', 'Unlimited Questions', 'See School Specific Scholarships', 'Export Spreadsheet'],
+    priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM,
   },
 ];
 
 const Checkout = () => {
-  async function handleCheckout(priceId, tierTitle) {
-    const stripe = await getStripe();
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: [
-        {
-          price: priceId,
-          quantity: 1,
+  const { user } = useCombined();
+
+  async function handleCheckout(priceId, accessLevel) {
+    console.log("accessLevel:", accessLevel)
+    try {
+      const response = await fetch('/api/create-stripe-customer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      ],
-      mode: 'subscription',
-      successUrl: `https://ai-d-ce511.web.app/success?tier=${tierTitle}`, // Pass the tier title in the success URL
-      cancelUrl: `http://localhost:3000/cancel`,
-      customerEmail: 'customer@email.com',
-    });
-    if (error) {
-      console.warn(error.message);
+        body: JSON.stringify({ uid: user.uid, email: user.email, priceId, accessLevel }),
+      });
+
+      const { url } = await response.json();
+
+      // Redirect the user to the Stripe-hosted checkout page
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error during checkout:', error);
     }
   }
 

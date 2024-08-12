@@ -62,7 +62,6 @@
     margin-inline-end: auto;
     padding-right: 20px;
     width: 100%;
-    min-height: 75vh;
     max-width: 1000px;
 
 }
@@ -339,7 +338,7 @@
     background: inherit;
     border-radius: inherit;
     font-weight: var(--chakra-fontWeights-bold);
-    font-size: 34px;
+    font-size: 28px;
     padding-left: 10px;
     margin-bottom: 20px;
 
@@ -375,7 +374,10 @@
     justify-content: space-between;
     align-items: flex-start;
     background: #fcfeff;
-    padding: 20px; /* Add some padding for better spacing */
+    padding-right: 20px; /* Add some padding for better spacing */
+    padding-left: 20px; /* Add some padding for better spacing */
+    padding-top: 10px; /* Add some padding for better spacing */
+    padding-bottom: 10px;
     border-radius: 5px; /* Optional: add rounded corners */
     white-space: nowrap; /* Prevent wrapping */
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Proper box shadow syntax */
@@ -394,7 +396,12 @@
     width: 100%;
     padding-left: 10px;
     padding-right: 10px;
+    white-space: normal; /* Ensure that text wraps normally */
+    overflow-wrap: break-word; /* Ensure long words break and wrap */
+    word-wrap: break-word; /* Ensure text wraps within the container */
+    word-break: break-word; /* Ensure text breaks at the end of the container */
     overflow-y: auto;
+    max-height: 400px;
   }
 
  
@@ -436,6 +443,7 @@
     justify-content: flex-start; /* Adjust to start to ensure columns stack properly */
     width: 100%;
     overflow-x: hidden; /* Prevent horizontal scrolling */
+    padding: 15px;
   }
 
   .column-right {
@@ -454,7 +462,7 @@
 
   .css-16ld5u0 {
     width: 100%;
-    padding: 10px;
+    padding: 0px;
     box-sizing: border-box;
   }
 
@@ -514,9 +522,10 @@
     min-height: 300px;
     max-height: 300px;
     height: auto;
-    padding: 10px;
+    padding: 0px 0px 0px;
     overflow-y: auto; /* Enable vertical scrolling */
     box-sizing: border-box;
+
   }
 
   .step-tracker {
@@ -574,9 +583,10 @@
 
   .chakra-button.css-gllksg,
   .chakra-button.css-reset {
-    height: 40px;
+    height: 35px;
     font-size: var(--chakra-fontSizes-xs);
     padding: 0 12px;
+    margin-bottom: 10px;
     border-radius: 10px;
     min-width: 100%;
     box-sizing: border-box;

@@ -3,6 +3,8 @@ import { doc, updateDoc, getDoc, increment } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import config from '../config.json';
 import { checkApiCallCount } from './Access'; // Ensure this path is correct
+import { marked } from 'marked';
+
 
 const OPENAI_API_KEY = config.OPENAI_API_KEY;
 
@@ -64,9 +66,21 @@ export const getChatResponse = async (userDocId, input, customMessage = '', setS
   }
 };
 
+
 const formatResponse = (response) => {
-  return response; // Markdown handles new lines and formatting natively
+  const htmlContent = marked(response);
+  const div = document.createElement('div');
+  div.innerHTML = htmlContent;
+
+  // Ensure innerText is being called on the created div element
+  const textContent = div.innerText || '';
+
+  // Split text content into lines by newline characters
+  const lines = textContent.split('\n').filter(line => line.trim() !== '');
+
+  return lines;
 };
+
 
 
 // Function to get the chat response
@@ -107,7 +121,7 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
     // Format the response
     const formattedResponse = formatResponse(rawResponse);
 
-    return formattedResponse;
+    return rawResponse; // Return the formatted response as an array
   } catch (error) {
     console.error('Error:', error.response ? error.response.data : error.message);
     throw new Error('Sorry, I could not process your request at this time.');

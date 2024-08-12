@@ -37,6 +37,23 @@ const Home2 = () => {
   const [testScores, setTestScores] = useState({}); // State for test scores
   const [showModal, setShowModal] = useState(false);
   const [isTypewriterDone, setIsTypewriterDone] = useState(false);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0); // Add state for current line index
+
+useEffect(() => {
+  if (botMessage.length > 0) {
+    setCurrentLineIndex(0); // Reset the line index when new botMessage is set
+  }
+}, [botMessage]);
+
+useEffect(() => {
+  if (currentLineIndex < botMessage.length) {
+    const timer = setTimeout(() => {
+      setCurrentLineIndex(prevIndex => prevIndex + 1);
+    }, (botMessage[currentLineIndex].length * 20) + 10); // Adjust the delay as per Typewriter settings
+
+    return () => clearTimeout(timer); // Clear the timeout if the component unmounts or updates
+  }
+}, [currentLineIndex, botMessage]);
 
 
   const steps = [
@@ -57,8 +74,9 @@ const Home2 = () => {
   ];
 
   const stepMessages = {
-    'Welcome': `Welcome to [Website Name]!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat state are you from? List state abreviation(ie NY)`,
-    'Add College': `The first step is to add at least one college to your college list. Which colleges are you interested in?`,
+    'Welcome': `Welcome to Pocketly!\nI'm here to help you navigate through the process of paying for college.\nThe first step is to add at least one college to your college list. Which colleges are you interested in?`,
+    'Add College': `Which colleges are you interested in?`,
+    'State Information': `What state are you from? List state abbreviation (e.g., NY)`,
     'Qualify for Financial Aid': `Do you think you qualify for financial aid? (Yes, No, Not Sure)`,
     'SAI': `Do you know your Student Aid Index? (Yes, No)`,
     'income': `Let's determine if you might qualify for financial aid. What is your family's approximate annual income?`,
@@ -72,6 +90,7 @@ const Home2 = () => {
     'complete': `You've completed all the steps! Now you can ask me any questions you have.`,
     'Ask Questions': `You've completed all the steps! Now you can ask me any questions you have.`
   };
+  
 
 
   useEffect(() => {
@@ -82,14 +101,15 @@ const Home2 = () => {
 
 useEffect(() => {
     // Initial message from the chatbot
-    const welcomeMessage = `Welcome to [Website Name]!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
+    const welcomeMessage = `Welcome to Pocketly!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
     setMessages([{ role: 'bot', content: welcomeMessage }]);
 }, []);
 
-  const handleStepClick = (step) => {
-    setCurrentStep(step);
-    setBotMessage(stepMessages[step]); // Update bot message to reflect the step change
-  };
+const handleStepClick = (step) => {
+  setCurrentStep(step);
+  setBotMessage(stepMessages[step]); // Update bot message to reflect the step change
+};
+
 
   const handlePromptClick = async (prompt) => {
     console.log('Prompt clicked:', prompt);
@@ -307,44 +327,43 @@ useEffect(() => {
       } else {
         switch (currentStep) {
           case 'Welcome':
-          updateCurrentStep(user, "Welcome")
-          setUserData({ ...userData, name: message });
+          updateCurrentStep(user, "Welcome");
+          const collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
+          const addedColleges = [];
+          console.log('College names extracted from user input:', collegeNames);
+
+          for (const collegeName of collegeNames) {
+            console.log('Searching for IPEDS ID for:', collegeName);
+            const ipedsId = await findCollegeIdByName(collegeName);
+            if (ipedsId) {
+              console.log('Found IPEDS ID:', ipedsId, 'for college:', collegeName);
+              await addCollegeByIpedsId(ipedsId);
+              addedColleges.push(collegeName);
+            } else {
+              console.log('Could not find a match for:', collegeName);
+              botResponse += `Could not find a match for "${collegeName}".\n`;
+            }
+          }
+
+          if (addedColleges.length > 0) {
+            botResponse += `Great! ${addedColleges.join(', ')} ha${addedColleges.length > 1 ? 've' : 's'} been added to your list.\n`;
+            botResponse += `What state are you from? List state abbreviation (e.g., NY)`;
+            setCurrentStep('State Information');
+          } else {
+            botResponse += `Please try adding colleges again.`;
+            setCurrentStep('Welcome');
+          }
+          break;
+
+        case 'State Information':
+          updateCurrentStep(user, "State Information");
           const updatedCollegesState = await handleStateAbbreviation(message.toUpperCase());
-          botResponse = ''
+          botResponse = '';
           if (updatedCollegesState.length > 0) {
             botResponse += `The following colleges have updated to in-state prices: ${updatedCollegesState.join(', ')}\n\n`;
           }
-          botResponse += `\nThe first step is to add at least one college to your college list. Which colleges are you interested in?`;
-
-
-          setCurrentStep('Add College');
-          break;
-          case 'Add College':
-              updateCurrentStep(user, "Add College")
-              const collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
-              const addedColleges = [];
-              console.log('College names extracted from user input:', collegeNames);
-    
-              for (const collegeName of collegeNames) {
-                console.log('Searching for IPEDS ID for:', collegeName);
-                const ipedsId = await findCollegeIdByName(collegeName);
-                if (ipedsId) {
-                  console.log('Found IPEDS ID:', ipedsId, 'for college:', collegeName);
-                  await addCollegeByIpedsId(ipedsId);
-                  addedColleges.push(collegeName);
-                } else {
-                  console.log('Could not find a match for:', collegeName);
-                  botResponse += `Could not find a match for "${collegeName}".\n`;
-                }
-              }
-    
-              if (addedColleges.length > 0) {
-                botResponse += `Great! ${addedColleges.join(', ')} ha${addedColleges.length > 1 ? 've' : 's'} been added to your list. Do you think you qualify for financial aid? (Yes, No, Not Sure)`;
-                setCurrentStep('Qualify for Financial Aid');
-              } else {
-                botResponse += `Please try adding colleges again.`;
-                setCurrentStep('Add College');
-              }
+          botResponse += `Do you think you qualify for financial aid? (Yes, No, Not Sure)`;
+          setCurrentStep('Qualify for Financial Aid');
           break;
           case 'Qualify for Financial Aid':
             updateCurrentStep(user, "Qualify for Financial Aid")
@@ -389,11 +408,12 @@ useEffect(() => {
             case 'Calculate SAI':
               updateCurrentStep(user, "Calculate SAI")
               try {
-                const incomeMatch = message.match(/Income:\s*\$?([\d,.]+)/i);
-                const assetsMatch = message.match(/Assets:\s*\$?([\d,.]+)/i);
-                const sizeMatch = message.match(/Family Size:\s*(\d+)/i);
-                const studentIncomeMatch = message.match(/Student Income:\s*\$?([\d,.]+)/i);
-                
+                const incomeMatch = message.match(/Income:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
+                const assetsMatch = message.match(/Assets:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
+                const sizeMatch = message.match(/Family Size:\s*([\d]+)/i);
+                const studentIncomeMatch = message.match(/Student Income:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
+
+                                
                   // Logging parsed values
                   console.log('Parsed values:', {
                       incomeMatch,
@@ -434,10 +454,17 @@ useEffect(() => {
 
                       for (const collegeId in updatedCollegesSAI) {
                           const college = updatedCollegesSAI[collegeId];
-                          if (college.myPrice_need !== undefined) {
-                              botResponse += `${college.Name}: ${college.myPrice_need}\n`;
-                          }
+                          if (college.myPrice_need !== undefined && college.myPrice !== college.myPrice_need) {
+                            const myPrice = parseFloat(college.myPrice.replace(/[^0-9.]/g, ''));
+                            const myPriceNeed = parseFloat(college.myPrice_need.replace(/[^0-9.]/g, ''));
+                            if (!isNaN(myPrice) && !isNaN(myPriceNeed)) {
+                                const difference = myPrice - myPriceNeed;
+                                const formattedDifference = difference.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                                botResponse += `${college.Name}: ${formattedDifference} \n`;
+                              }
+                        }
                       }
+                      botResponse += "Would you like to see if you qualify for merit aid?";
                   } else {
                       botResponse = "There was an error updating your college prices. Please try again.";
                   }
@@ -576,9 +603,10 @@ useEffect(() => {
         content: botResponse,
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
-      setBotMessage(botMessage.content);
+      setBotMessage(botMessage.content); // Directly set the botMessage state
       setLoading(false); // Set loading to false after processing
     }
+    
   };
 
   const handleMeritAid = (gpa, testScore, testType) => {
@@ -620,7 +648,7 @@ useEffect(() => {
             setUserData({});
             setCurrentStep('Ask Questions');
         } else {
-            const welcomeMessage = `Welcome to aiD!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat state are you from?`;
+            const welcomeMessage = `Welcome to Pocketly!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nList schools you are intrested in.`;
             setMessages([{ role: 'bot', content: welcomeMessage }]);
             setBotMessage(welcomeMessage);
             setInput('');
@@ -708,19 +736,18 @@ useEffect(() => {
                   */}
                   <div className="css-adkx0o">
                   <StepTracker currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
-                    <div className="font-medium">
-                      <div className="text-container"> {/* Apply the new class here */}
-                      <p style={{ textAlign: 'left', width: '100%' }}>
-                        <Typewriter
-                          key={botMessage} // This ensures the component remounts and re-runs the animation
-                          words={[botMessage]}
-                          loop={1}
-                          typeSpeed={20}
-                          deleteSpeed={50}
-                          delaySpeed={1000}
-                        />
-                      </p> 
-                      </div>
+                  <div className="text-container">
+    <p style={{ textAlign: 'left', width: '100%' }}>
+      <Typewriter
+        key={botMessage} // This ensures the component remounts and re-runs the animation
+        words={[botMessage]}
+        loop={1}
+        typeSpeed={10}
+        deleteSpeed={50}
+        delaySpeed={1000}
+      />
+    </p>
+  </div>
                     </div>
                     
                   </div>
@@ -753,7 +780,6 @@ useEffect(() => {
             </div>
           </div>
         </div>
-      </div>
     </>
   );
 };

@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebaseConfig'; // Adjust the import path as needed
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
 import { useCombined } from './CollegeContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
-import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
+import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import stringSimilarity from 'string-similarity';
 import './ScholarshipTable.css';
 import '../global.css';
@@ -65,6 +65,8 @@ const ScholarshipSpreadsheet = () => {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
+  const [pageIndex, setPageIndex] = useState(0);
+  const pageSize = 5; // Number of scholarships per page
 
   useEffect(() => {
     const fetchScholarshipData = async () => {
@@ -89,29 +91,64 @@ const ScholarshipSpreadsheet = () => {
     fetchScholarshipData();
   }, [user]);
 
-  // Define the specific order of columns
-  const desiredOrder = ['schoolid', 'scholarshipname', 'aidamount', 'criteria', 'needbased', 'separateapplicationrequired', 'deadline', 'additionalinfo', 'linktoscholarship'];
+  const handleRemoveScholarship = async (schoolId, scholarshipName) => {
+    if (!user) return;
+
+    const userDocRef = doc(db, 'userScholarships', user.uid);
+
+    try {
+      const userDocSnap = await getDoc(userDocRef);
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        const updatedScholarships = userData.scholarships || {};
+
+        if (updatedScholarships[schoolId]) {
+          updatedScholarships[schoolId] = updatedScholarships[schoolId].filter(
+            (scholarship) => scholarship.scholarshipname !== scholarshipName
+          );
+
+          if (updatedScholarships[schoolId].length === 0) {
+            delete updatedScholarships[schoolId];
+          }
+
+          await updateDoc(userDocRef, { scholarships: updatedScholarships });
+
+          setScholarships(prev =>
+            prev.filter(scholarship => scholarship.schoolId !== schoolId || scholarship.scholarshipname !== scholarshipName)
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error removing scholarship:', error);
+    }
+  };
 
   const columns = useMemo(() => {
     if (scholarships.length === 0) return [];
     const allKeys = Array.from(new Set(scholarships.flatMap(Object.keys)));
     const mergedKeys = mergeSimilarColumns(allKeys);
 
-    // Create columns based on the desired order
-    const orderedColumns = desiredOrder.filter(key => mergedKeys.includes(key)).map(key => ({
+    const orderedColumns = mergedKeys.map(key => ({
       accessorKey: key,
       header: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
       enableSorting: true,
     }));
 
-    // Add any additional columns that are not in the desired order
-    const additionalColumns = mergedKeys.filter(key => !desiredOrder.includes(key)).map(key => ({
-      accessorKey: key,
-      header: key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' '),
-      enableSorting: true,
-    }));
+    const removeColumn = {
+      accessorKey: 'remove',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <button
+          onClick={() => handleRemoveScholarship(row.original.schoolId, row.original.scholarshipname)}
+          style={{ whiteSpace: 'nowrap' }}
+        >
+          Remove
+        </button>
+      ),
+      enableSorting: false,
+    };
 
-    return [...orderedColumns, ...additionalColumns];
+    return [...orderedColumns, removeColumn];
   }, [scholarships]);
 
   const table = useReactTable({
@@ -121,6 +158,7 @@ const ScholarshipSpreadsheet = () => {
       sorting,
       columnFilters,
       columnVisibility,
+      pagination: { pageIndex, pageSize }
     },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -128,7 +166,13 @@ const ScholarshipSpreadsheet = () => {
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    manualPagination: true,
+    pageCount: Math.ceil(scholarships.length / pageSize),
   });
+
+  console.log('Table Rows:', table.getRowModel().rows); // Debug: Log the table rows
+  console.log('Pagination State:', table.getState().pagination); // Debug: Log the pagination state
 
   if (loading) {
     return <div>Loading...</div>;
@@ -151,7 +195,7 @@ const ScholarshipSpreadsheet = () => {
                       key={header.id}
                       onClick={header.column.getToggleSortingHandler()}
                       style={{
-                        whiteSpace: 'nowrap', // Prevent breaking words in headers
+                        whiteSpace: 'nowrap',
                         cursor: header.column.getCanSort() ? 'pointer' : 'default'
                       }}
                     >
@@ -167,24 +211,31 @@ const ScholarshipSpreadsheet = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row, rowIndex) => (
-              <TableRow key={row.id} className={rowIndex % 2 === 0 ? "bg-accent" : ""}>
-                {row.getVisibleCells().map(cell => (
-                  <TableCell
-                    key={cell.id}
-                    style={{
-                      wordBreak: 'break-word' // Allow breaking words in cells
-                    }}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+            {table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row, rowIndex) => (
+                <TableRow key={row.id} className={rowIndex % 2 === 0 ? "bg-accent" : ""}>
+                  {row.getVisibleCells().map(cell => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        wordBreak: 'break-word'
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                  No data available.
+                </TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
-        <div>     
-        </div>
+        
       </CardContent>
     </Card>
   );
