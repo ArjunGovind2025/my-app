@@ -9,12 +9,10 @@ export const updateSAI = async (userId, SAI) => {
         if (userDoc.exists()) {
             const userData = userDoc.data();
             
-            // Check if the SAI field exists and update it
+            
             if ('SAI' in userData) {
-                // SAI field exists, update it
                 await updateDoc(userDocRef, { SAI });
-            } else {
-                // SAI field does not exist, add it
+            } else {   
                 await setDoc(userDocRef, { SAI }, { merge: true });
             }
 

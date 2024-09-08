@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
-import { db, auth } from '../firebaseConfig'; // Update the path as necessary
+import { db, auth } from '../firebaseConfig'; 
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import '../global.css';
 
@@ -13,7 +13,7 @@ const parseCSV = (data) => {
     const values = line.split(/;(?!\s)/).map(value => value.trim().replace(/"/g, ''));
     let rowObject = {};
     headers.forEach((header, index) => {
-      rowObject[header] = values[index] || '';  // Ensure we handle missing values
+      rowObject[header] = values[index] || '';  // handle missing values
     });
     return rowObject;
   });
@@ -29,7 +29,7 @@ const ScholarshipTable = ({ data, ipedsId }) => {
   const [selectedScholarships, setSelectedScholarships] = useState([]);
   const [idToSchoolNames, setIdToSchoolNames] = useState({});
 
-  // Fetch the reverse mapping once when the component mounts
+  // Fetch the reverse mapping once when component mounts
   useEffect(() => {
     const fetchReverseMapping = async () => {
       const idToNameRef = doc(db, 'nameToID', 'IPEDSIDToCollegeName');

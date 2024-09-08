@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db, auth, provider, signInWithPopup,signOut} from '../firebaseConfig';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
-import { updateCollegePricesWithNeedAid } from './updating'; // Update the import path accordingly
+import { updateCollegePricesWithNeedAid } from './updating'; 
 
 // Create Context
 const CombinedContext = createContext();
@@ -57,7 +57,7 @@ export const CombinedProvider = ({ children }) => {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth); // This will sign out the user from Firebase Auth
+      await signOut(auth); // sign out the user from Firebase Auth
       setUser(null); // Clear the user state
       setMyColleges({}); // Clear the user's colleges
       setUserDoc({}); // Clear the user document
@@ -89,7 +89,7 @@ export const CombinedProvider = ({ children }) => {
         "Avg merit award for Freshman w/out need": college['Avg merit award for Freshman w/out need'],
         "State Abbr": college['State Abbr'],
         "Merit Aid Cutoff Score": college['Merit Aid Cutoff Score'],
-        // Add other relevant data here
+
       };
 
     
@@ -107,7 +107,7 @@ export const CombinedProvider = ({ children }) => {
             [collegeData['IPEDS ID']]: collegeData
           },
           visibleColleges: newVisibleColleges,
-          access: "Free" // Set access level to "Free"
+          access: "Free" 
         });
       
         setMyColleges({
@@ -115,10 +115,9 @@ export const CombinedProvider = ({ children }) => {
         });
       
         console.log('College added to new user document:', collegeData.Name);
-        return; // Exit after creating a new document
+        return; 
       }
       
-      // User document exists, proceed with adding the college
       const userData = userDocSnap.data();
       const currentVisibleColleges = userData.visibleColleges || [];
       const currentMyColleges = userData.myColleges || {};
@@ -241,7 +240,7 @@ export const CombinedProvider = ({ children }) => {
 
       if (docSnap.exists()) {
         const allData = docSnap.data();
-        const collegeData = allData[ipedsId]; // Assuming IPEDS ID is the key
+        const collegeData = allData[ipedsId]; 
         
 
         console.log('College data retrieved:', collegeData);
@@ -261,7 +260,7 @@ export const CombinedProvider = ({ children }) => {
             "Avg merit award for Freshman w/out need": collegeData['Avg merit award for Freshman w/out need'],
             "State Abbr": collegeData['State Abbr'],
             "Merit Aid Cutoff Score": collegeData['Merit Aid Cutoff Score'],
-            // Add other relevant data here
+         
           };
 
           if (userDocSnap.exists()) {
@@ -300,10 +299,8 @@ export const CombinedProvider = ({ children }) => {
           
             console.log('College added to existing user document:', collegeData.Name);
           } else {
-            // If the document does not exist, create new visibleColleges array
             const newVisibleColleges = [collegeData['IPEDS ID']];
           
-            // Create the document with the new college and visibleColleges
             await setDoc(userDocRef, {
               myColleges: {
                 [collegeData['IPEDS ID']]: collegeToAdd
@@ -312,7 +309,7 @@ export const CombinedProvider = ({ children }) => {
               access: "Free" 
             });
           
-            // Update the local state with the new college
+         
             setMyColleges({
               [collegeData['IPEDS ID']]: collegeToAdd
             });

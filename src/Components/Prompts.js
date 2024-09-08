@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from './ui/button'; // Import the Button component from ShadCN UI
+import { Button } from './ui/button'; 
 
 const promptsList = [
   { name: 'Top Merit Schools', prompt: 'What are the top merit schools?' },

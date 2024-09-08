@@ -3,12 +3,12 @@ import { doc, getDoc } from 'firebase/firestore';
 
 export const retrieveCurrentStep = async (user) => {
     try {
-        const userDocRef = doc(db, 'userData', user.uid); // Replace 'user.uid' with your user identifier logic if different
+        const userDocRef = doc(db, 'userData', user.uid); 
         const userDocSnap = await getDoc(userDocRef);
 
         if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
-            console.log('User data retrieved:', userData); // Log the entire user data
+            console.log('User data retrieved:', userData);
 
             if (userData.currentStep !== undefined) {
                 console.log('Current step retrieved:', userData.currentStep);

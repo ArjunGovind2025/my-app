@@ -5,11 +5,11 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userData, setUserData] = useState({}); // Store user data
-  const [currentStep, setCurrentStep] = useState('welcome'); // Track the current step
+  const [userData, setUserData] = useState({}); 
+  const [currentStep, setCurrentStep] = useState('welcome'); 
 
   useEffect(() => {
-    // Initial message from the chatbot
+
     const welcomeMessage = `Welcome to [Website Name]!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
     setMessages([{ role: 'bot', content: welcomeMessage }]);
   }, []);

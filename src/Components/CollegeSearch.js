@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { useCombined } from './CollegeContext'; // Use the combined context
+import { useCombined } from './CollegeContext'; 
 import './CollegeSearch.css';
 
 const CollegeSearch = () => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const { user, addCollegeToUser } = useCombined(); // Use the context to get user and addCollegeToUser
+  const { user, addCollegeToUser } = useCombined(); 
 
   const fetchSuggestions = async (query) => {
     console.log('Fetching suggestions for:', query);
@@ -18,7 +18,7 @@ const CollegeSearch = () => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             
-            // Extract the values from the object where keys are IPEDS IDs
+       
             const colleges = Object.values(data);
             
 

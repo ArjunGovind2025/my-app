@@ -8,7 +8,7 @@ import SmallerPieChartComponent from './SmallerPieChartComponent';
 import { useCombined } from './CollegeContext';
 import ThreeDotsMenu from './ThreeDotsMenu';
 import { fetchUserAccessLevel } from './retrieving';
-import { FaLock } from 'react-icons/fa'; // Import lock icon from react-icons
+import { FaLock } from 'react-icons/fa'; 
 import {UpgradeTooltipNoBlur} from './UpgradeTooltip';
 
 
@@ -119,43 +119,44 @@ const MySchools = () => {
           .sort((b, a) => visibleSchools.indexOf(a['IPEDS ID']) - visibleSchools.indexOf(b['IPEDS ID'])) // Sort to keep visible schools on top
           .map((school, index) => (
             <li key={index} className="school-item">
-              <div className="school-container2">
-                <div className="column-left2">
-                  <Link to={`/school/${school['IPEDS ID']}`} className="school-link">
+              <Link to={`/school/${school['IPEDS ID']}`} className="school-link">
+                <div className="school-container2">
+                  <div className="column-left2">
                     <strong>{school.Name}</strong>
-                  </Link>
-                </div>
-                
-                <div className="column-right2">
-                  {!visibleSchools.includes(school['IPEDS ID']) && (
-                    <UpgradeTooltipNoBlur>
-                      <div className="lock">
-                        <FaLock style={{ fontSize: '.85em' }} />
-                      </div>
-                    </UpgradeTooltipNoBlur>
-                  )}
+                  </div>
                   
-                  <span
-                    className={`chakra-badge css-y5xvhi`}
-                    style={{
-                      backgroundColor: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#e7f9f6' : '',
-                      color: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#00b473' : '',
-                    }}
-                  >
-                    {!visibleSchools.includes(school['IPEDS ID']) 
-                      ? school['Total price for out-of-state students 2022-23'] 
-                      : school.myPrice}
-                  </span>
-                  <ThreeDotsMenu
-                    onEdit={() => console.log('Edit clicked')}
-                    onExport={() => console.log('Export clicked')}
-                    onRemove={() => removeSchool(school['IPEDS ID'])}
-                    onReset={() => resetMyPrice(school['IPEDS ID'], school['Total price for out-of-state students 2022-23'])}
-                  />
-                  <br />
+                  <div className="column-right2">
+                    {!visibleSchools.includes(school['IPEDS ID']) && (
+                      <UpgradeTooltipNoBlur>
+                        <div className="lock">
+                          <FaLock style={{ fontSize: '.85em' }} />
+                        </div>
+                      </UpgradeTooltipNoBlur>
+                    )}
+                    
+                    <span
+                      className={`chakra-badge css-y5xvhi`}
+                      style={{
+                        backgroundColor: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#e7f9f6' : '',
+                        color: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#00b473' : '',
+                      }}
+                    >
+                      {!visibleSchools.includes(school['IPEDS ID']) 
+                        ? school['Total price for out-of-state students 2022-23'] 
+                        : school.myPrice}
+                    </span>
+                    <ThreeDotsMenu
+                      onEdit={() => console.log('Edit clicked')}
+                      onExport={() => console.log('Export clicked')}
+                      onRemove={() => removeSchool(school['IPEDS ID'])}
+                      onReset={() => resetMyPrice(school['IPEDS ID'], school['Total price for out-of-state students 2022-23'])}
+                    />
+                    <br />
+                  </div>
                 </div>
-              </div>
+              </Link>
             </li>
+
           ))
       ) : (
         <li>No schools added yet.</li>

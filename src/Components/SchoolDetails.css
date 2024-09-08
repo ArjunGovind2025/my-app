@@ -5,20 +5,20 @@
 }
 
 .school-details-container {
-  display: flex; /* Ensure the parent is using flexbox */
+  display: flex; 
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  max-width: 100%; /* Use full width available */
+  max-width: 100%; 
   margin: 20px auto;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden; /* Prevent horizontal scroll */
+  overflow: hidden; 
 
 }
 
 .school-details-content {
-  flex: 3; /* Take up more space */
-  margin-right: 20px; /* Add some space between the content and screen */
+  flex: 3; 
+  margin-right: 20px; 
   width: 980px;
   min-width: 980px;
   max-width: 980px;
@@ -26,10 +26,10 @@
 
 .screen-container {
     flex: 1;
-    flex-direction: column; /* Stack the containers vertically */
-    gap: 20px; /* Add some space between the two chat containers */
-    width: 35%; /* Allocate width for the screen container */
-    height: 100%; /* Ensure it takes the full height */
+    flex-direction: column; 
+    gap: 20px; 
+    width: 35%; 
+    height: 100%; 
   
 }
 
@@ -51,9 +51,9 @@ p {
 
 .screen-container {
   display: flex;
-  flex-direction: column; /* Stack the containers vertically */
-  gap: 20px; /* Add some space between the two chat containers */
-  width: 35%; /* Allocate width for the screen container */
+  flex-direction: column; 
+  gap: 20px; 
+  width: 35%; 
 }
 
 .chat-container-wrapper {

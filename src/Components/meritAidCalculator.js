@@ -2,7 +2,6 @@ import { getDoc, setDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 export const calculateMeritAidEligibilityScore = async (userId, gpa, testScore, testType = 'SAT') => {
-  // Normalize GPA
      // Normalize GPA
      const normalizedGpa = (gpa - 2.5) / (4.0 - 2.5);
 
@@ -24,28 +23,28 @@ export const calculateMeritAidEligibilityScore = async (userId, gpa, testScore, 
       // Ensure userId is a string
       userId = String(userId); // Convert userId to string if it's not
   
-      // Log userId to ensure it's correct
+
       console.log(`Updating meritScore for userId: ${userId}`);
   
       // Get the user's document reference
       const userDocRef = doc(db, 'userData', userId);
       console.log(`Document reference created: ${userDocRef.path}`);
   
-      // Fetch the user document
+
       const userDocSnap = await getDoc(userDocRef);
       console.log(`Document snapshot obtained: ${userDocSnap.exists()}`);
   
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
   
-        // Log current userData
+
         console.log('Current userData:', userData);
   
-        // Update or create the meritScore field
+
         await updateDoc(userDocRef, { meritScore: combinedScore });
         console.log('meritScore updated or created successfully.');
   
-        // Fetch the document again to verify the update
+
         const updatedDocSnap = await getDoc(userDocRef);
         console.log('Updated userData:', updatedDocSnap.data());
       } else {
@@ -67,7 +66,7 @@ export const updateUserCollegePrice = async (userId, ipedsId, name, myPrice) => 
       return;
     }
 
-    // Format myPrice as a currency string
+
     const formattedMyPrice = `$${myPrice.toLocaleString()}`;
 
     console.log(`Updating user college price for userId: ${userId}, ipedsId: ${ipedsId}, name: ${name}, myPrice: ${formattedMyPrice}`);
@@ -93,7 +92,7 @@ export const updateUserCollegePrice = async (userId, ipedsId, name, myPrice) => 
         meritQualified: meritQualified,
       };
       
-      // Update the specific field in Firestore
+
       await updateDoc(userDocRef, {
         [`myColleges.${ipedsId}`]: updatedCollegeData
       });

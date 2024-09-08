@@ -9,14 +9,14 @@ import MySchools from './MySchools.js';
 import testMySchools from './testMySchools.js';
 import ProgressTracker from './ProgressTracker.js';
 import StepTracker from './StepTracker';
-import { getChatResponse, getShortChatResponse } from './API'; // Import the API logic
-import { useCombined } from './CollegeContext'; // Import the custom hook to access context
+import { getChatResponse, getShortChatResponse } from './API'; 
+import { useCombined } from './CollegeContext'; 
 import WorkflowsBot from './WorkflowsBot';
-import { calculateMeritAidEligibilityScore, fetchMeritAidData} from './meritAidCalculator'; // Import the functions
+import { calculateMeritAidEligibilityScore, fetchMeritAidData} from './meritAidCalculator'; 
 import { db } from '../firebaseConfig';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; // Import Firestore functions
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'; 
 import { Typewriter } from 'react-simple-typewriter';
-import { updateSAI } from './SAI'; // Update the import path accordingly
+import { updateSAI } from './SAI'; 
 import retrieveCurrentStep from './retrieving';
 import { updateCurrentStep } from './updating';
 import Modal from './Modal';
@@ -30,14 +30,14 @@ const Home2 = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [botMessage, setBotMessage] = useState('');
-  const [userData, setUserData] = useState({}); // Store user data
+  const [userData, setUserData] = useState({}); 
   const [currentStep, setCurrentStep] = useState('welcome'); // Track the current step
-  const [loading, setLoading] = useState(false); // Add loading state
-  const [gpa, setGpa] = useState(''); // State for GPA
-  const [testScores, setTestScores] = useState({}); // State for test scores
+  const [loading, setLoading] = useState(false); 
+  const [gpa, setGpa] = useState(''); 
+  const [testScores, setTestScores] = useState({}); 
   const [showModal, setShowModal] = useState(false);
   const [isTypewriterDone, setIsTypewriterDone] = useState(false);
-  const [currentLineIndex, setCurrentLineIndex] = useState(0); // Add state for current line index
+  const [currentLineIndex, setCurrentLineIndex] = useState(0); 
 
 useEffect(() => {
   if (botMessage.length > 0) {
@@ -49,9 +49,9 @@ useEffect(() => {
   if (currentLineIndex < botMessage.length) {
     const timer = setTimeout(() => {
       setCurrentLineIndex(prevIndex => prevIndex + 1);
-    }, (botMessage[currentLineIndex].length * 20) + 10); // Adjust the delay as per Typewriter settings
+    }, (botMessage[currentLineIndex].length * 20) + 10); // delay for typewriter settings
 
-    return () => clearTimeout(timer); // Clear the timeout if the component unmounts or updates
+    return () => clearTimeout(timer); // clear the timeout if the component unmounts or updates
   }
 }, [currentLineIndex, botMessage]);
 
@@ -100,14 +100,13 @@ useEffect(() => {
 }, [user]); // Run the effect only when `user` changes
 
 useEffect(() => {
-    // Initial message from the chatbot
     const welcomeMessage = `Welcome to Pocketly!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
     setMessages([{ role: 'bot', content: welcomeMessage }]);
 }, []);
 
 const handleStepClick = (step) => {
   setCurrentStep(step);
-  setBotMessage(stepMessages[step]); // Update bot message to reflect the step change
+  setBotMessage(stepMessages[step]); 
 };
 
 
@@ -122,7 +121,7 @@ const handleStepClick = (step) => {
         content: response,
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
-      setBotMessage(response); // Update the botMessage state to trigger Typewriter
+      setBotMessage(response); // updats the botMessage state to trigger Typewriter
     } catch (error) {
       console.error('Error handling prompt click:', error);
     } finally {
@@ -137,7 +136,7 @@ const handleStepClick = (step) => {
       console.log("Firestore document snapshot:", userDocSnap.exists() ? "Document exists" : "Document does not exist");
   
       if (userDocSnap.exists()) {
-        // Update the existing document
+
         console.log("Updating existing document with GPA and Test Score");
    
         await updateDoc(userDocRef, {
@@ -146,7 +145,7 @@ const handleStepClick = (step) => {
         });
         console.log("Document updated successfully");
       } else {
-        // Create a new document if it doesn't exist
+
         console.log("Creating a new document with GPA and Test Score");
         await setDoc(userDocRef, {
           GPA: gpa,
@@ -183,37 +182,37 @@ const handleStepClick = (step) => {
 
   const updateCollegePricesWithNeedAid = async (SAI) => {
     try {
-      // Get the current user's document
-      const userDocRef = doc(db, 'userData', user.uid); // Replace 'user.uid' with your user identifier logic if different
+
+      const userDocRef = doc(db, 'userData', user.uid); 
       const userDocSnap = await getDoc(userDocRef);
   
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
         const colleges = userData.myColleges || {};
   
-        console.log('User data retrieved:', userData); // Log the entire user data
-        console.log('Colleges data:', colleges); // Log the initial colleges data
+        console.log('User data retrieved:', userData); 
+        console.log('Colleges data:', colleges); 
   
         const parsedSAI = parseFloat(SAI); // Convert SAI to a number
   
         if (isNaN(parsedSAI)) {
           console.error(`Invalid SAI value: ${SAI}`);
-          return null; // Stop processing if SAI is not a valid number
+          return null; // stop processing if SAI is not a valid number
         }
   
-        console.log(`Parsed SAI: ${parsedSAI} (type: ${typeof parsedSAI})`); // Log the parsed SAI value and its type
+        console.log(`Parsed SAI: ${parsedSAI} (type: ${typeof parsedSAI})`); 
   
         for (const collegeId in colleges) {
           const college = colleges[collegeId];
   
-          console.log(`Processing college ID: ${collegeId}`); // Log the college ID being processed
+          console.log(`Processing college ID: ${collegeId}`); 
   
           if (college.myPrice && college['Avg % of Need met for Freshman']) {
             const myPriceString = college.myPrice.replace(/[^0-9.]/g, '');
             const myPrice = parseFloat(myPriceString);
             const avgNeedMet = parseFloat(college['Avg % of Need met for Freshman']) / 100;
   
-            // Add more detailed logging
+
             console.log(`Raw myPrice: ${college.myPrice}, Converted myPrice: ${myPrice}`);
             console.log(`Raw Avg % of Need met for Freshman: ${college['Avg % of Need met for Freshman']}, Converted avgNeedMet: ${avgNeedMet}`);
             console.log(`SAI: ${parsedSAI}`);
@@ -222,10 +221,10 @@ const handleStepClick = (step) => {
             if (isNaN(myPrice) || isNaN(avgNeedMet)) {
               console.error(`Invalid number conversion for college ID: ${collegeId}`);
               console.error(`myPrice: ${myPrice}, avgNeedMet: ${avgNeedMet}, SAI: ${parsedSAI}`);
-              continue; // Skip this college and move to the next one
+              continue; 
             }
   
-            // Break down the calculation into steps and log each part
+       
             const priceDifference = myPrice - parsedSAI;
             if(priceDifference <= 0) {
               continue
@@ -234,7 +233,7 @@ const handleStepClick = (step) => {
             const newPrice = adjustedDifference;
             const finalPrice = myPrice - newPrice ;
   
-            // Log intermediate and final values
+
             console.log(`Price Difference (myPrice - parsedSAI): ${priceDifference}`);
             console.log(`Adjusted Difference (priceDifference * avgNeedMet): ${adjustedDifference}`);
             console.log(`New Price (myPrice_need) for college ${college['Name'] || collegeId}: ${newPrice}`);
@@ -248,35 +247,32 @@ const handleStepClick = (step) => {
             const collegeFieldPath = `myColleges.${collegeId}.myPrice`;
             await updateDoc(userDocRef, { [collegeFieldPathNeed]: String(formattedPrice)});
             await updateDoc(userDocRef, { [collegeFieldPath]: String(formattedPrice)});
-            await updateSAI(user.uid, parsedSAI); // Update the import path accordingly
+            await updateSAI(user.uid, parsedSAI); 
 
           } else {
             console.log(`Skipping college ID: ${collegeId} - Missing myPrice or Avg % of Need met for Freshman`);
           }
         }
   
-        // Update the user's document with the modified colleges map
+
         
   
         console.log('Updated college prices with need aid successfully.');
-        return colleges; // Return the updated colleges data
+        return colleges; 
       } else {
         console.log('No such document!');
       }
     } catch (error) {
       console.error('Error updating college prices with need aid:', error);
     }
-    return null; // Return null if something goes wrong
+    return null; 
   };
 
   const handleStateAbbreviation = async (stateAbbr) => {
-    // Get the reference to the user's document
     const userDocRef = doc(db, 'userData', user.uid);
   
-    // Create or update the stateAbbr field in the user's document
     await setDoc(userDocRef, { stateAbbr }, { merge: true });
   
-    // Fetch the user's document to get the current colleges
     const userDocSnap = await getDoc(userDocRef);
     if (userDocSnap.exists()) {
       const userData = userDocSnap.data();
@@ -291,7 +287,7 @@ const handleStepClick = (step) => {
         if (college['State Abbr'] === stateAbbr && college['Total price for in-state students 2022-23']!= college['Total price for out-of-state students 2022-23']) {
           const totalPriceInState = college['Total price for in-state students 2022-23'];
           if (totalPriceInState) {
-            // Update myPrice for in-state colleges
+            // update myPrice for in-state colleges
             const collegeFieldPath = `myColleges.${collegeId}.myPrice`;
             await updateDoc(userDocRef, { [collegeFieldPath]: totalPriceInState });
             updatedCollegesState.push(college['Name'] || collegeId);
@@ -314,14 +310,14 @@ const handleStepClick = (step) => {
     const userMessage = { role: 'user', content: message };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInput('');
-    setLoading(true); // Set loading to true when processing the message
+    setLoading(true); 
 
     let botResponse = '';
 
     try {
       if (currentStep === 'Ask Questions') {
         updateCurrentStep(user, "Ask Questions")
-        // Call OpenAI API to handle user questions in the final step
+        // call OpenAI API to handle users questions in final step
 
         botResponse = await getShortChatResponse(user.uid, message, userDoc, myColleges, 'Provide short and concise answers.', setShowModal);
       } else {
@@ -414,7 +410,6 @@ const handleStepClick = (step) => {
                 const studentIncomeMatch = message.match(/Student Income:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
 
                                 
-                  // Logging parsed values
                   console.log('Parsed values:', {
                       incomeMatch,
                       assetsMatch,
@@ -604,13 +599,12 @@ const handleStepClick = (step) => {
       };
       setMessages((prevMessages) => [...prevMessages, botMessage]);
       setBotMessage(botMessage.content); // Directly set the botMessage state
-      setLoading(false); // Set loading to false after processing
+      setLoading(false); 
     }
     
   };
 
   const handleMeritAid = (gpa, testScore, testType) => {
-    // Your function logic here
     console.log(`GPA: ${gpa}, Test Score: ${testScore} (${testType})`);
   };
 
@@ -636,7 +630,7 @@ const handleStepClick = (step) => {
     }
 
     try {
-        const currStep = await retrieveCurrentStep(user); // Await the asynchronous function
+        const currStep = await retrieveCurrentStep(user); 
         console.log('currStep: ', currStep);
         setCurrentStep(currStep);
 
@@ -739,7 +733,7 @@ const handleStepClick = (step) => {
                   <div className="text-container">
     <p style={{ textAlign: 'left', width: '100%' }}>
       <Typewriter
-        key={botMessage} // This ensures the component remounts and re-runs the animation
+        key={botMessage} // ensurs the component remounts and re-runs the animation
         words={[botMessage]}
         loop={1}
         typeSpeed={10}

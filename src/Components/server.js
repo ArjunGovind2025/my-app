@@ -5,7 +5,7 @@ const serviceAccount = require('/Users/arjungovind/Desktop/ai-D/ai-d-ce511-fireb
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://ai-d-ce511.firebaseio.com" // Replace with your actual database URL
+  databaseURL: "https://ai-d-ce511.firebaseio.com" // Replace withactual database URL
 });
 
 const db = admin.firestore();
@@ -80,7 +80,6 @@ app.post('/api/create-billing-session', async (req, res) => {
   const { uid } = req.body;
   
   try {
-    // Fetch the user's document from Firestore
     const userDoc = await db.collection('userData').doc(uid).get();
 
     if (!userDoc.exists) {
@@ -110,6 +109,6 @@ app.post('/api/create-billing-session', async (req, res) => {
   }
 });
 
-// Start the server
+
 app.listen(5000, () => console.log('Server running on port 5000'));
 

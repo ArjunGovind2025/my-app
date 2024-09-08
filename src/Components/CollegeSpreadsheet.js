@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebaseConfig"; // Adjust the import path as needed
+import { db } from "../firebaseConfig"; 
 import { useCombined } from "./CollegeContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
@@ -38,7 +38,7 @@ const CollegeSpreadsheet = () => {
           const userData = userDoc.data();
           const newVisibleColleges = userData.visibleColleges || [];
           setVisibleColleges(newVisibleColleges);
-          console.log('Visible Colleges after update:', newVisibleColleges); // Logs the updated array directly
+          console.log('Visible Colleges after update:', newVisibleColleges); 
         }
 
         const collegePromises = Object.keys(myColleges).map(async (ipedsId) => {
@@ -72,7 +72,7 @@ const CollegeSpreadsheet = () => {
     const handleKeyDown = (e) => {
       if (
         (e.ctrlKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) || // Prevent Ctrl+C, Ctrl+U, Ctrl+S
-        (e.ctrlKey && e.shiftKey && e.key === 'I') || // Prevent Ctrl+Shift+I (DevTools)
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || // Prevent Ctrl+Shift+I
         (e.metaKey && (e.key === 'c' || e.key === 'u' || e.key === 's')) || // Prevent Cmd+C, Cmd+U, Cmd+S (Mac)
         (e.metaKey && e.shiftKey && e.key === 'I') // Prevent Cmd+Shift+I (DevTools on Mac)
       ) {
@@ -179,7 +179,7 @@ const CollegeSpreadsheet = () => {
       { accessorKey: "Early Decision Acceptance Rate", header: "ED Acceptance", enableSorting: true },
       { accessorKey: "Early Action Deadline", header: "EA Deadline", enableSorting: true },
     ],
-    [visibleColleges] // Ensure columns re-render when visibleColleges changes
+    [visibleColleges] //  columns re-render when visibleColleges changes
   );
 
   const table = useReactTable({

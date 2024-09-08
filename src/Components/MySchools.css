@@ -27,8 +27,12 @@
   overflow-x: hidden;
   max-width: 100%;
   width: 500px;
-  min-height: 70px ; /* Force min-height to be applied */
+  min-height: 70px ; 
   max-height: 500px;
+}
+
+.school-container2:hover {
+  background-color: rgb(245, 245, 245); /* background color on hover */
 }
 
 
@@ -62,20 +66,18 @@
 
 .school-link {
   display: inline-block;
-  background-color: #fff; /* Change the background color */
+  background-color: #fff; 
   padding: 5px 10px;
   border-radius: 5px;
-  text-decoration: none; /* Remove underline */
+  text-decoration: none; 
   color: #000; /* Text color */
   transition: background-color 0.3s ease; /* Smooth transition for background color change */
-  white-space: normal; /* Allow text to wrap */
-  width: auto; /* Adjust width to content */
+  white-space: normal; 
+  width: auto; 
   max-width: 100%; /* Ensure it does not exceed the container */
 }
 
-.school-link:hover {
-  background-color: #e0e0e0; /* Background color on hover */
-}
+
 
 .css-y5xvhi {
   display: inline-block;

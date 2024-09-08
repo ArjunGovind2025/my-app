@@ -142,7 +142,7 @@
     padding-inline-start: 16px;
     -webkit-padding-end: 16px;
     padding-inline-end: 16px;
-    background: linear-gradient(to top, #4a25e0, #7a5aff);
+    background: linear-gradient(to top, #7bc393, #31b7c2);
 
 
 
@@ -629,4 +629,6 @@
   overflow-x: hidden;
   width: 100%; /* Ensure it takes full width */
 }
+
+
 }

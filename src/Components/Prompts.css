@@ -2,9 +2,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%; /* Ensure the container takes full width */
+  width: 100%; 
   padding: 10px;
-  box-sizing: border-box; /* Include padding in the element's total width and height */
+  box-sizing: border-box; 
 }
 
 .flex {
@@ -26,3 +26,5 @@
 .rounded-button {
   border-radius: 70px; /* Adjust this value to change the roundness of the corners */
 }
+
+

@@ -24,3 +24,5 @@ yarn-error.log*
 
 # Ignore config.json file
 src/config.json
+
+.env

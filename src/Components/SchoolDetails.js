@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { useCombined } from './CollegeContext'; // Import the custom hook to access context
-import { getChatResponse } from './API'; // Import the API logic
+import { useCombined } from './CollegeContext'; 
+import { getChatResponse } from './API'; 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./ui/card";
 import { Button } from "./ui/button";
 import {

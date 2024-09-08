@@ -12,7 +12,7 @@ import Auth from './Auth';
 import { CombinedProvider } from './Components/CollegeContext'; 
 import CollegeSpreadsheet from './Components/CollegeSpreadsheet'
 import ScholarshipSpreadsheet from './Components/ScholarshipSpreadsheet'; 
-import Checkout from './Components/Checkout'; // Adjust the import path accordingly
+import Checkout from './Components/Checkout'; 
 import Success from './Components/Success';
 import ProfileScreen from './Components/ProfileScreen';
 import { Elements } from '@stripe/react-stripe-js';
@@ -28,11 +28,11 @@ function App() {
       <Header />
         <Routes>
           <Route path="/school/:ipedsId" element={<SchoolDetails />} />
-          <Route path="/my-colleges-spreadsheet" element={<CollegeSpreadsheet />} /> {/* Corrected route */}
-          <Route path="/my-scholarships-spreadsheet" element={<ScholarshipSpreadsheet />} /> {/* Add the new link */}
-          <Route path="/Upgrade" element={<Checkout/>} /> {/* Add the new link */}
-          <Route path="/ProfileScreen" element={<ProfileScreen/>} /> {/* Add the new link */}
-          <Route path="/success" element={<Success />} /> {/* Add the Success route */}
+          <Route path="/my-colleges-spreadsheet" element={<CollegeSpreadsheet />} /> {}
+          <Route path="/my-scholarships-spreadsheet" element={<ScholarshipSpreadsheet />} /> {}
+          <Route path="/Upgrade" element={<Checkout/>} /> {}
+          <Route path="/ProfileScreen" element={<ProfileScreen/>} /> {}
+          <Route path="/success" element={<Success />} /> {}
           <Route path="/" element={<Home2 />} />
         </Routes>
       </Router>

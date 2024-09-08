@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from './ui/button'; // Import the Button component from your UI library
+import { Button } from './ui/button'; 
 
 const Modal = ({ message, onClose }) => {
   const navigate = useNavigate();
 
   const handleCheckoutRedirect = () => {
-    navigate('/upgrade'); // Adjust the path to your checkout screen
+    navigate('/upgrade'); 
   };
 
   return (

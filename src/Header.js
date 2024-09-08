@@ -1,10 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
-import { handleLogin } from './Auth'; // Import the handleLogin function
+import { handleLogin } from './Auth'; 
 import { Button } from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/button.jsx';
 import { Sheet, SheetTrigger, SheetContent } from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/sheet.jsx';
-import { Package2, User } from 'lucide-react'; // Import the icons
+import { Package2, User } from 'lucide-react'; 
+import logoImage from '/Users/arjungovind/Desktop/ai-D/my-app/src/PocketlyLogo.jpg'; 
+
 
 
 const HeaderContainer = styled.header`
@@ -71,7 +73,8 @@ const Header = () => {
   return (
     <HeaderContainer>
       <Logo to="/">
-        <Package2 className="h-6 w-6" />
+        {/*<Package2 className="h-6 w-6" />*/}
+        <img src={logoImage} alt="Pocketly Logo" className="h-6 w-6" />
         Pocketly
       </Logo>
       <Nav>
