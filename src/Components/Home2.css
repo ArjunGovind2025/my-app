@@ -142,7 +142,7 @@
     padding-inline-start: 16px;
     -webkit-padding-end: 16px;
     padding-inline-end: 16px;
-    background: linear-gradient(to top, #7bc393, #31b7c2);
+    background: var(--color-chrome);
 
 
 

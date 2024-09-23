@@ -171,7 +171,6 @@ const CollegeSpreadsheet = () => {
         },
       },
       { accessorKey: "% Admitted-Total", header: "Acceptance Rate", cell: (info) => `${info.getValue()}%`, enableSorting: true },
-      { accessorKey: "meritQualified", header: "Qualified for Merit Aid", cell: (info) => (info.getValue() ? "Yes" : "No"), enableSorting: true },
       { accessorKey: "Avg merit award for Freshman w/out need", header: "Avg Merit Aid Award", enableSorting: true },
       { accessorKey: "% Fresh w/out need Receiving Merit Aid", header: "% Receiving Merit Aid", enableSorting: true },
       { accessorKey: "SAT/ACT Required", header: "SAT/ACT Required", enableSorting: true },

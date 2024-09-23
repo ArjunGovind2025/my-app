@@ -1,0 +1,11 @@
+/* Base button styles */
+
+/* Use the Tailwind-defined color variable */
+.standard-button, .premium-button {
+    background-image: var(--color-chrome); /* Use the Chrome gradient */
+}
+
+/* Hover effects */
+button:hover {
+    opacity: 0.9;
+}

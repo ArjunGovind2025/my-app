@@ -15,7 +15,7 @@
   }
   
   .step.active {
-    background: linear-gradient(to top, #7bc393, #31b7c2);
+    background: var(--color-chrome);
     color: white;
     border-color: #fff;
   }

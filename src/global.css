@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-    --color-chrome: #4285F4;
+    --color-chrome: linear-gradient(to right, #c000f7, #fa4b6e);
     --color-safari: #1E90FF;
     --color-firefox: #FF7139;
     --color-edge: #0078D7;

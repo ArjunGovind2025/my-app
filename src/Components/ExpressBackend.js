@@ -21,7 +21,7 @@ app.post('/api/create-billing-session', async (req, res) => {
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: 'http://localhost:3000/ProfileScreen',
+      return_url: 'https://pocketly.ai/ProfileScreen',
     });
 
     res.json({ url: session.url });

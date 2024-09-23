@@ -15,18 +15,39 @@ const ThreeDotsMenu = ({ onRemove, onReset }) => {
       <DropdownMenuTrigger asChild>
         <Button
           size="icon"
-          variant="ghost" // Use "ghost" variant to remove background and border
+          variant="ghost"
           className="p-0 m-0 focus:ring-0 focus:outline-none"
-          style={{ background: "none", border: "none" }} // Ensure no background and no border
+          style={{ background: "none", border: "none" }}
+          onClick={(e) => {
+            e.stopPropagation();  // Ensure button click doesn't propagate to Link
+          }}
         >
           <MoreVertical className="h-3.5 w-3.5" />
           <span className="sr-only">More</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={onRemove}>Remove School</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();  // Ensure event doesn't propagate to Link
+            console.log("Remove clicked");
+            onRemove();  // Call the remove function
+          }}
+        >
+          Remove School
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onReset}>Reset Price</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();  // Ensure event doesn't propagate to Link
+            console.log("Reset clicked");
+            onReset();  // Call the reset function
+          }}
+        >
+          Reset Price
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

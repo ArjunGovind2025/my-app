@@ -4,16 +4,11 @@ import { db, auth } from '../firebaseConfig';
 import { Link } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import './MySchools.css';
-import SmallerPieChartComponent from './SmallerPieChartComponent';
-import { useCombined } from './CollegeContext';
 import ThreeDotsMenu from './ThreeDotsMenu';
-import { fetchUserAccessLevel } from './retrieving';
 import { FaLock } from 'react-icons/fa'; 
-import {UpgradeTooltipNoBlur} from './UpgradeTooltip';
-
+import { UpgradeTooltipNoBlur } from './UpgradeTooltip';
 
 const MySchools = () => {
-  const { user, myColleges } = useCombined();
   const [mySchools, setMySchools] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visibleSchools, setVisibleSchools] = useState([]); // Track visible schools
@@ -28,7 +23,9 @@ const MySchools = () => {
       }
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      unsubscribeAuth();
+    };
   }, []);
 
   const subscribeToMySchools = (uid) => {
@@ -42,10 +39,9 @@ const MySchools = () => {
           return { ...college, priceChanged };
         });
 
-        // Set visible schools directly from user document's visibleColleges field
         const visibleCollegesFromDoc = userData.visibleColleges || [];
         setVisibleSchools(visibleCollegesFromDoc);
-        
+
         setMySchools(collegesArray);
         setLoading(false);
       } else {
@@ -54,27 +50,54 @@ const MySchools = () => {
         setLoading(false);
       }
     }, (error) => {
-      console.error('Error fetching user document:', error);
       setLoading(false);
+      console.error("Error fetching user document:", error);
     });
 
     return unsubscribeSnapshot;
   };
 
-  const resetMyPrice = async (ipedsId, outOfStatePrice) => {
-    if (!user) {
-      console.log('User is not signed in.');
+  const unlockSchool = async (ipedsId) => {
+    if (!auth.currentUser) {
+      console.log("unlockSchool: No authenticated user found");
       return;
     }
   
     try {
-      const userDocRef = doc(db, 'userData', user.uid);
+      console.log("unlockSchool: Attempting to unlock school with IPEDS ID:", ipedsId);
+      const userDocRef = doc(db, 'userData', auth.currentUser.uid);
+      const userData = (await getDoc(userDocRef)).data();
+      console.log("unlockSchool: User data fetched from Firestore:", userData);
+  
+      // Add the unlocked school to Firestore visibleColleges array
+      await updateDoc(userDocRef, {
+        visibleColleges: [...(userData.visibleColleges || []), ipedsId], // Add the school to visibleColleges in Firestore
+      });
+      console.log("unlockSchool: Successfully updated Firestore with the unlocked school");
+  
+      // Update local state to reflect the unlocked school
+      setVisibleSchools(prevVisibleSchools => {
+        const updatedVisibleSchools = [...prevVisibleSchools, ipedsId];
+        console.log("unlockSchool: Updated visibleSchools in state:", updatedVisibleSchools);
+        return updatedVisibleSchools;
+      });
+  
+    } catch (error) {
+      console.error("unlockSchool: Error unlocking school:", error);
+    }
+  };
+
+  const resetMyPrice = async (ipedsId, outOfStatePrice) => {
+    if (!auth.currentUser) return;
+
+    try {
+      const userDocRef = doc(db, 'userData', auth.currentUser.uid);
       await updateDoc(userDocRef, {
         [`myColleges.${ipedsId}.myPrice`]: outOfStatePrice,
         [`myColleges.${ipedsId}.myPrice_need`]: outOfStatePrice,
         [`myColleges.${ipedsId}.meritQualified`]: false,
       });
-  
+
       setMySchools(prevSchools =>
         prevSchools.map(school =>
           school['IPEDS ID'] === ipedsId
@@ -82,29 +105,24 @@ const MySchools = () => {
             : school
         )
       );
-      console.log('myPrice and myPrice_need reset for college with IPEDS ID:', ipedsId);
     } catch (error) {
-      console.error('Error resetting myPrice and myPrice_need:', error);
+      console.error("Error resetting myPrice and myPrice_need:", error);
     }
   };
 
   const removeSchool = async (ipedsId) => {
-    if (!user) {
-      console.log('User is not signed in.');
-      return;
-    }
+    if (!auth.currentUser) return;
 
     try {
-      const userDocRef = doc(db, 'userData', user.uid);
+      const userDocRef = doc(db, 'userData', auth.currentUser.uid);
       await updateDoc(userDocRef, {
         [`myColleges.${ipedsId}`]: deleteField()
       });
 
       setMySchools(prevSchools => prevSchools.filter(school => school['IPEDS ID'] !== ipedsId));
       setVisibleSchools(prevVisible => prevVisible.filter(id => id !== ipedsId));
-      console.log('Removed college with IPEDS ID:', ipedsId);
     } catch (error) {
-      console.error('Error removing school:', error);
+      console.error("Error removing school:", error);
     }
   };
 
@@ -119,44 +137,46 @@ const MySchools = () => {
           .sort((b, a) => visibleSchools.indexOf(a['IPEDS ID']) - visibleSchools.indexOf(b['IPEDS ID'])) // Sort to keep visible schools on top
           .map((school, index) => (
             <li key={index} className="school-item">
-              <Link to={`/school/${school['IPEDS ID']}`} className="school-link">
-                <div className="school-container2">
-                  <div className="column-left2">
+              <div className="school-container2">
+                <div className="column-left2">
+                  <Link to={`/school/${school['IPEDS ID']}`} className="school-link">
                     <strong>{school.Name}</strong>
-                  </div>
-                  
-                  <div className="column-right2">
-                    {!visibleSchools.includes(school['IPEDS ID']) && (
-                      <UpgradeTooltipNoBlur>
-                        <div className="lock">
-                          <FaLock style={{ fontSize: '.85em' }} />
-                        </div>
-                      </UpgradeTooltipNoBlur>
-                    )}
-                    
-                    <span
-                      className={`chakra-badge css-y5xvhi`}
-                      style={{
-                        backgroundColor: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#e7f9f6' : '',
-                        color: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#00b473' : '',
-                      }}
-                    >
-                      {!visibleSchools.includes(school['IPEDS ID']) 
-                        ? school['Total price for out-of-state students 2022-23'] 
-                        : school.myPrice}
-                    </span>
-                    <ThreeDotsMenu
-                      onEdit={() => console.log('Edit clicked')}
-                      onExport={() => console.log('Export clicked')}
-                      onRemove={() => removeSchool(school['IPEDS ID'])}
-                      onReset={() => resetMyPrice(school['IPEDS ID'], school['Total price for out-of-state students 2022-23'])}
-                    />
-                    <br />
-                  </div>
+                  </Link>
                 </div>
-              </Link>
-            </li>
 
+                <div className="column-right2">
+                  {!visibleSchools.includes(school['IPEDS ID']) && (
+                    <UpgradeTooltipNoBlur
+                      uid={auth.currentUser.uid}
+                      ipedsId={school['IPEDS ID']}
+                      onUnlock={() => unlockSchool(school['IPEDS ID'])} // Pass the unlock function
+                    >
+                      <div className="lock">
+                        <FaLock style={{ fontSize: ".85em" }} />
+                      </div>
+                    </UpgradeTooltipNoBlur>
+                  )}
+
+                  <span
+                    className={`chakra-badge css-y5xvhi`}
+                    style={{
+                      backgroundColor: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#e7f9f6' : '',
+                      color: visibleSchools.includes(school['IPEDS ID']) && school.priceChanged ? '#00b473' : '',
+                    }}
+                  >
+                    {visibleSchools.includes(school['IPEDS ID']) ? school.myPrice : school['Total price for out-of-state students 2022-23']}
+                  </span>
+
+                  <ThreeDotsMenu
+                    onEdit={() => console.log('Edit clicked for school with IPEDS ID:', school['IPEDS ID'])}
+                    onExport={() => console.log('Export clicked for school with IPEDS ID:', school['IPEDS ID'])}
+                    onRemove={() => removeSchool(school['IPEDS ID'])}
+                    onReset={() => resetMyPrice(school['IPEDS ID'], school['Total price for out-of-state students 2022-23'])}
+                  />
+                  <br />
+                </div>
+              </div>
+            </li>
           ))
       ) : (
         <li>No schools added yet.</li>

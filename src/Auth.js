@@ -10,3 +10,6 @@ export const handleLogin = async () => {
     console.error("Error signing in: ", error);
   }
 };
+
+
+export default auth;

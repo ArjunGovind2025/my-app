@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import getStripe from './getStripe';
 import { useCombined } from './CollegeContext';
 import config from '../config';
+import './Checkout.css'; // Import the CSS for custom styles
 
 const tiers = [
   {
@@ -30,7 +31,6 @@ const Checkout = () => {
   const { user } = useCombined();
 
   async function handleCheckout(priceId, accessLevel) {
-    console.log("accessLevel:", accessLevel)
     try {
       const response = await fetch('/api/create-stripe-customer', {
         method: 'POST',
@@ -68,9 +68,13 @@ const Checkout = () => {
                 </ul>
               </CardContent>
             </div>
+            {/* Only show the button for Standard and Premium tiers */}
             {tier.title !== 'Free' && (
               <CardFooter className="mt-auto">
-                <Button className="w-full" onClick={() => handleCheckout(tier.priceId, tier.title)}>
+                <Button
+                  className={`w-full ${tier.title.toLowerCase()}-button`} // Apply different button styles based on the tier
+                  onClick={() => handleCheckout(tier.priceId, tier.title)}
+                >
                   Select {tier.title}
                 </Button>
               </CardFooter>

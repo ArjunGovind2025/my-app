@@ -16,12 +16,15 @@ import Checkout from './Components/Checkout';
 import Success from './Components/Success';
 import ProfileScreen from './Components/ProfileScreen';
 import { Elements } from '@stripe/react-stripe-js';
+import ProtectedRoute from './Components/ProtectedRoute';
+import Login from './Components/Login';
 
 
 
 
 
 function App() {
+  
   return (
   <CombinedProvider>
       <Router>
@@ -33,7 +36,8 @@ function App() {
           <Route path="/Upgrade" element={<Checkout/>} /> {}
           <Route path="/ProfileScreen" element={<ProfileScreen/>} /> {}
           <Route path="/success" element={<Success />} /> {}
-          <Route path="/" element={<Home2 />} />
+          <Route path="/" element={<ProtectedRoute><Home2 /></ProtectedRoute>} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
   </CombinedProvider>

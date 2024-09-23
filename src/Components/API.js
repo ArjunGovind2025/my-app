@@ -127,3 +127,46 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
     throw new Error('Sorry, I could not process your request at this time.');
   }
 };
+
+
+export const getShorterChatResponse = async (userDocId, input, setShowModal) => {
+
+  try {
+    const hasExceededLimit = await checkApiCallCount(userDocId);
+
+    if (hasExceededLimit) {
+      setShowModal(true); // Show the modal popup
+      throw new Error('API call limit exceeded.');
+    }
+
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: `You are a college advisor` },
+          { role: 'user', content: input }
+        ],
+        max_tokens: 300,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    await incrementApiCallCount(userDocId);
+
+    // Get the raw response text
+    const rawResponse = response.data.choices[0].message.content.trim();
+
+    // Format the response
+    const formattedResponse = formatResponse(rawResponse);
+
+    return rawResponse; // Return the formatted response as an array
+  } catch (error) {
+    console.error('Error:', error.response ? error.response.data : error.message);
+    throw new Error('Sorry, I could not process your request at this time.');
+  }
+};
