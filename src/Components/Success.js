@@ -27,7 +27,7 @@ const Success = () => {
       console.log('Updating subscription with access level:', accessLevelValue); // Debugging line
       const updateSubscription = async () => {
         try {
-          await fetch('/api/update-user-subscription', {
+          await fetch('https://us-central1-ai-d-ce511.cloudfunctions.net/api/update-user-subscription', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

@@ -26,7 +26,7 @@ const ProfileScreen = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/create-billing-session", {
+      const response = await fetch("https://us-central1-ai-d-ce511.cloudfunctions.net/api/create-billing-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -3,11 +3,16 @@
 @tailwind utilities;
 
 
+.html, .body {
+  overflow: hidden;
+}
+
+
 .row {
     padding: 10px;
     display: flex;
     justify-content: flex-end; 
-  }
+  }  
   
   .column-right {
     flex: 70%;;
@@ -437,6 +442,11 @@
 
   
 @media (max-width: 912px) {
+
+  html, body {
+    overflow: visible;
+  }
+
   .row {
     display: flex;
     flex-direction: column-reverse;

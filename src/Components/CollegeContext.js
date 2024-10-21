@@ -12,6 +12,7 @@ export const useCombined = () => useContext(CombinedContext);
 export const CombinedProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [myColleges, setMyColleges] = useState({});
+  const [visibleColleges, setVisibleColleges] = useState({});
   const [userDoc, setUserDoc] = useState({});
 
 
@@ -25,6 +26,8 @@ export const CombinedProvider = ({ children }) => {
         if (userDocSnap.exists()) {
           setUserDoc(userDocSnap.data());
           setMyColleges(userDocSnap.data().myColleges || {});
+          setVisibleColleges(userDocSnap.data().visibleColleges || {});
+
         }
       } else {
         console.log('No user signed in.');
@@ -40,6 +43,7 @@ export const CombinedProvider = ({ children }) => {
         const userData = userDocSnap.data();
         setUserDoc(userData);
         setMyColleges(userData.myColleges || {});
+        setVisibleColleges(userData.visibleColleges || {});
       }
     }
   };
@@ -60,6 +64,7 @@ export const CombinedProvider = ({ children }) => {
       await signOut(auth); // sign out the user from Firebase Auth
       setUser(null); // Clear the user state
       setMyColleges({}); // Clear the user's colleges
+      setVisibleColleges({})
       setUserDoc({}); // Clear the user document
       console.log("User signed out.");
     } catch (error) {
@@ -338,7 +343,7 @@ export const CombinedProvider = ({ children }) => {
   };
 
   return (
-    <CombinedContext.Provider value={{ user, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId, handleLogout }}>
+    <CombinedContext.Provider value={{ user, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId, handleLogout, visibleColleges }}>
       {children}
     </CombinedContext.Provider>
   );

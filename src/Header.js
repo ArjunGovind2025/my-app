@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { handleLogin } from './Auth'; 
 import { Button } from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/button.jsx';
 import { Sheet, SheetTrigger, SheetContent } from '/Users/arjungovind/Desktop/ai-D/my-app/src/Components/ui/sheet.jsx';
-import { Package2, User } from 'lucide-react'; 
+import { Package2, User, ChevronDown } from 'lucide-react'; 
 import logoImage from '/Users/arjungovind/Desktop/ai-D/my-app/src/PocketlyLogo.jpg'; 
-
-
+import { useCombined } from './Components/CollegeContext';
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -63,11 +62,62 @@ const MobileNav = styled.div`
   }
 `;
 
+const DropdownContainer = styled.div`
+  position: relative;
+  display: inline-block;
+`;
+
+const DropdownButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const DropdownContent = styled.div`
+  display: ${(props) => (props.show ? 'block' : 'none')};
+  position: absolute;
+  background-color: white;
+  min-width: 160px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border-radius: 4px;
+  padding: 0.5rem;
+`;
+
+const DropdownItem = styled.div`
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: black;
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+`;
+
 const Header = () => {
   const navigate = useNavigate();
+  const { myColleges } = useCombined();
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const handleProfileClick = () => {
     navigate('/ProfileScreen');
+  };
+
+  const handleCollegeClick = (collegeId) => {
+    navigate(`/school/${collegeId}`);
   };
 
   return (
@@ -79,13 +129,28 @@ const Header = () => {
       </Logo>
       <Nav>
         <NavLink to="/">Home</NavLink>
+        <DropdownContainer>
+          <DropdownButton onClick={() => setShowDropdown((prev) => !prev)}>
+            My Colleges <ChevronDown className="h-4 w-4" />
+          </DropdownButton>
+          <DropdownContent show={showDropdown}>
+            {myColleges && Object.keys(myColleges).length > 0 ? (
+              Object.keys(myColleges).map((collegeId) => (
+                <DropdownItem
+                  key={collegeId}
+                  onClick={() => handleCollegeClick(collegeId)}
+                >
+                  {myColleges[collegeId].Name}
+                </DropdownItem>
+              ))
+            ) : (
+              <DropdownItem>No colleges added</DropdownItem>
+            )}
+          </DropdownContent>
+        </DropdownContainer>
         <NavLink to="/my-colleges-spreadsheet">College Spreadsheet</NavLink>
         <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink>
         <NavLink to="/upgrade">Upgrade</NavLink>
-        <Button variant="outline" className="flex items-center gap-2" onClick={handleLogin}>
-          <ChromeIcon className="h-4 w-4" />
-          Sign in with Google
-        </Button>
         <User className="h-5 w-5 cursor-pointer" onClick={handleProfileClick} />
       </Nav>
       <MobileNav>
@@ -104,13 +169,28 @@ const Header = () => {
               </Logo>
               <nav className="grid gap-2">
                 <NavLink to="/">Home</NavLink>
+                <DropdownContainer>
+          <DropdownButton onClick={() => setShowDropdown((prev) => !prev)}>
+            My Colleges <ChevronDown className="h-4 w-4" />
+          </DropdownButton>
+          <DropdownContent show={showDropdown}>
+            {myColleges && Object.keys(myColleges).length > 0 ? (
+              Object.keys(myColleges).map((collegeId) => (
+                <DropdownItem
+                  key={collegeId}
+                  onClick={() => handleCollegeClick(collegeId)}
+                >
+                  {myColleges[collegeId].Name}
+                </DropdownItem>
+              ))
+            ) : (
+              <DropdownItem>No colleges added</DropdownItem>
+            )}
+          </DropdownContent>
+        </DropdownContainer>
                 <NavLink to="/my-colleges-spreadsheet">College Spreadsheet</NavLink>
                 <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink>
                 <NavLink to="/upgrade">Upgrade</NavLink>
-                <Button variant="outline" className="flex items-center gap-2" onClick={handleLogin}>
-                  <ChromeIcon className="h-4 w-4" />
-                  Sign in with Google
-                </Button>
               </nav>
             </div>
           </SheetContent>

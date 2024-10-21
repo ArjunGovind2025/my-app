@@ -5,6 +5,8 @@ import getStripe from './getStripe';
 import { useCombined } from './CollegeContext';
 import config from '../config';
 import './Checkout.css'; // Import the CSS for custom styles
+import{ useState } from 'react';
+
 
 const tiers = [
   {
@@ -22,17 +24,21 @@ const tiers = [
   {
     title: 'Premium',
     price: '$14.99/month',
-    features: ['Unlimited Schools', 'Unlimited Questions', 'See School Specific Scholarships', 'Export Spreadsheet'],
+    features: ['See 30 Schools', 'Ask 50 Questions a Week', 'See School Specific Scholarships', 'Export Spreadsheet'],
     priceId: config.NEXT_PUBLIC_STRIPE_PRICE_ID_PREMIUM,
   },
 ];
 
 const Checkout = () => {
   const { user } = useCombined();
+  const [isLoading, setIsLoading] = useState(false);
+
 
   async function handleCheckout(priceId, accessLevel) {
+    setIsLoading(true);
+    
     try {
-      const response = await fetch('/api/create-stripe-customer', {
+      const response = await fetch('https://us-central1-ai-d-ce511.cloudfunctions.net/api/create-stripe-customer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,6 +52,8 @@ const Checkout = () => {
       window.location.href = url;
     } catch (error) {
       console.error('Error during checkout:', error);
+    }finally {
+      setIsLoading(false);
     }
   }
 
@@ -72,10 +80,11 @@ const Checkout = () => {
             {tier.title !== 'Free' && (
               <CardFooter className="mt-auto">
                 <Button
-                  className={`w-full ${tier.title.toLowerCase()}-button`} // Apply different button styles based on the tier
+                  className={`w-full ${tier.title.toLowerCase()}-button`}
                   onClick={() => handleCheckout(tier.priceId, tier.title)}
+                  disabled={isLoading}
                 >
-                  Select {tier.title}
+                  {isLoading ? 'Loading...' : `Select ${tier.title}`}
                 </Button>
               </CardFooter>
             )}

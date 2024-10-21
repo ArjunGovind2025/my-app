@@ -1,0 +1,5 @@
+{
+    "STRIPE_SECRET" : "sk_test_51PemTHHcQJIFzfCVAxEgDiV2cPoBbNQA30ZwNPsjK6mNqyXEbNE1cxWiI4CqoIejBX08plpdGuAhYYRYUfaXx9f10030NHGHSk",
+    "STRIPE_WEBHOOK": "whsec_XMwBaqYHIol8PzBcOpaDjDD9UBBWuEAn"
+  }
+  

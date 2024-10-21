@@ -225,8 +225,9 @@ const handleStepClick = (step) => {
             }
   
        
-            const priceDifference = myPrice - parsedSAI;
+            let priceDifference = myPrice - parsedSAI;
             if(priceDifference <= 0) {
+              priceDifference = 0;
               continue
             }
             const adjustedDifference = priceDifference * avgNeedMet;
@@ -440,6 +441,9 @@ const handleStepClick = (step) => {
                   // Calculating the predicted label using the equation of the line
                   let predictedLabel = 0.398 * PAAI - 18405.66;
                   predictedLabel = Math.round(predictedLabel / 100) * 100;
+                  predictedLabel = Math.max(0, predictedLabel);
+
+
                   console.log('predicted label: ',predictedLabel)
                   
                   const updatedCollegesSAI = await updateCollegePricesWithNeedAid(predictedLabel);
@@ -550,8 +554,8 @@ const handleStepClick = (step) => {
                   const myColleges = userData.myColleges || {};
                   const ipedsIds = Object.keys(myColleges);
                   await updateDoc(userDocRef, {
-                    ['GPA']: parseFloat(gpaMatch[1]),
-                    ['Test Score']: satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]),
+                    'GPA': parseFloat(gpaMatch[1]),
+                    'Test Score': satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]),
                   });
 
 
@@ -752,24 +756,24 @@ const handleStepClick = (step) => {
 
                     </div>
                 
-                <div className="css-6n9yju">
-                  <input
-                    placeholder="Type your message here..."
-                    className="chakra-input css-1pgcnou"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    mr={2}
-                  />
-                  <button type="button" onClick={handleSubmit} className="chakra-button css-gllksg">
-                    Submit
-                    {showModal && <Modal message="API call limit exceeded. Please upgrade your plan." onClose={() => setShowModal(false)} />}
-
-                  </button>
-                  {/* <button type="button" onClick={handleResetMessages} className="chakra-button css-reset">
-  Reset Messages
-</button> */}
-
-                </div>
+                    <div className="css-6n9yju">
+  <input
+    placeholder="Type your message here..."
+    className="chakra-input css-1pgcnou"
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    onKeyPress={(e) => {
+      if (e.key === 'Enter') {
+        handleSubmit(e);
+      }
+    }}
+    mr={2}
+  />
+  <button type="button" onClick={handleSubmit} className="chakra-button css-gllksg">
+    Submit
+    {showModal && <Modal message="API call limit exceeded. Please upgrade your plan." onClose={() => setShowModal(false)} />}
+  </button>
+</div>
               </div>
             </div>
           </div>

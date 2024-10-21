@@ -66,6 +66,33 @@ export const getChatResponse = async (userDocId, input, customMessage = '', setS
   }
 };
 
+export const getChatResponseFree = async (userDocId, input, customMessage = '', setShowModal) => {
+  try {
+    
+    const response = await axios.post(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: `You are an advisor for financing college. ${customMessage}` }, 
+          { role: 'user', content: input }
+        ],
+        max_tokens: 2000,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    return response.data.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error:', error.response ? error.response.data : error.message);
+    throw new Error('Sorry, I could not process your request at this time.');
+  }
+};
+
 
 const formatResponse = (response) => {
   const htmlContent = marked(response);

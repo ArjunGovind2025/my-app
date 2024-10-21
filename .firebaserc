@@ -1,5 +1,16 @@
 {
   "projects": {
     "default": "ai-d-ce511"
-  }
+  },
+  "targets": {
+    "ai-d-ce511": {
+      "hosting": {
+        "default": [
+          "ai-d-ce511"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
