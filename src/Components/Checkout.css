@@ -2,7 +2,8 @@
 
 /* Use the Tailwind-defined color variable */
 .standard-button, .premium-button {
-    background-image: var(--color-chrome); /* Use the Chrome gradient */
+    color: var(--color-text); /* Use the Chrome gradient */
+    background-color: var(--color-chrome);
 }
 
 /* Hover effects */

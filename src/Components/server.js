@@ -1,5 +1,5 @@
 const express = require('express');
-const stripe = require('stripe')('sk_test_51PemTHHcQJIFzfCVAxEgDiV2cPoBbNQA30ZwNPsjK6mNqyXEbNE1cxWiI4CqoIejBX08plpdGuAhYYRYUfaXx9f10030NHGHSk'); // Replace with your actual Stripe secret key
+const stripe = require('stripe')('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'); // Replace with your actual Stripe secret key
 const admin = require('firebase-admin');
 const serviceAccount = require('/Users/arjungovind/Desktop/ai-D/ai-d-ce511-firebase-adminsdk-nl1bl-a414a7a9c6.json'); // Ensure the path to your service account key is correct
 
@@ -28,7 +28,7 @@ app.post('/api/create-stripe-customer', async (req, res) => {
     } else {
       // Create a new Stripe customer
       const customer = await stripe.customers.create({ email });
-      console.log("accessLevel RIght before update: " , accessLevel)
+      console.log("accessLevel Right before update: " , accessLevel)
       await db.collection('userData').doc(uid).set({ stripeCustomerId: customer.id, access: accessLevel }, { merge: true });
       stripeCustomerId = customer.id;
     }
@@ -45,8 +45,8 @@ app.post('/api/create-stripe-customer', async (req, res) => {
       ],
     
       mode: 'subscription',
-      success_url: `http://localhost:3000/success?accessLevel=${accessLevel}&tier=${priceId}`,
-      cancel_url: 'http://localhost:3000/cancele',
+      success_url: `https://pocketly.ai/success?accessLevel=${accessLevel}&tier=${priceId}`,
+      cancel_url: 'https://pocketly.ai/upgrade',
     });
 
     res.json({ url: session.url, stripeCustomerId });
@@ -97,7 +97,7 @@ app.post('/api/create-billing-session', async (req, res) => {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: 'http://localhost:3000/ProfileScreen',
+      return_url: 'https://pocketly.ai/ProfileScreen',
     });
 
     console.log('Billing session created successfully:', session);

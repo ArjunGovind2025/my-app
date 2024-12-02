@@ -107,6 +107,15 @@ p {
   white-space: pre-wrap; /* Preserve line breaks */
   max-width: 95%; /* Prevent messages from being too wide */
 }
+.tab-button[data-state='active'] {
+  color: blue;
+  background-color: green;
+}
+
+.tab-button {
+  color: rgb(183, 183, 183);
+  background-color: rgb(106, 19, 47);
+}
 
 .button-container {
   display: flex;

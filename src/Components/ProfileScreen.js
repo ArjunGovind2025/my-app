@@ -106,7 +106,12 @@ const ProfileScreen = () => {
             )}
           </div>
           <hr className="border-t border-gray-200" />
-          <Button variant="destructive" onClick={handleLogout} className="w-full">
+          <Button 
+          style={{
+            backgroundColor: '#DABFFF', // Replace with your desired color
+            color: 'white', // Text color
+          }}
+          variant="destructive" onClick={handleLogout} className="w-full">
             Log Out
           </Button>
         </CardContent>
@@ -129,10 +134,17 @@ const ProfileScreen = () => {
             >
               Upgrade Now
             </Button>
+            
           </div>
+          
         </Modal>
+        
       )}
+<p className="mt-8 text-sm text-gray-600 text-center">
+Questions? Contact <a href="mailto:pocketly.ai@gmail.com" className="text-blue-600 underline">pocketly.ai@gmail.com</a>
+    </p>
     </div>
+    
   );
 };
 

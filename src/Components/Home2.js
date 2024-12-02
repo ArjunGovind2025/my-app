@@ -80,11 +80,11 @@ useEffect(() => {
     'Qualify for Financial Aid': `Do you think you qualify for financial aid? (Yes, No, Not Sure)`,
     'SAI': `Do you know your Student Aid Index? (Yes, No)`,
     'income': `Let's determine if you might qualify for financial aid. What is your family's approximate annual income?`,
-    'Calculate SAI': `Please provide the following information to calculate your SAI: 1. Income 2. Assets 3. Family Size 4. Student Income`,
+    'Calculate SAI': `The Student Aid Index (SAI) determines how  much your family can afford to pay. To calculate it I will need you families income, assets, size and your income. Is this information you know?`,
     'completeSAI': `Here is how much money you can expect to receive from your schools:\n`,
     'submitFAFSA': `Please submit your FAFSA and state-specific financial aid applications. Once done, review your financial aid offers and deduct the aid from your college list costs.`,
     'reviewAidOffers': `Review your financial aid offers and deduct the aid from your college list costs. Have you reviewed your offers yet? (Yes, No)`,
-    'Qualify for Merit Aid': `Enter your GPA and SAT/ACT scores to calculate merit aid eligibility (ie GPA: 3.5 SAT: 1400 ).`,
+    'Qualify for Merit Aid': `Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., GPA: 3.8).`,
     'applyMeritAid': `Great! Based on your academic achievements, let's explore other scholarships you might qualify for.`,
     'otherScholarships': `You have some other scholarships left to explore. Let's find more opportunities.`,
     'complete': `You've completed all the steps! Now you can ask me any questions you have.`,
@@ -325,8 +325,8 @@ const handleStepClick = (step) => {
         switch (currentStep) {
           case 'Welcome':
           updateCurrentStep(user, "Welcome");
-          const collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
-          const addedColleges = [];
+          let collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
+          let addedColleges = [];
           console.log('College names extracted from user input:', collegeNames);
 
           for (const collegeName of collegeNames) {
@@ -351,6 +351,37 @@ const handleStepClick = (step) => {
             setCurrentStep('Welcome');
           }
           break;
+          case 'Add College':
+            console.log("IN ADD COLLEGE")
+            updateCurrentStep(user, "Add College");
+            console.log("IN ADD COLLEGE2")
+            let collegeNames2 = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
+            console.log("IN ADD COLLEGE3")
+            let addedColleges2 = [];
+            console.log('College names extracted from user input:', collegeNames2);
+  
+            for (const collegeName2 of collegeNames2) {
+              console.log('Searching for IPEDS ID for:', collegeName2);
+              const ipedsId = await findCollegeIdByName(collegeName2);
+              if (ipedsId) {
+                console.log('Found IPEDS ID:', ipedsId, 'for college:', collegeName2);
+                await addCollegeByIpedsId(ipedsId);
+                addedColleges2.push(collegeName2);
+              } else {
+                console.log('Could not find a match for:', collegeName2);
+                botResponse += `Could not find a match for "${collegeName2}".\n`;
+              }
+            }
+  
+            if (addedColleges2.length > 0) {
+              botResponse += `Great! ${addedColleges2.join(', ')} ha${addedColleges2.length > 1 ? 've' : 's'} been added to your list.\n`;
+              botResponse += `What state are you from? List state abbreviation (e.g., NY)`;
+              setCurrentStep('State Information');
+            } else {
+              botResponse += `Please try adding colleges again.`;
+              setCurrentStep('Add College');
+            }
+            break;
 
         case 'State Information':
           updateCurrentStep(user, "State Information");
@@ -372,7 +403,7 @@ const handleStepClick = (step) => {
               botResponse = "Let's determine if you might qualify for financial aid. What is your family's approximate annual income?";
               setCurrentStep('income');
             } else {
-              botResponse = "No problem. Let's focus on merit aid to help you pay for college. Enter your GPA and SAT/ACT scores (ie GPA: 3.7 ACT: 34)";
+              botResponse = "No problem! Would you like to see if you qualify for merit aid?";
               setCurrentStep('Qualify for Merit Aid');
             }
             break;
@@ -383,11 +414,7 @@ const handleStepClick = (step) => {
                 botResponse = "What is your Student Aid Index? (ie 60,000)";
                 setCurrentStep('completeSAI');
               } else {
-                botResponse = "No worries! Lets calculate it. I will need the following information: ";
-                botResponse += "1. Income: (e.g., Income: $150,000)\n";
-                botResponse += "2. Assets: (e.g., Assets: $60,000)\n";
-                botResponse += "3. Family Size: (e.g., Family Size: 5)\n";
-                botResponse += "4. Student Income: (e.g., Student Income: $200)\n";
+                botResponse = "Lets calculate it! I will need your family's income, assets, size, and your income. Are you ready to provide this information? (Yes/No)";
                 setCurrentStep('Calculate SAI');
               }
             break;
@@ -402,83 +429,156 @@ const handleStepClick = (step) => {
               setCurrentStep('Qualify for Merit Aid');
             }
             break;
-            case 'Calculate SAI':
-              updateCurrentStep(user, "Calculate SAI")
-              try {
-                const incomeMatch = message.match(/Income:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
-                const assetsMatch = message.match(/Assets:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
-                const sizeMatch = message.match(/Family Size:\s*([\d]+)/i);
-                const studentIncomeMatch = message.match(/Student Income:\s*\$?\s*([\d,]+(\.\d{1,2})?)/i);
-
-                                
-                  console.log('Parsed values:', {
-                      incomeMatch,
-                      assetsMatch,
-                      sizeMatch,
-                      studentIncomeMatch,
-                  });
-
-                  if (!incomeMatch || !assetsMatch || !sizeMatch || !studentIncomeMatch) {
-                      throw new Error('Missing or invalid input values');
-                  }
-
-                  // Parsing and converting the matched strings to numbers
-                  const famIncome = parseFloat(incomeMatch[1].replace(/,/g, ''));
-                  const famAssets = parseFloat(assetsMatch[1].replace(/,/g, ''));
-                  const famSize = parseInt(sizeMatch[1], 10);
-                  const studentIncome = parseFloat(studentIncomeMatch[1].replace(/,/g, ''));
-
-                  // Calculating PAI
-                  const familySizeAllowance = famSize * 10000;
-                  const PAI = famIncome - familySizeAllowance - 4750;
-
-                  // Calculating PCA
-                  const PCA = famAssets * 0.12;
-
-                  // Calculating PAAI
-                  const PAAI = PAI + PCA;
-
-                  // Calculating the predicted label using the equation of the line
-                  let predictedLabel = 0.398 * PAAI - 18405.66;
-                  predictedLabel = Math.round(predictedLabel / 100) * 100;
-                  predictedLabel = Math.max(0, predictedLabel);
-
-
-                  console.log('predicted label: ',predictedLabel)
-                  
-                  const updatedCollegesSAI = await updateCollegePricesWithNeedAid(predictedLabel);
-
-                  if (updatedCollegesSAI) {
-                      botResponse = "Here is how much money you can expect to receive from your schools:\n";
-
-                      for (const collegeId in updatedCollegesSAI) {
-                          const college = updatedCollegesSAI[collegeId];
-                          if (college.myPrice_need !== undefined && college.myPrice !== college.myPrice_need) {
-                            const myPrice = parseFloat(college.myPrice.replace(/[^0-9.]/g, ''));
-                            const myPriceNeed = parseFloat(college.myPrice_need.replace(/[^0-9.]/g, ''));
-                            if (!isNaN(myPrice) && !isNaN(myPriceNeed)) {
-                                const difference = myPrice - myPriceNeed;
-                                const formattedDifference = difference.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-                                botResponse += `${college.Name}: ${formattedDifference} \n`;
-                              }
-                        }
-                      }
-                      botResponse += "Would you like to see if you qualify for merit aid?";
-                  } else {
-                      botResponse = "There was an error updating your college prices. Please try again.";
-                  }
-
-                  setCurrentStep('Qualify for Merit Aid');
-              } catch (error) {
-                  console.error('Error in calculateSAI:', error);
-                  botResponse = "Please provide the following information:\n";
-                  botResponse += "1. Income: (e.g., Income: $150,000)\n";
-                  botResponse += "2. Assets: (e.g., Assets: $60,000)\n";
-                  botResponse += "3. Family Size: (e.g., Family Size: 5)\n";
-                  botResponse += "4. Student Income: (e.g., Student Income: $200)\n";
-                  setCurrentStep('Calculate SAI');
+            case 'Calculate SAI': {
+              console.log("[DEBUG] Entering Calculate SAI case");
+          
+              // Check if user is ready to proceed
+              if (message.toLowerCase().trim() === 'no') {
+                  botResponse = "No worries! You can come back to this another time. Would you like to see if you qualify for merit aid?";
+                  setCurrentStep('Qualify for Merit Aid'); // Move to merit aid
+                  console.log("[DEBUG] Transitioning to Qualify for Merit Aid");
+                  break;
+              }
+          
+              if (message.toLowerCase().trim() === 'yes') {
+                  botResponse = "Great! Let's start. Please provide your family's income (e.g., Income: $150,000).";
+                  setCurrentStep('Income'); // Move to Income step
+                  console.log("[DEBUG] Transitioning to Income step");
+                  break;
+              }
+          
+              botResponse = "The Student Aid Index (SAI) determines how much your family can afford to pay. To calculate it, I will need your family's income, assets, size, and your income. Are you ready to provide this information? (Yes/No)";
+              console.log("[DEBUG] Prompting user to confirm readiness");
+              break;
+          }
+          
+          case 'Income': {
+              console.log("[DEBUG] Entering Income step");
+          
+              const incomeMatch = message.match(/\$?\s*([\d,]+(\.\d{1,2})?)/);
+              if (incomeMatch) {
+                  const income = parseFloat(incomeMatch[1].replace(/,/g, ''));
+                  user.tempSAIData = { income };
+                  botResponse = "Got it! Now, please provide your total assets (e.g., Assets: $60,000).";
+                  setCurrentStep('Assets'); // Move to Assets step
+                  console.log("[DEBUG] Valid income received:", income);
+                  console.log("[DEBUG] Transitioning to Assets step");
+              } else {
+                  botResponse = "Please provide your family's income in a valid format (e.g., Income: $150,000).";
+                  console.log("[DEBUG] Invalid income format received");
               }
               break;
+          }
+          
+          case 'Assets': {
+              console.log("[DEBUG] Entering Assets step");
+          
+              const assetsMatch = message.match(/\$?\s*([\d,]+(\.\d{1,2})?)/);
+              if (assetsMatch) {
+                  const assets = parseFloat(assetsMatch[1].replace(/,/g, ''));
+                  user.tempSAIData.assets = assets;
+                  botResponse = "Thank you! How many people are in your family? (e.g., Family Size: 5)";
+                  setCurrentStep('Family Size'); // Move to Family Size step
+                  console.log("[DEBUG] Valid assets received:", assets);
+                  console.log("[DEBUG] Transitioning to Family Size step");
+              } else {
+                  botResponse = "Please provide your assets in a valid format (e.g., Assets: $60,000).";
+                  console.log("[DEBUG] Invalid assets format received");
+              }
+              break;
+          }
+          
+          case 'Family Size': {
+              console.log("[DEBUG] Entering Family Size step");
+          
+              const sizeMatch = message.match(/(\d+)/);
+              if (sizeMatch) {
+                  const familySize = parseInt(sizeMatch[1], 10);
+                  user.tempSAIData.familySize = familySize;
+                  botResponse = "Almost done! What is the student's income? (e.g., Student Income: $200)";
+                  setCurrentStep('Student Income'); // Move to Student Income step
+                  console.log("[DEBUG] Valid family size received:", familySize);
+                  console.log("[DEBUG] Transitioning to Student Income step");
+              } else {
+                  botResponse = "Please provide your family size as a number (e.g., Family Size: 5).";
+                  console.log("[DEBUG] Invalid family size format received");
+              }
+              break;
+          }
+          
+          case 'Student Income': {
+            console.log("[DEBUG] Entering Student Income step");
+        
+            const studentIncomeMatch = message.match(/\$?\s*([\d,]+(\.\d{1,2})?)/);
+            if (studentIncomeMatch) {
+                const studentIncome = parseFloat(studentIncomeMatch[1].replace(/,/g, ''));
+                user.tempSAIData.studentIncome = studentIncome;
+        
+                // Perform SAI Calculation
+                const { income, assets, familySize } = user.tempSAIData;
+                const familySizeAllowance = familySize * 10000;
+                const PAI = income - familySizeAllowance - 4750;
+                const PCA = assets * 0.12;
+                const PAAI = PAI + PCA;
+        
+                let predictedLabel = 0.398 * PAAI - 18405.66;
+                predictedLabel = Math.round(predictedLabel / 100) * 100;
+                predictedLabel = Math.max(0, predictedLabel);
+        
+                console.log("[DEBUG] SAI Calculation Inputs:", user.tempSAIData);
+                console.log("[DEBUG] Predicted Label:", predictedLabel);
+        
+                // Update college prices with need aid
+                try {
+                    const updatedCollegesSAI = await updateCollegePricesWithNeedAid(predictedLabel);
+        
+                    if (updatedCollegesSAI) {
+                        botResponse = "Here is how much money you can expect to receive from your schools:\n";
+        
+                        for (const collegeId in updatedCollegesSAI) {
+                            const college = updatedCollegesSAI[collegeId];
+                            console.log('Processing College ID:', collegeId);
+                            console.log('Colelge:', college);
+                            console.log('IPEDS ID:', college['IPEDS ID']);
+                            console.log('User Data:', userData);
+                            console.log('User Doc:', userDoc);
+                            console.log('Visible Colleges:', userDoc.visibleColleges);
+                            if (
+                              college.myPrice_need !== undefined &&
+                              college.myPrice !== college.myPrice_need &&
+                              userDoc.visibleColleges.includes(college['IPEDS ID']) // Check if the IPEDS ID is in visibleColleges
+                            ) {
+                                const myPrice = parseFloat(college.myPrice.replace(/[^0-9.]/g, ''));
+                                const myPriceNeed = parseFloat(college.myPrice_need.replace(/[^0-9.]/g, ''));
+                                if (!isNaN(myPrice) && !isNaN(myPriceNeed)) {
+                                    const difference = myPrice - myPriceNeed;
+                                    const formattedDifference = difference.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                                    botResponse += `${college.Name}: ${formattedDifference} \n`;
+                                }
+                            }
+                        }
+                        botResponse += "Would you like to see if you qualify for merit aid?";
+                        setCurrentStep('Qualify for Merit Aid'); // Transition to Merit Aid step
+                        console.log("[DEBUG] Transitioning to Merit Aid step");
+                    } else {
+                        botResponse = "There was an error updating your college prices. Please try again.";
+                        console.error("[ERROR] Failed to update college prices with need aid");
+                    }
+                } catch (error) {
+                    botResponse = "There was an error calculating your SAI. Please try again.";
+                    console.error("[ERROR] Exception during SAI calculation:", error);
+                }
+        
+                // Clear temporary data
+                user.tempSAIData = null;
+            } else {
+                botResponse = "Please provide the student's income in a valid format (e.g., Student Income: $200).";
+                console.log("[DEBUG] Invalid student income format received:", message);
+            }
+            break;
+        }
+        
+          
           case 'completeSAI':
                 updateCurrentStep(user, "completeSAI")
                 setUserData({ ...userData, SAI: message });
@@ -517,66 +617,110 @@ const handleStepClick = (step) => {
               setCurrentStep('reviewAidOffers');
             }
             break;
-            case 'Qualify for Merit Aid':
-              updateCurrentStep(user, "Qualify for Merit Aid")
-              const gpaMatch = message.match(/GPA:\s*([\d.]+)/i);
-              const satMatch = message.match(/SAT:\s*(\d+)/i);
-              const actMatch = message.match(/ACT:\s*(\d+)/i);
-
-              console.log('gpaMatch: ', gpaMatch)
-
+            case 'Qualify for Merit Aid': {
+              console.log("[DEBUG] Entering Qualify for Merit Aid case");
+          
+              botResponse = "Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., GPA: 3.8).";
+              setCurrentStep('Enter GPA'); // Move to Enter GPA step
+              console.log("[DEBUG] Transitioning to Enter GPA step");
+              break;
+          }
+          
+          case 'Enter GPA': {
+              console.log("[DEBUG] Entering Enter GPA step");
+          
+              const gpaMatch = message.match(/\s*([\d.]+)/i);
               if (gpaMatch) {
-                setGpa(gpaMatch[1]);
-              }
-              if (satMatch) {
-                setTestScores({ type: 'SAT', score: satMatch[1] });
-              } else if (actMatch) {
-                setTestScores({ type: 'ACT', score: actMatch[1] });
-              }
-
-              if (gpaMatch && (satMatch || actMatch)) {
-                const score = await calculateMeritAidEligibilityScore(
-                  user.uid,
-                  parseFloat(gpaMatch[1]),
-                  satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]),
-                  satMatch ? 'SAT' : 'ACT'
-                );
-
-
-                const userDocRef = doc(db, 'userData', user.uid);
-                const userDoc = await getDoc(userDocRef);
-
-                console.log('GPA: ', parseFloat(gpaMatch[1]),)
-                console.log('TEST SCORE: ', satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]))
-
-                if (userDoc.exists()) {
-                  const userData = userDoc.data();
-                  const myColleges = userData.myColleges || {};
-                  const ipedsIds = Object.keys(myColleges);
-                  await updateDoc(userDocRef, {
-                    'GPA': parseFloat(gpaMatch[1]),
-                    'Test Score': satMatch ? parseFloat(satMatch[1]) : parseFloat(actMatch[1]),
-                  });
-
-
-                  console.log(`IPED IDs: ${ipedsIds}`);
-
-                  const meritAidResults = await fetchMeritAidData(user.uid, score, ipedsIds); // Pass ipedsIds as an array
-
-                  if (meritAidResults) {
-                    fetchUserDoc(user);
-                    botResponse = `Based on your academic achievements, you qualfiy for aid at the following schools: ` + meritAidResults.join('\n') + ' Feel free to ask me any questions! ';
-                    setCurrentStep('Ask Questions');
-                  } else {
-                    botResponse = "There was an error updating your college prices. Please try again.";
-                  }
-                } else {
-                  botResponse = "No such document exists.";
-                }
+                  const gpa = parseFloat(gpaMatch[1]);
+                  user.tempMeritAidData = { gpa }; // Store GPA
+                  botResponse = "Got it! Now, please enter your test score. You can provide either SAT (e.g., SAT: 1400) or ACT (e.g., ACT: 32).";
+                  setCurrentStep('Enter Test Score'); // Move to Enter Test Score step
+                  console.log("[DEBUG] GPA received:", gpa);
+                  console.log("[DEBUG] Transitioning to Enter Test Score step");
               } else {
-                botResponse = "Please enter both your GPA and either SAT or ACT scores in the format 'GPA: 3.8, SAT: 1400' or 'GPA: 3.8, ACT: 32'.";
+                  botResponse = "Please enter your GPA in the format 'GPA: 3.8'.";
+                  console.log("[DEBUG] Invalid GPA format received:", message);
               }
+              break;
+          }
+          
+          case 'Enter Test Score': {
+            console.log("[DEBUG] Entering Enter Test Score step");
+        
+            const testScore = parseFloat(message.trim());
+        
+            // Determine test type based on score range
+            let testType = null;
+            if (testScore >= 1 && testScore <= 36) {
+                testType = 'ACT';
+            } else if (testScore >= 100 && testScore <= 1600) {
+                testType = 'SAT';
+            }
+        
+            if (testType) {
+                user.tempMeritAidData = {
+                    ...user.tempMeritAidData,
+                    testScore,
+                    testType,
+                };
+        
+                console.log("[DEBUG] Test score received:", testScore, "Test type:", testType);
+        
+                const { gpa } = user.tempMeritAidData;
+        
+                try {
+                    // Perform calculation
+                    const score = await calculateMeritAidEligibilityScore(user.uid, gpa, testScore, testType);
+        
+                    // Fetch user data
+                    const userDocRef = doc(db, 'userData', user.uid);
+                    const userDoc = await getDoc(userDocRef);
+        
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const myColleges = userData.myColleges || {};
+                        const ipedsIds = Object.keys(myColleges);
+        
+                        await updateDoc(userDocRef, {
+                            GPA: gpa,
+                            'Test Score': testScore,
+                            'Test Type': testType,
+                        });
+        
+                        console.log(`[DEBUG] IPEDS IDs: ${ipedsIds}`);
+        
+                        // Fetch Merit Aid Results
+                        const meritAidResults = await fetchMeritAidData(user.uid, score, ipedsIds);
+        
+                        if (meritAidResults) {
+                            botResponse = `Based on your academic achievements, you qualify for aid at the following schools:\n` +
+                                meritAidResults.join('\n') +
+                                "\nFeel free to ask me any questions!";
+                            setCurrentStep('Ask Questions'); // Transition to Ask Questions step
+                            console.log("[DEBUG] Merit aid results calculated:", meritAidResults);
+                        } else {
+                            botResponse = "There was an error fetching your merit aid results. Please try again.";
+                            console.error("[ERROR] Failed to fetch merit aid results");
+                        }
+                    } else {
+                        botResponse = "No user data found. Please ensure your profile is set up correctly.";
+                        console.error("[ERROR] User document does not exist");
+                    }
+        
+                    // Clear temporary data
+                    user.tempMeritAidData = null;
+                } catch (error) {
+                    botResponse = "There was an error calculating your merit aid. Please try again.";
+                    console.error("[ERROR] Exception during merit aid calculation:", error);
+                }
+            } else {
+                botResponse = "Please enter a valid test score. For ACT, enter a number between 1 and 36. For SAT, enter a number between 100 and 1600.";
+                console.log("[DEBUG] Invalid test score received:", message);
+            }
             break;
+        }
+        
+          
           case 'applyMeritAid':
             botResponse = "Awesome! Finally, let's explore other scholarships you might qualify for. [Link to search tool]";
             setCurrentStep('otherScholarships');
@@ -590,8 +734,6 @@ const handleStepClick = (step) => {
             botResponse = "You've completed all the steps! Now you can ask me any questions you have.";
             setCurrentStep('Ask Questions');
             break;
-          default:
-            botResponse = "Something went wrong. Please try again.";
         }
       }
     } catch (error) {

@@ -1,9 +1,8 @@
-// src/Components/Login.js
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // Add Link for navigation
 import { useCombined } from './CollegeContext'; // Your context
-import { Button } from "./ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { Button } from "./ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 
 const Login = () => {
   const { user, handleLogin } = useCombined();
@@ -24,7 +23,7 @@ const Login = () => {
             Use your Google account to sign in to our platform
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center">
+        <CardContent className="flex flex-col items-center space-y-4">
           <Button className="w-full max-w-sm" variant="outline" onClick={handleLogin}>
             <svg
               role="img"
@@ -36,6 +35,12 @@ const Login = () => {
             </svg>
             Sign in with Google
           </Button>
+          <p className="text-sm text-center text-gray-600">
+            By signing in, you agree to our{' '}
+            <Link to="/terms" className="text-blue-500 hover:underline">
+              Terms and Conditions
+            </Link>.
+          </p>
         </CardContent>
       </Card>
     </div>

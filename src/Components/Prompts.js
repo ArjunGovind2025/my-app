@@ -26,7 +26,7 @@ const promptsList = [
 ];
 
 function Prompts({ onPromptClick }) {
-  console.log('onPromptClick prop:', onPromptClick);
+  
   const [currentPrompts, setCurrentPrompts] = useState([]);
 
   useEffect(() => {

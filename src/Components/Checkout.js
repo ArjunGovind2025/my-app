@@ -91,6 +91,9 @@ const Checkout = () => {
           </Card>
         ))}
       </div>
+      <p className="mt-8 text-sm text-gray-600">
+      Questions? Contact <a href="mailto:pocketly.ai@gmail.com" className="text-blue-600 underline">pocketly.ai@gmail.com</a>
+    </p>
     </div>
   );
 };

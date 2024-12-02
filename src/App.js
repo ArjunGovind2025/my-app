@@ -18,6 +18,7 @@ import ProfileScreen from './Components/ProfileScreen';
 import { Elements } from '@stripe/react-stripe-js';
 import ProtectedRoute from './Components/ProtectedRoute';
 import Login from './Components/Login';
+import Terms from './Components/Terms';
 
 
 
@@ -38,6 +39,7 @@ function App() {
           <Route path="/success" element={<Success />} /> {}
           <Route path="/" element={<ProtectedRoute><Home2 /></ProtectedRoute>} />
           <Route path="/login" element={<Login />} />
+          <Route path="/terms" element={<Terms />} />
         </Routes>
       </Router>
   </CombinedProvider>

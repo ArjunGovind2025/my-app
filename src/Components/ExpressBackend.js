@@ -1,5 +1,5 @@
 const express = require('express');
-const stripe = require('stripe')('sk_test_51PemTHHcQJIFzfCVAxEgDiV2cPoBbNQA30ZwNPsjK6mNqyXEbNE1cxWiI4CqoIejBX08plpdGuAhYYRYUfaXx9f10030NHGHSk');
+const stripe = require('stripe')('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');
 const { getFirestore } = require('firebase-admin/firestore');
 const admin = require('firebase-admin');
 
@@ -30,4 +30,4 @@ app.post('/api/create-billing-session', async (req, res) => {
   }
 });
 
-app.listen(3001, () => console.log('Server running on port 3000'));
+app.listen(3001, () => console.log('Server running on port 3001'));

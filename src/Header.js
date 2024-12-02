@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import { handleLogin } from './Auth'; 
@@ -111,6 +111,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { myColleges } = useCombined();
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleProfileClick = () => {
     navigate('/ProfileScreen');
@@ -119,6 +120,19 @@ const Header = () => {
   const handleCollegeClick = (collegeId) => {
     navigate(`/school/${collegeId}`);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <HeaderContainer>
@@ -129,7 +143,7 @@ const Header = () => {
       </Logo>
       <Nav>
         <NavLink to="/">Home</NavLink>
-        <DropdownContainer>
+        <DropdownContainer ref={dropdownRef}>
           <DropdownButton onClick={() => setShowDropdown((prev) => !prev)}>
             My Colleges <ChevronDown className="h-4 w-4" />
           </DropdownButton>
@@ -169,25 +183,25 @@ const Header = () => {
               </Logo>
               <nav className="grid gap-2">
                 <NavLink to="/">Home</NavLink>
-                <DropdownContainer>
-          <DropdownButton onClick={() => setShowDropdown((prev) => !prev)}>
-            My Colleges <ChevronDown className="h-4 w-4" />
-          </DropdownButton>
-          <DropdownContent show={showDropdown}>
-            {myColleges && Object.keys(myColleges).length > 0 ? (
-              Object.keys(myColleges).map((collegeId) => (
-                <DropdownItem
-                  key={collegeId}
-                  onClick={() => handleCollegeClick(collegeId)}
-                >
-                  {myColleges[collegeId].Name}
-                </DropdownItem>
-              ))
-            ) : (
-              <DropdownItem>No colleges added</DropdownItem>
-            )}
-          </DropdownContent>
-        </DropdownContainer>
+                <DropdownContainer ref={dropdownRef}>
+                  <DropdownButton onClick={() => setShowDropdown((prev) => !prev)}>
+                    My Colleges <ChevronDown className="h-4 w-4" />
+                  </DropdownButton>
+                  <DropdownContent show={showDropdown}>
+                    {myColleges && Object.keys(myColleges).length > 0 ? (
+                      Object.keys(myColleges).map((collegeId) => (
+                        <DropdownItem
+                          key={collegeId}
+                          onClick={() => handleCollegeClick(collegeId)}
+                        >
+                          {myColleges[collegeId].Name}
+                        </DropdownItem>
+                      ))
+                    ) : (
+                      <DropdownItem>No colleges added</DropdownItem>
+                    )}
+                  </DropdownContent>
+                </DropdownContainer>
                 <NavLink to="/my-colleges-spreadsheet">College Spreadsheet</NavLink>
                 <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink>
                 <NavLink to="/upgrade">Upgrade</NavLink>
