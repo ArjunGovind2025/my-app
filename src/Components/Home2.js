@@ -20,6 +20,11 @@ import { updateSAI } from './SAI';
 import retrieveCurrentStep from './retrieving';
 import { updateCurrentStep } from './updating';
 import Modal from './Modal';
+import { FaSpinner } from "react-icons/fa";
+import { useGenerateCollegeRecommendations } from './AIFeatures';
+import { useCheapestOptionsForUser } from './Features';
+
+
 
 
 
@@ -33,11 +38,19 @@ const Home2 = () => {
   const [userData, setUserData] = useState({}); 
   const [currentStep, setCurrentStep] = useState('welcome'); // Track the current step
   const [loading, setLoading] = useState(false); 
+  const [loadingFeatures, setLoadingFeatures] = useState(false); 
+
   const [gpa, setGpa] = useState(''); 
   const [testScores, setTestScores] = useState({}); 
   const [showModal, setShowModal] = useState(false);
   const [isTypewriterDone, setIsTypewriterDone] = useState(false);
   const [currentLineIndex, setCurrentLineIndex] = useState(0); 
+  const [isLoading, setIsLoading] = useState(false); // Loading state
+  const [matches, setMatches] = useState([]); // State persists across renders
+  const { generateCollegeRecommendations } = useGenerateCollegeRecommendations();
+  const { getCheapestOptionsForUser, getHighestMeritAid } = useCheapestOptionsForUser();
+
+
 
 useEffect(() => {
   if (botMessage.length > 0) {
@@ -84,11 +97,11 @@ useEffect(() => {
     'completeSAI': `Here is how much money you can expect to receive from your schools:\n`,
     'submitFAFSA': `Please submit your FAFSA and state-specific financial aid applications. Once done, review your financial aid offers and deduct the aid from your college list costs.`,
     'reviewAidOffers': `Review your financial aid offers and deduct the aid from your college list costs. Have you reviewed your offers yet? (Yes, No)`,
-    'Qualify for Merit Aid': `Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., GPA: 3.8).`,
+    'Qualify for Merit Aid': `Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., 3.8).`,
     'applyMeritAid': `Great! Based on your academic achievements, let's explore other scholarships you might qualify for.`,
     'otherScholarships': `You have some other scholarships left to explore. Let's find more opportunities.`,
     'complete': `You've completed all the steps! Now you can ask me any questions you have.`,
-    'Ask Questions': `You've completed all the steps! Now you can ask me any questions you have.`
+    'Ask Questions': `You've completed all the steps! Click on each school to check out other schorlships offered. You can ask me any questions you have!`
   };
   
 
@@ -102,6 +115,7 @@ useEffect(() => {
 useEffect(() => {
     const welcomeMessage = `Welcome to Pocketly!\nI'm here to help you navigate through the process of paying for college.\nLet's get started with some basic information.\nWhat is your name?`;
     setMessages([{ role: 'bot', content: welcomeMessage }]);
+
 }, []);
 
 const handleStepClick = (step) => {
@@ -111,6 +125,8 @@ const handleStepClick = (step) => {
 
 
   const handlePromptClick = async (prompt) => {
+
+       
     console.log('Prompt clicked:', prompt);
     setLoading(true);
     try {
@@ -160,24 +176,106 @@ const handleStepClick = (step) => {
 
   const findCollegeIdByName = async (collegeName) => {
     try {
+      console.log('🔍 Starting search for:', collegeName); // Log input
       const docRef = doc(db, 'nameToID', 'collegeNametoIPEDSID');
       const docSnap = await getDoc(docRef);
-
+  
       if (docSnap.exists()) {
         const data = docSnap.data();
-        for (const [name, id] of Object.entries(data)) {
-          if (name.toLowerCase().includes(collegeName.toLowerCase())) {
-            return id;
-          }
-        }
+  
+        const normalizedInput = collegeName.toLowerCase().trim();
+  
+        const matches = Object.entries(data).filter(([name]) => {
+          const normalizedName = name.toLowerCase().trim();
+          return normalizedName.includes(normalizedInput); // Check for partial match
+        });
+  
+        console.log('🎯 Matches Found:', matches); // Log matches found
+        return matches.map(([name, id]) => ({ name, id })); // Return formatted matches
       } else {
-        console.log('No such document!');
+        console.warn('⚠️ No document found in Firestore!');
       }
     } catch (error) {
-      console.error('Error finding college ID:', error);
+      console.error('❌ Error finding college ID:', error);
     }
-    return null;
+    return [];
   };
+  
+  
+  const handleGenerateRecommendations = async () => {
+    if (!user?.uid) {
+      console.warn('User ID not available.');
+      return;
+    }
+    setLoadingFeatures(true);
+    try {
+      await generateCollegeRecommendations(user.uid, findCollegeIdByName, 5);
+      console.log('Recommendations generated successfully!');
+    } catch (error) {
+      if (error) {
+        setShowModal(true); // Show modal if API limit is reached or error occurs
+      }
+    } finally {
+      setLoadingFeatures(false);
+    }
+  };
+
+  
+ 
+ 
+  
+  const renderGenerateCheapButton = () => (
+    <button
+      onClick={async () => {
+        if (!user?.uid) {
+          console.warn('User ID not available.');
+          return;
+        }
+        setLoading(true);
+        try {
+          console.log('Calling getCheapestOptionsForUser...');
+          const recommendations = await getCheapestOptionsForUser(user.uid); // Ensure this is the function from your hook
+          console.log('Cheapest options generated successfully!', recommendations);
+        } catch (error) {
+          console.error('Error generating cheap recommendations:', error);
+        } finally {
+          setLoading(false);
+        }
+      }}
+      className="bg-[--color-chrome] hover:bg-[--color-chrome] text-[#000] py-1 px-2 text-xs rounded shadow-md mb-4 ml-4"
+      disabled={loading}
+    >
+      {'Cheapest Schools'}
+    </button>
+  );
+
+  const renderGenerateMeritButton = () => (
+    <button
+      onClick={async () => {
+        if (!user?.uid) {
+          console.warn('User ID not available.');
+          return;
+        }
+        setLoadingFeatures(true);
+        try {
+          console.log('Calling getHighestMeritAid...');
+          const recommendations = await getHighestMeritAid(user.uid); // Ensure this is the function from your hook
+          console.log('Highest merit options generated successfully!', recommendations);
+        } catch (error) {
+          console.error('Error generating merit recommendations:', error);
+        } finally {
+          setLoadingFeatures(false);
+        }
+      }}
+      className="bg-[--color-chrome] hover:bg-[--color-chrome] text-[#000] py-1 px-2 text-xs rounded shadow-md mb-4 ml-4"
+      disabled={loadingFeatures}
+    >
+      {loadingFeatures ? 'Thinking...' : '★ Top Merit Qualified'}
+    </button>
+  );
+ 
+ 
+  
 
 
   const updateCollegePricesWithNeedAid = async (SAI) => {
@@ -232,7 +330,7 @@ const handleStepClick = (step) => {
             }
             const adjustedDifference = priceDifference * avgNeedMet;
             const newPrice = adjustedDifference;
-            const finalPrice = myPrice - newPrice ;
+            const finalPrice = Math.round((myPrice - newPrice) / 100) * 100;
   
 
             console.log(`Price Difference (myPrice - parsedSAI): ${priceDifference}`);
@@ -302,9 +400,11 @@ const handleStepClick = (step) => {
     }
   };
   
-  
+
+
 
   const handleMessageSubmit = async (message) => {
+    
     if (message.trim() === '') return;
     
 
@@ -319,39 +419,86 @@ const handleStepClick = (step) => {
       if (currentStep === 'Ask Questions') {
         updateCurrentStep(user, "Ask Questions")
         // call OpenAI API to handle users questions in final step
-
-        botResponse = await getShortChatResponse(user.uid, message, userDoc, myColleges, 'Provide short and concise answers.', setShowModal);
+        try{
+          setIsLoading(true);
+          botResponse = await getShortChatResponse(user.uid, message, userDoc, myColleges, 'Provide short and concise answers.', setShowModal);
+        } finally{
+          setIsLoading(false);
+        }
+        
+        
       } else {
         switch (currentStep) {
           case 'Welcome':
-          updateCurrentStep(user, "Welcome");
-          let collegeNames = message.split(',').map(name => name.trim()); // Split and trim the user input to get individual college names
-          let addedColleges = [];
-          console.log('College names extracted from user input:', collegeNames);
+            
+  updateCurrentStep(user, "Welcome");
+  
+  
+  let collegeNames = message.split(',').map(name => name.trim()); // Split input
+  let addedColleges = [];
+  let clarificationNeeded = false;
 
-          for (const collegeName of collegeNames) {
-            console.log('Searching for IPEDS ID for:', collegeName);
-            const ipedsId = await findCollegeIdByName(collegeName);
-            if (ipedsId) {
-              console.log('Found IPEDS ID:', ipedsId, 'for college:', collegeName);
-              await addCollegeByIpedsId(ipedsId);
-              addedColleges.push(collegeName);
-            } else {
-              console.log('Could not find a match for:', collegeName);
-              botResponse += `Could not find a match for "${collegeName}".\n`;
-            }
-          }
+  console.log('College names extracted from user input:', collegeNames);
 
-          if (addedColleges.length > 0) {
-            botResponse += `Great! ${addedColleges.join(', ')} ha${addedColleges.length > 1 ? 've' : 's'} been added to your list.\n`;
-            botResponse += `What state are you from? List state abbreviation (e.g., NY)`;
-            setCurrentStep('State Information');
-          } else {
-            botResponse += `Please try adding colleges again.`;
-            setCurrentStep('Welcome');
-          }
+  for (const collegeName of collegeNames) {
+    console.log('Searching for matches for:', collegeName);
+    const result = await findCollegeIdByName(collegeName);
+
+    if (result.length === 1) {
+      // Single match found: Proceed to add the college
+      const { id, name } = result[0];
+      console.log('Found match:', name, id);
+      await addCollegeByIpedsId(id);
+      addedColleges.push(name);
+    } else if (result.length > 1) {
+      setMatches(result);
+      // Multiple matches found: Prompt user to clarify
+      botResponse += `Multiple matches found for "${collegeName}":\n`;
+      result.forEach((match, index) => {
+        botResponse += `${index + 1}. ${match.name}\n`;
+      });
+      botResponse += `Please reply with the number of your preferred choice.\n`;
+      setCurrentStep('Clarify College'); // Update step for clarification
+      clarificationNeeded = true;
+      break; // Stop processing further until clarification
+    } else {
+      // No matches found
+      console.log('No match for:', collegeName);
+      botResponse += `Could not find a match for "${collegeName}".\n`;
+    }
+  }
+
+  if (!clarificationNeeded) {
+    if (addedColleges.length > 0) {
+      botResponse += `Great! ${addedColleges.join(', ')} ha${addedColleges.length > 1 ? 've' : 's'} been added to your list.\n`;
+      botResponse += `What state are you from? List state abbreviation (e.g., NY)`;
+      setCurrentStep('State Information');
+    } else {
+      botResponse += `Please try adding colleges again.`;
+      setCurrentStep('Welcome');
+    }
+  }
+  break;
+  case 'Clarify College':
+  const clarificationIndex = parseInt(message.trim(), 10) - 1;
+
+  if (!isNaN(clarificationIndex) && clarificationIndex >= 0 && clarificationIndex < matches.length) {
+    const { id, name } = matches[clarificationIndex];
+    console.log('User selected:', name, id);
+    await addCollegeByIpedsId(id);
+    botResponse = `${name} has been added to your list.\n`;
+    botResponse += `What state are you from? List state abbreviation (e.g., NY)`;
+    setMatches([]);
+    setCurrentStep('State Information');
+  } else {
+    botResponse = `Invalid choice. Please reply with a number between 1 and ${matches.length}.`;
+  }
+  break;
+
+
           break;
           case 'Add College':
+            
             console.log("IN ADD COLLEGE")
             updateCurrentStep(user, "Add College");
             console.log("IN ADD COLLEGE2")
@@ -420,9 +567,12 @@ const handleStepClick = (step) => {
             break;
           case 'income':
             updateCurrentStep(user, "income")
+          
             setUserData({ ...userData, income: message });
-            if (parseInt(message) < 300000) {
-              botResponse = "Based on your income, you likely qualify for financial aid. Would you like to complete the simplified FAFSA form to determine how much aid?";
+            const income2 = message.match(/\$?\s*([\d,]+(\.\d{1,2})?)/);
+
+            if (income2 < 300000) {
+              botResponse = "Based on your income, you likely qualify for financial aid. Would you like to complete the simplified FAFSA form to determine how much aid? It takes less than a minute";
               setCurrentStep('Calculate SAI');
             } else {
               botResponse = "Based on your income, you may not qualify for need-based financial aid, but it's still worth applying. Would you like to see if you qualify for merit aid?";
@@ -524,6 +674,18 @@ const handleStepClick = (step) => {
                 let predictedLabel = 0.398 * PAAI - 18405.66;
                 predictedLabel = Math.round(predictedLabel / 100) * 100;
                 predictedLabel = Math.max(0, predictedLabel);
+
+              
+              
+              const userDocRef = doc(db, 'userData', user.uid);
+
+              await updateDoc(userDocRef, {
+                SAI: predictedLabel, // Existing field
+                income, // Add income as a field
+                assets, // Add assets as a field
+                familySize // Add familySize as a field
+              });
+            
         
                 console.log("[DEBUG] SAI Calculation Inputs:", user.tempSAIData);
                 console.log("[DEBUG] Predicted Label:", predictedLabel);
@@ -534,6 +696,7 @@ const handleStepClick = (step) => {
         
                     if (updatedCollegesSAI) {
                         botResponse = "Here is how much money you can expect to receive from your schools:\n";
+                        let anyQualifiedSchools = false;
         
                         for (const collegeId in updatedCollegesSAI) {
                             const college = updatedCollegesSAI[collegeId];
@@ -550,12 +713,16 @@ const handleStepClick = (step) => {
                             ) {
                                 const myPrice = parseFloat(college.myPrice.replace(/[^0-9.]/g, ''));
                                 const myPriceNeed = parseFloat(college.myPrice_need.replace(/[^0-9.]/g, ''));
-                                if (!isNaN(myPrice) && !isNaN(myPriceNeed)) {
-                                    const difference = myPrice - myPriceNeed;
+                                const difference = myPrice - myPriceNeed;
+                                if (!isNaN(myPrice) && !isNaN(myPriceNeed && difference > 0)) {
+                                    anyQualifiedSchools = true;
                                     const formattedDifference = difference.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
                                     botResponse += `${college.Name}: ${formattedDifference} \n`;
                                 }
                             }
+                        }
+                        if (!anyQualifiedSchools) {
+                          botResponse += "Unfortunately, you don’t qualify for financial aid at the schools on your list. ";
                         }
                         botResponse += "Would you like to see if you qualify for merit aid?";
                         setCurrentStep('Qualify for Merit Aid'); // Transition to Merit Aid step
@@ -579,26 +746,46 @@ const handleStepClick = (step) => {
         }
         
           
-          case 'completeSAI':
-                updateCurrentStep(user, "completeSAI")
-                setUserData({ ...userData, SAI: message });
-                const updatedColleges = await updateCollegePricesWithNeedAid(parseFloat(message));
-              
-                if (updatedColleges) {
-                  botResponse = "Here is how much money you can expect to receive from your schools:\n";
-              
-                  for (const collegeId in updatedColleges) {
-                    const college = updatedColleges[collegeId];
-                    if (college.myPrice_need !== undefined) {
-                      botResponse += `${college.Name}: ${college.myPrice_need}\n`;
-                    }
-                  }
-                } else {
-                  botResponse = "There was an error updating your college prices. Please try again.";
-                }
-              
-                setCurrentStep('Qualify for Merit Aid');
-              break;              
+        case 'completeSAI':
+          updateCurrentStep(user, "completeSAI");
+        
+          // Remove non-numeric characters (except the decimal point) and parse as float
+          const sanitizedMessage = message.replace(/[^0-9.]/g, '');
+          const parsedSAI = parseFloat(sanitizedMessage);
+        
+          if (isNaN(parsedSAI)) {
+            botResponse = "Invalid input. Please provide a valid number for your SAI.";
+            break;
+          }
+        
+          setUserData({ ...userData, SAI: parsedSAI });
+          const updatedColleges = await updateCollegePricesWithNeedAid(parsedSAI);
+        
+          if (updatedColleges) {
+            botResponse = "Here is how much money you can expect to receive from your schools:\n";
+            console.log('userDocVisibleCollege' + userDoc.visibleColleges);
+
+            for (const collegeId in updatedColleges) {
+              const college = updatedColleges[collegeId];
+              console.log('userDocVisibleCollege' + userDoc.visibleColleges);
+              console.log('collegeId' + collegeId);
+              const difference = parseFloat(college.myPrice.replace(/[$,]/g, '')) - Number(college.myPrice_need) ;
+              console.log('norm:' + college.myPrice);
+              console.log('need:' + college.myPrice_need);
+              console.log('diff:' + difference);
+              if (college.myPrice_need !== undefined && !isNaN(college.myPrice_need)
+                && userDoc.visibleColleges.includes(Number(collegeId))
+              ) {
+                botResponse += `${college.Name}: $${difference.toLocaleString()}\n`;
+
+              }
+            }
+          } else {
+            botResponse = "There was an error updating your college prices. Please try again.";
+          }
+        
+          setCurrentStep('Qualify for Merit Aid');
+          break;     
           case 'submitFAFSA':
             if (message.toLowerCase() === 'yes') {
               botResponse = "Review your financial aid offers and deduct the aid from your college list costs. Have you reviewed your offers yet? (Yes, No)";
@@ -620,9 +807,20 @@ const handleStepClick = (step) => {
             case 'Qualify for Merit Aid': {
               console.log("[DEBUG] Entering Qualify for Merit Aid case");
           
-              botResponse = "Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., GPA: 3.8).";
-              setCurrentStep('Enter GPA'); // Move to Enter GPA step
-              console.log("[DEBUG] Transitioning to Enter GPA step");
+              // Check if GPA is already included in the initial message
+              const gpaMatch = message.match(/\s*([\d.]+)/i);
+              if (gpaMatch) {
+                  const gpa = parseFloat(gpaMatch[1]);
+                  user.tempMeritAidData = { gpa }; // Store GPA
+                  botResponse = "Got it! Now, please enter your test score. You can provide either SAT (e.g., 1400) or ACT (e.g., 32).";
+                  setCurrentStep('Enter Test Score'); // Move to Enter Test Score step
+                  console.log("[DEBUG] GPA received in Qualify for Merit Aid step:", gpa);
+                  console.log("[DEBUG] Transitioning to Enter Test Score step");
+              } else {
+                  botResponse = "Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., 3.8).";
+                  setCurrentStep('Enter GPA'); // Move to Enter GPA step
+                  console.log("[DEBUG] Prompting for GPA in Qualify for Merit Aid step");
+              }
               break;
           }
           
@@ -633,12 +831,12 @@ const handleStepClick = (step) => {
               if (gpaMatch) {
                   const gpa = parseFloat(gpaMatch[1]);
                   user.tempMeritAidData = { gpa }; // Store GPA
-                  botResponse = "Got it! Now, please enter your test score. You can provide either SAT (e.g., SAT: 1400) or ACT (e.g., ACT: 32).";
+                  botResponse = "Got it! Now, please enter your test score. You can provide either SAT (e.g., 1400) or ACT (e.g., 32).";
                   setCurrentStep('Enter Test Score'); // Move to Enter Test Score step
                   console.log("[DEBUG] GPA received:", gpa);
                   console.log("[DEBUG] Transitioning to Enter Test Score step");
               } else {
-                  botResponse = "Please enter your GPA in the format 'GPA: 3.8'.";
+                  botResponse = "Please enter your GPA in the format '3.8'.";
                   console.log("[DEBUG] Invalid GPA format received:", message);
               }
               break;
@@ -692,16 +890,20 @@ const handleStepClick = (step) => {
                         // Fetch Merit Aid Results
                         const meritAidResults = await fetchMeritAidData(user.uid, score, ipedsIds);
         
-                        if (meritAidResults) {
-                            botResponse = `Based on your academic achievements, you qualify for aid at the following schools:\n` +
-                                meritAidResults.join('\n') +
-                                "\nFeel free to ask me any questions!";
-                            setCurrentStep('Ask Questions'); // Transition to Ask Questions step
-                            console.log("[DEBUG] Merit aid results calculated:", meritAidResults);
-                        } else {
-                            botResponse = "There was an error fetching your merit aid results. Please try again.";
-                            console.error("[ERROR] Failed to fetch merit aid results");
-                        }
+                        if (meritAidResults && meritAidResults.length > 0) {
+                          botResponse = `Based on your academic achievements, you qualify for aid at the following schools:\n` +
+                              meritAidResults.join('\n') +
+                              "\nClick on each school to checkout other scholarships they offer. Feel free to ask me any questions you have!!";
+                          setCurrentStep('Ask Questions'); // Transition to Ask Questions step
+                          console.log("[DEBUG] Merit aid results calculated:", meritAidResults);
+                      } else if (meritAidResults && meritAidResults.length === 0) {
+                          botResponse = "Unfortunately, you do not qualify for merit aid at any of the schools on your list. Consider adding more safety schools to increase your chances. Let me know if you have any questions!";
+                          setCurrentStep('Add More Schools'); // Optional: Suggest adding schools
+                          console.log("[DEBUG] Merit aid results are empty. Suggesting to add more schools.");
+                      } else {
+                          botResponse = "There was an error fetching your merit aid results. Please try again.";
+                          console.error("[ERROR] Failed to fetch merit aid results");
+                      }
                     } else {
                         botResponse = "No user data found. Please ensure your profile is set up correctly.";
                         console.error("[ERROR] User document does not exist");
@@ -731,7 +933,7 @@ const handleStepClick = (step) => {
             break;
           case 'complete':
             updateCurrentStep(user, "complete")
-            botResponse = "You've completed all the steps! Now you can ask me any questions you have.";
+            botResponse = "You've completed all the steps! Click on each school to check out other schorlships offered. You can ask me any questions you have!";
             setCurrentStep('Ask Questions');
             break;
         }
@@ -781,7 +983,7 @@ const handleStepClick = (step) => {
         setCurrentStep(currStep);
 
         if (currStep === 'Ask Questions') {
-            const message = 'Feel free to ask me any questions you have!';
+            const message = 'Click on each school to checkout other scholarships they offer. Feel free to ask me any questions you have!';
             setMessages([{ role: 'bot', content: message }]);
             setBotMessage(message);
             setInput('');
@@ -807,6 +1009,26 @@ const handleStepClick = (step) => {
         <div className="column-left">
           <a className="chakra-link css-1hngipw" href="#">My Schools</a>
           <CollegeSearch />
+          <div>
+          <button
+        onClick={handleGenerateRecommendations}
+        className="bg-[--color-chrome] hover:bg-[--color-chrome] text-[#000] py-1 px-2 text-xs rounded shadow-md mb-4 ml-4"
+        disabled={loadingFeatures}
+      >
+        {loadingFeatures ? 'Thinking...' : '★ AI Suggestions'}
+        
+      </button>
+
+      {/* Modal Component */}
+      {showModal && (
+        <Modal
+          message="AI credits exceeded. Please upgrade your plan."
+          onClose={() => setShowModal(false)}
+        />
+      )}
+           {/*{renderGenerateCheapButton()}*/}
+           {renderGenerateMeritButton()}
+        </div>
           <div className="school-container">
             <MySchools />
           </div>
@@ -877,17 +1099,23 @@ const handleStepClick = (step) => {
                   <div className="css-adkx0o">
                   <StepTracker currentStep={currentStep} steps={steps} onStepClick={handleStepClick} />
                   <div className="text-container">
-    <p style={{ textAlign: 'left', width: '100%' }}>
+  <p style={{ textAlign: 'left', width: '100%' }}>
+    {isLoading ? (
+      // Show "Loading..." when isLoading is true
+      <span>Thinking...</span>
+    ) : (
+      // Show Typewriter animation when isLoading is false
       <Typewriter
-        key={botMessage} // ensurs the component remounts and re-runs the animation
+        key={botMessage} // Ensures the component remounts and re-runs the animation
         words={[botMessage]}
         loop={1}
         typeSpeed={10}
         deleteSpeed={50}
         delaySpeed={1000}
       />
-    </p>
-  </div>
+    )}
+  </p>
+</div>
                     </div>
                     
                   </div>
@@ -911,10 +1139,37 @@ const handleStepClick = (step) => {
     }}
     mr={2}
   />
-  <button type="button" onClick={handleSubmit} className="chakra-button css-gllksg">
-    Submit
-    {showModal && <Modal message="API call limit exceeded. Please upgrade your plan." onClose={() => setShowModal(false)} />}
-  </button>
+  
+
+<button
+  type="button"
+  onClick={handleSubmit}
+  className="chakra-button css-gllksg"
+  disabled={isLoading}
+>
+  {isLoading ? (
+    <FaSpinner
+      style={{
+        fontSize: "14px",
+        animation: "spin 1s linear infinite",
+      }}
+    />
+  ) : (
+    <span style={{ fontSize: "14px" }}>&#8593;</span>
+  )}
+
+
+</button>
+
+<style>
+  {`
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  `}
+</style>
+
 </div>
               </div>
             </div>

@@ -23,7 +23,7 @@ import { UpgradeTooltip, UpgradeTooltipNoBlur } from './UpgradeTooltip';
 
 const SchoolDetails = () => {
   const { ipedsId } = useParams();
-  const { user, uid, myColleges, visibleColleges } = useCombined();
+  const { user, uid, myColleges} = useCombined();
   const [school, setSchool] = useState(null);
   const [messages, setMessages] = useState([]);
   const [botMessage, setBotMessage] = useState('');
@@ -35,30 +35,64 @@ const SchoolDetails = () => {
   const [error, setError] = useState(null);
   const [input, setInput] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [visibleColleges, setVisibleColleges] = useState([]); // To store the list of visible colleges
+  const [userDataLoaded, setUserDataLoaded] = useState(false); // To track if the user data is fully loaded
 
   useEffect(() => {
     const fetchSchoolDetails = async () => {
-      const schoolDocRef = doc(db, 'collegeData', ipedsId);
-      const schoolDocSnap = await getDoc(schoolDocRef);
-      fetchMeritData(false)
-
-      if (schoolDocSnap.exists()) {
-        const schoolDetails = schoolDocSnap.data();
-        setSchool(schoolDetails);
-        const welcomeMessage = `Hi, I am an advisor for ${schoolDetails.Name}. Ask me any questions you have!`;
-        setMessages([{ role: 'bot', content: welcomeMessage }]);
+      setLoading(true); // Set loading state
+      try {
+        const schoolDocRef = doc(db, 'collegeData', ipedsId);
+        const schoolDocSnap = await getDoc(schoolDocRef);
+  
+        if (schoolDocSnap.exists()) {
+          const schoolDetails = schoolDocSnap.data();
+          setSchool(schoolDetails);
+  
+          const welcomeMessage = `Hi, I am an advisor for ${schoolDetails.Name}. Ask me any questions you have!`;
+          setMessages([{ role: 'bot', content: welcomeMessage }]);
+  
+          console.log('School data fetched:', schoolDetails);
+          
+          if (schoolDetails.Name) {
+            await fetchMeritData(false);
+          }
+        } 
+         else {
+          console.error('School data not found');
+        }
+      } catch (error) {
+        console.error('Error fetching school details:', error);
+      } finally {
+        setLoading(false); // Stop loading state
       }
     };
-
+  
     fetchSchoolDetails();
-  }, [ipedsId]);
-
+  }, [ipedsId]); // Add ipedsId as a dependency
+  
   useEffect(() => {
-    const welcomeMessage = `You are an advisor for ${school?.Name}.`;
-    setMessages([{ role: 'bot', content: welcomeMessage }]);
-  }, []);
-
-
+    const fetchUserData = async () => {
+      try {
+        if (user?.uid) {
+          const userDocRef = doc(db, 'userData', user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            setUserData(data); // Store user data
+            setVisibleColleges(data.visibleColleges || []); // Update visible colleges
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setUserDataLoaded(true); // Mark data as loaded
+      }
+    };
+  
+    fetchUserData();
+  }, [user]);
+/*
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
     const handleSelectStart = (e) => e.preventDefault();
@@ -82,8 +116,8 @@ const SchoolDetails = () => {
       document.removeEventListener('selectstart', handleSelectStart);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
-  
+  }, []); */
+
   const isCollegeVisible = Array.isArray(visibleColleges) && visibleColleges.includes(Number(ipedsId));
 
   const handleButtonClick = async (instruction) => {
@@ -199,30 +233,48 @@ const SchoolDetails = () => {
               <CardTitle>{school.Name}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="custom-flex-wrap">
-                <span className="badge badge-pill badge-college">In-state: {school['Total_price_for_in_state_students_2022_23']}</span>
-                <span className="badge badge-pill badge-college">Out-of-state: {school['Total_price_for_out_of_state_students_2022_23']}</span>
+            <div className="custom-flex-wrap">
+                <span className="badge badge-pill badge-college">
+                  In-state: {isNaN(Number(school['Total_price_for_in_state_students_2022_23']))
+                    ? 'NA'
+                    : school['Total_price_for_in_state_students_2022_23']}
+                </span>
+                <span className="badge badge-pill badge-college">
+                  Out-of-state: {isNaN(Number(school['Total_price_for_out_of_state_students_2022_23']))
+                    ? 'NA'
+                    : school['Total_price_for_out_of_state_students_2022_23']}
+                </span>
                 <span className="badge badge-pill badge-college">
                   Percent receiving merit award: {isCollegeVisible ? (
-                    school['% Fresh w/out need Receiving Merit Aid']
+                    `${school['% Fresh w/out need Receiving Merit Aid'] || '15'}%`
                   ) : (
                     <UpgradeTooltip>
-                      <span className="blurred-text">{school['Percent_Freshman_without_need_receiving_merit_aid']}%</span>
+                      <span className="blurred-text">
+                        {`${school['Percent_Freshman_without_need_receiving_merit_aid'] || '15'}%`}
+                      </span>
                     </UpgradeTooltip>
                   )}
                 </span>
                 <span className="badge badge-pill badge-college">
                   Avg merit award: {isCollegeVisible ? (
-                    school['Avg_merit_award_for_Freshman_without_need']
+                    school['Avg_merit_award_for_Freshman_without_need'] || '$7,500'
                   ) : (
                     <UpgradeTooltip>
-                      <span className="blurred-text">{school['Avg merit award for Freshman w/out need']}</span>
+                      <span className="blurred-text">
+                        {school['Avg merit award for Freshman w/out need'] || '$7,500'}
+                      </span>
                     </UpgradeTooltip>
                   )}
                 </span>
-                <span className="badge badge-pill badge-college">4 yr Graduation Rate: {school['4 yr Graduation Rate']}%</span>
-                <span className="badge badge-pill badge-college">Total Students: {school['Size (all students)']}</span>
-                <span className="badge badge-pill badge-college">Mean Earnings After 10 Years: {school['Mean Earnings of Students Working After 10 Years']}</span>
+                <span className="badge badge-pill badge-college">
+                  4 yr Graduation Rate: {school['4 yr Graduation Rate']}%
+                </span>
+                <span className="badge badge-pill badge-college">
+                  Total Students: {school['Size (all students)']}
+                </span>
+                <span className="badge badge-pill badge-college">
+                  Mean Earnings After 10 Years: {school['Mean Earnings of Students Working After 10 Years']}
+                </span>
               </div>
             </CardContent>
           </Card>

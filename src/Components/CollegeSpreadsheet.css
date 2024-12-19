@@ -1,3 +1,4 @@
+
 .my-colleges-container {
   padding: 20px;
   background-color: #f9f9f9;
@@ -10,6 +11,11 @@
 .my-colleges-container h1 {
   font-size: 24px;
   margin-bottom: 20px;
+}
+
+.text-green-600 {
+  background-color: #16a34a; /* Tailwind green-600 */
+  font-weight: bold;
 }
 
 .colleges-table {
@@ -60,3 +66,58 @@
   }
   
   
+  @media (max-width: 768px) {
+    th, td {
+      white-space: nowrap; /* Prevent wrapping onto the next line */
+      overflow: hidden; /* Clip overflowing content */
+      text-overflow: ellipsis; /* Add "..." for truncated text */
+      word-break: normal; /* Ensure words don’t break unexpectedly */
+      overflow-wrap: normal; /* Prevent words from wrapping to the next line */
+    }
+
+    th.text-slate-500 {
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    font-size: 12px; /* Smaller font size */
+
+  }
+    h1, h2, h3, h4, h5, h6, p, span, th, td, h-12{
+      font-size: 11px; /* Adjust to your needs */
+    }
+
+
+
+    .my-colleges-container {
+      padding: 10px;
+      margin: 5px auto;
+    }
+  
+    .my-colleges-container h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+  
+    .colleges-table {
+      font-size: 12px;
+      overflow-x: auto; /* Enable horizontal scrolling */
+    }
+  
+    .colleges-table th, .colleges-table td {
+      padding: 5px;
+    }
+  
+    .table-controls {
+      margin-bottom: 5px;
+    }
+  
+    .filter-input {
+      font-size: 12px;
+      padding: 4px;
+      width: 100%;
+    }
+  
+    .small-font {
+      font-size: 11px; /* Further reduce font size for very small screens */
+    }
+  }

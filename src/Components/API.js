@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { doc, updateDoc, getDoc, increment } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, getDoc, increment, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import config from '../config.json';
 import { checkApiCallCount } from './Access'; 
@@ -31,6 +31,33 @@ const incrementApiCallCount = async (userDocId) => {
   }
 };
 
+
+const logMessageToFirestore = async (userDocId, input, botMessage) => {
+  try {
+    const userDocRef = doc(db, 'recordedData', userDocId);
+
+    // Check if the document exists
+    const userDocSnap = await getDoc(userDocRef);
+    if (userDocSnap.exists()) {
+      // Document exists; append the message to the messages array
+      await updateDoc(userDocRef, {
+        messages: arrayUnion(input),
+        botMessages : arrayUnion(botMessage)
+      });
+    } else {
+      // Document does not exist; create it with the messages array
+      await setDoc(userDocRef, {
+        messages: [input],
+        botMessages: [botMessage]
+      });
+    }
+  } catch (error) {
+    console.error('Error logging message to Firestore:', error);
+    throw new Error('Failed to log message to Firestore.');
+  }
+};
+
+
 export const getChatResponse = async (userDocId, input, customMessage = '', setShowModal) => {
   try {
     const hasExceededLimit = await checkApiCallCount(userDocId);
@@ -39,6 +66,7 @@ export const getChatResponse = async (userDocId, input, customMessage = '', setS
       setShowModal(true); // Show the modal popup
       throw new Error('API call limit exceeded.');
     }
+
 
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
@@ -58,6 +86,7 @@ export const getChatResponse = async (userDocId, input, customMessage = '', setS
     );
 
     await incrementApiCallCount(userDocId);
+    await logMessageToFirestore(userDocId, input, (response.data.choices[0].message.content) )
 
     return response.data.choices[0].message.content.trim();
   } catch (error) {
@@ -128,7 +157,7 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
       {
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. Here is the student's financial situation, Student Aid Index (SAI)/EFC: ${userDoc.SAI}. Here is the state they are from: ${userDoc.stateAbbr}. ${customMessage}` },
+          { role: 'system', content: `You are a college advisor. Provide concise and accurate information. Here are the colleges the user is interested in: ${mySchools}. Here is the student's GPA: ${userDoc.GPA} and test score: ${userDoc['Test Score']}. Here is the student's financial situation, Student Aid Index (SAI)/EFC: ${userDoc.SAI}. Here is the state they are from: ${userDoc.stateAbbr}. Give specifics to the question: ${customMessage}` },
           { role: 'user', content: 'Based on my details ' + input }
         ],
         max_tokens: 300,
@@ -141,6 +170,8 @@ export const getShortChatResponse = async (userDocId, input, userDoc, myColleges
     );
 
     await incrementApiCallCount(userDocId);
+    await logMessageToFirestore(userDocId, input, (response.data.choices[0].message.content) )
+
 
     // Get the raw response text
     const rawResponse = response.data.choices[0].message.content.trim();
@@ -184,6 +215,8 @@ export const getShorterChatResponse = async (userDocId, input, setShowModal) => 
     );
 
     await incrementApiCallCount(userDocId);
+    await logMessageToFirestore(userDocId, input, (response.data.choices[0].message.content) )
+
 
     // Get the raw response text
     const rawResponse = response.data.choices[0].message.content.trim();

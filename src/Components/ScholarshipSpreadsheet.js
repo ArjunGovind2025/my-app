@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "./ui/table";
 import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import stringSimilarity from 'string-similarity';
-import './ScholarshipTable.css';
+import './ScholarshipSpreadsheet.css';
 import '../global.css';
 
 const normalizeHeader = (header) => {
@@ -93,7 +93,7 @@ const ScholarshipSpreadsheet = () => {
 
   const handleRemoveScholarship = async (schoolId, scholarshipName) => {
     if (!user) return;
-
+    
     const userDocRef = doc(db, 'userScholarships', user.uid);
 
     try {
@@ -101,12 +101,14 @@ const ScholarshipSpreadsheet = () => {
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
         const updatedScholarships = userData.scholarships || {};
-
+        console.log('userScholarships', updatedScholarships);
         if (updatedScholarships[schoolId]) {
+          console.log('here inside')
           updatedScholarships[schoolId] = updatedScholarships[schoolId].filter(
             (scholarship) => scholarship.scholarshipname !== scholarshipName
+            
           );
-
+          
           if (updatedScholarships[schoolId].length === 0) {
             delete updatedScholarships[schoolId];
           }
@@ -217,9 +219,7 @@ const ScholarshipSpreadsheet = () => {
                   {row.getVisibleCells().map(cell => (
                     <TableCell
                       key={cell.id}
-                      style={{
-                        wordBreak: 'break-word'
-                      }}
+                      
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>

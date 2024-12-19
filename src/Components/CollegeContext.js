@@ -11,6 +11,8 @@ export const useCombined = () => useContext(CombinedContext);
 
 export const CombinedProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [uid, setUID] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [myColleges, setMyColleges] = useState({});
   const [visibleColleges, setVisibleColleges] = useState({});
   const [userDoc, setUserDoc] = useState({});
@@ -23,11 +25,18 @@ export const CombinedProvider = ({ children }) => {
         console.log('User signed in:', currentUser.uid);
         const userDocRef = doc(db, 'userData', currentUser.uid);
         const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
+        if (!userDocSnap.exists()) {
+          // Create the user document with default fields, including "access"
+          await setDoc(userDocRef, {
+            myColleges: {},
+            visibleColleges: [],
+            access: "Free", // Set the default access level
+          });
+        }if (userDocSnap.exists()) {
           setUserDoc(userDocSnap.data());
           setMyColleges(userDocSnap.data().myColleges || {});
           setVisibleColleges(userDocSnap.data().visibleColleges || {});
-
+          setUID(currentUser.uid)
         }
       } else {
         console.log('No user signed in.');
@@ -45,6 +54,7 @@ export const CombinedProvider = ({ children }) => {
         setMyColleges(userData.myColleges || {});
         setVisibleColleges(userData.visibleColleges || {});
       }
+      setLoading(false); 
     }
   };
 
@@ -112,7 +122,7 @@ export const CombinedProvider = ({ children }) => {
             [collegeData['IPEDS ID']]: collegeData
           },
           visibleColleges: newVisibleColleges,
-          access: "Free" 
+          //access: "Free" 
         });
       
         setMyColleges({
@@ -202,7 +212,9 @@ export const CombinedProvider = ({ children }) => {
   
         if (meritScore >= meritCutoffScore) {
           console.log("YOU ARE HERE 4");
-          const avgMeritAidAward = parseFloat(collegeData['Avg merit award for Freshman w/out need'].replace(/[^0-9.]/g, ''));
+          const avgMeritAidAward = collegeData['Avg merit award for Freshman w/out need']
+          ? parseFloat(collegeData['Avg merit award for Freshman w/out need'].toString().replace(/[^0-9.]/g, ''))
+          : 0; // Default to 0 if the value is null or undefined
           const myPrice = parseFloat(collegeData['myPrice'].replace(/[^0-9.]/g, ''));
   
           console.log(`Average Merit Aid Award: ${avgMeritAidAward}`);
@@ -232,7 +244,7 @@ export const CombinedProvider = ({ children }) => {
   };
   
 
-  const addCollegeByIpedsId = async (ipedsId) => {
+  const addCollegeByIpedsId = async (ipedsId, isRecommended = false) => {
     if (!user) {
       console.log('User is not signed in.');
       return;
@@ -265,7 +277,7 @@ export const CombinedProvider = ({ children }) => {
             "Avg merit award for Freshman w/out need": collegeData['Avg merit award for Freshman w/out need'],
             "State Abbr": collegeData['State Abbr'],
             "Merit Aid Cutoff Score": collegeData['Merit Aid Cutoff Score'],
-         
+            "recommended": isRecommended, // Mark as recommended
           };
 
           if (userDocSnap.exists()) {
@@ -284,16 +296,25 @@ export const CombinedProvider = ({ children }) => {
               const meritCutoffScore = parseFloat(collegeToAdd['Merit Aid Cutoff Score']);
 
               if (meritScore >= meritCutoffScore) {
-                const avgMeritAidAward = parseFloat(collegeToAdd['Avg merit award for Freshman w/out need'].replace(/[^0-9.]/g, ''));
-                const myPrice = parseFloat(collegeToAdd['myPrice'].replace(/[^0-9.]/g, ''));
+
+
+                const avgMeritAidAward = parseFloat(
+                  (collegeData['Avg merit award for Freshman w/out need'] || '0').replace(/[^0-9.]/g, '')
+                ) || 7500; //DEFAULT MERIT AID AMOUNT
+                
+                const myPrice = parseFloat(
+                  (collegeToAdd['myPrice'] || '0').replace(/[^0-9.]/g, '')
+                ) || 0;
+                
                 collegeToAdd['myPrice'] = `$${(myPrice - avgMeritAidAward).toLocaleString()}`;
+                
               }
             }
 
             await updateDoc(userDocRef, {
               [`myColleges.${collegeData['IPEDS ID']}`]: collegeToAdd,
               visibleColleges: newVisibleColleges,
-              access: "Free"
+              //access: "Free"
             });
           
             // Update the local state with the new college
@@ -311,7 +332,7 @@ export const CombinedProvider = ({ children }) => {
                 [collegeData['IPEDS ID']]: collegeToAdd
               },
               visibleColleges: newVisibleColleges,
-              access: "Free" 
+              //access: "Free" 
             });
           
          
@@ -325,7 +346,9 @@ export const CombinedProvider = ({ children }) => {
           // Check if SAI field is present and is a number less than myPrice
           const userData = userDocSnap.data();
           if (userData && typeof userData.SAI === 'number') {
-            const myPrice = parseFloat(collegeData['myPrice'].replace(/[^0-9.]/g, ''));
+            const myPrice = parseFloat(
+              ((collegeData['myPrice'] || '0').toString()).replace(/[^0-9.]/g, '')
+            );
             if (!isNaN(myPrice) && userData.SAI < myPrice) {
               await updateCollegePricesWithNeedAid(userData.SAI, user);
             }
@@ -343,7 +366,7 @@ export const CombinedProvider = ({ children }) => {
   };
 
   return (
-    <CombinedContext.Provider value={{ user, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId, handleLogout, visibleColleges }}>
+    <CombinedContext.Provider value={{ user, uid, userDoc, myColleges, fetchUserDoc, addCollegeToUser, handleLogin, addCollegeByIpedsId, handleLogout, visibleColleges }}>
       {children}
     </CombinedContext.Provider>
   );

@@ -4,11 +4,12 @@
 
 :root {
     --color-chrome: #DABFFF;
+    --color-accent: #ffc71f;
     --color-text: #111827;
     --color-safari: #1E90FF;
     --color-firefox: #FF7139;
     --color-edge: #0078D7;
-    --color-other: #888888;
+    --color-other: #DABFFF;
   
     --chart-1: 217, 83, 79;
     --chart-2: 91, 192, 222;

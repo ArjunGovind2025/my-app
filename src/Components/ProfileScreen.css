@@ -1,0 +1,9 @@
+
+  .gradient-background {
+    background: linear-gradient(90deg, #b713db, #fb044c); /* Gradient */
+    width: 100%; /* Ensure full width */
+    height: 100%; /* Ensure full height */
+    padding: 20px; /* Optional: Adjust spacing */
+    box-sizing: border-box; /* Include padding in height/width */
+  }
+  

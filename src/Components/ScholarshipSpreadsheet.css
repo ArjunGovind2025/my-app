@@ -1,0 +1,51 @@
+@media (max-width: 768px) {
+    td, th {
+        white-space: normal; /* Allow text to wrap */
+        word-break: keep-all; /* Prevent breaking within words */
+        overflow-wrap: break-word; /* Break lines only at word boundaries */
+    }
+
+    td.p-4.align-middle {
+        white-space: normal; /* Allow line wrapping */
+        word-break: keep-all; /* Prevent mid-word breaking */
+        overflow-wrap: break-word; /* Break lines at word boundaries */
+    }
+
+    
+    h1, h2, h3, h4, h5, h6, p, span, th, td {
+        font-size: 14px; /* Adjust to your needs */
+    }
+
+    .my-colleges-container {
+        padding: 10px;
+        margin: 5px auto;
+    }
+  
+    .my-colleges-container h1 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+  
+    .colleges-table {
+        font-size: 12px;
+        overflow-x: auto; /* Enable horizontal scrolling */
+    }
+  
+    .colleges-table th, .colleges-table td {
+        padding: 5px;
+    }
+  
+    .table-controls {
+        margin-bottom: 5px;
+    }
+  
+    .filter-input {
+        font-size: 12px;
+        padding: 4px;
+        width: 100%;
+    }
+  
+    .small-font {
+        font-size: 11px; /* Further reduce font size for very small screens */
+    }
+}

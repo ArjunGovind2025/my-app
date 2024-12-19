@@ -23,10 +23,10 @@ const UpgradeTooltipNoBlur = ({ children, uid, ipedsId, onUnlock }) => {
         const userData = userDoc.data();
         console.log('User data fetched:', userData);
 
-        const hasStandardAccess = userData.access === 'Standard';
-        const hasPremiumAccess = userData.access === 'Premium';
+        const hasStandardAccess = userData.access.trim() === 'Standard';
+        const hasPremiumAccess = userData.access.trim() === 'Premium';
         const visibleSchoolsCount = userData.visibleColleges?.length || 0;
-
+        
         if (hasStandardAccess && visibleSchoolsCount < 15) {
           setCanUnlock(true);
           console.log('User has Standard access and can unlock up to 15 schools.');
@@ -34,6 +34,9 @@ const UpgradeTooltipNoBlur = ({ children, uid, ipedsId, onUnlock }) => {
           setCanUnlock(true);
           console.log('User has Premium access and can unlock up to 30 schools.');
         } else {
+          console.log('standard:' + hasStandardAccess);
+          console.log('api:' + visibleSchoolsCount);
+
           setCanUnlock(false);
           console.log('User cannot unlock: either access level is insufficient or limit reached.');
         }

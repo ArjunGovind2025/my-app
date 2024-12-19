@@ -178,6 +178,7 @@ export const fetchMeritAidData = async (userId, userScore, ipedsIds) => {
                   console.log("I ENDED UP HERE 2");
                   myPrice = myPriceCurr - avgMeritAwardValue;
                 }
+                myPrice = Math.max(0, myPrice);
 
                 console.log(`myPriceCurr: ${myPriceCurr}, avgMeritAwardValue: ${avgMeritAwardValue}, Calculated myPrice: ${myPrice}`);
 

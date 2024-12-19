@@ -3,26 +3,35 @@
 @tailwind utilities;
 
 
-.html, .body {
-  overflow: hidden;
+html, body {
+}
+
+body.modal-open .modal-overlay {
+  display: flex !important; /* Ensure the modal stays visible */
 }
 
 
 .row {
-    padding: 10px;
-    display: flex;
-    justify-content: flex-end; 
-  }  
+  padding: 10px;
+  display: flex;
+  justify-content: center; /* Center the content */
+  max-width: 1200px; /* Restrict maximum width */
+  margin: 0 auto; /* Center the entire .row within its container */
+  box-sizing: border-box; /* Include padding in width calculations */
+}
+
   
   .column-right {
     flex: 70%;;
+
 
   }
   
   .column-left {
     flex: 30%;
     background-color: #fcfeff;
-    padding-left: 30px;
+    padding-left: 0px;
+    
     
   }
 
@@ -154,6 +163,9 @@
     color: var(--color-text);
     padding-top: 20px;
     padding-bottom: 20px;
+    padding-left:20px;
+    padding-right:20px;
+
     margin-inline-start: auto;
 }
 
@@ -313,7 +325,10 @@
     background: #fff;
 
 }
-
+.step{
+  max-width: 70%; /* Ensure it takes full width */
+  font-size: 5px;
+}
 
   .step-tracker {
     max-width: 70%; /* Ensure it takes full width */
@@ -346,7 +361,6 @@
     font-size: 28px;
     padding-left: 10px;
     margin-bottom: 20px;
-
     flex: center;
     
 }
@@ -446,6 +460,8 @@
   html, body {
     overflow: visible;
   }
+  
+
 
   .row {
     display: flex;
@@ -453,55 +469,70 @@
     justify-content: flex-start; /* Adjust to start to ensure columns stack properly */
     width: 100%;
     overflow-x: hidden; /* Prevent horizontal scrolling */
-    padding: 15px;
   }
 
+  .row {
+    display: flex;
+    flex-direction: column-reverse; /* Stack child containers vertically */
+    justify-content: flex-start; /* Ensure content aligns at the top initially */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height of the screen */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  /* Top container */
   .column-right {
-    max-height: 500px;
-    margin-bottom: 20px; /* Add margin to push .column-left down */
-    width: 100%; /* Ensure full width */
-    box-sizing: border-box;
+    flex-grow: 1; /* Fill the remaining space below .column-left */
+    overflow-y: auto; /* Enable scrolling if content overflows */
+    align-self: stretch; /* Ensure it stretches to full width */
+    padding-top: 15px;
+      box-sizing: border-box;
+    box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
   }
-
+  
+  /* Bottom container */
   .column-left {
-    flex: 1 0 100%;
-    width: 100%;
-    margin: 0; /* Reset margin */
+    margin-top: 10px;
+    flex-shrink: 0;
+    height: auto;
     box-sizing: border-box;
-  }
+    box-shadow: 0 0 6px 2px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
 
+  
   .css-16ld5u0 {
     width: 100%;
     padding: 0px;
     box-sizing: border-box;
+    min-height: 0px;
   }
 
   .css-1k6m9o {
-    padding-top: 20px;
+    padding-top: 0px;
     box-sizing: border-box;
   }
 
   .css-1799jpi {
     width: 100%;
     max-width: none;
-    padding: 10px;
     box-sizing: border-box;
+    padding-right: 0;
   }
 
-  .css-6n9yju {
-    margin-top: 10px;
-    justify-self: center;
-    box-sizing: border-box;
-  }
+ 
 
   .css-1pgcnou {
     width: 100%;
-    padding: 10px;
+    padding-top: 0px;
     box-sizing: border-box;
+    min-height: 0px;
+    padding-right: 0px;
   }
 
   .css-gllksg {
-    height: 40px;
+    height: 30px;
     min-width: 100%;
     font-size: var(--chakra-fontSizes-xs);
     padding: 10px;
@@ -532,23 +563,39 @@
     min-height: 300px;
     max-height: 300px;
     height: auto;
-    padding: 0px 0px 0px;
+    padding-left: 0px;
+    padding-right: 0px;
     overflow-y: auto; /* Enable vertical scrolling */
     box-sizing: border-box;
+    padding-inline-start: 0px;
+    box-shadow: 0 0 40px 4px rgba(112, 144, 176, .2);
+    font-weight: 400;
 
   }
 
   .step-tracker {
     max-width: 100%;
-    box-sizing: border-box;
   }
 
+  .step {
+    max-width: 50%; /* Keep the step responsive */
+  }
 
+  .prompts-container {
+    justify-content: center;
+    align-items: center;
+    width: 100%; /* Ensure the container takes full width */
+    padding-top: 5px;
+    padding-bottom:0px;
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+  }
 
   .css-1hngipw {
     font-size: 24px;
     text-align: center;
     box-sizing: border-box;
+    justify-content: center;
+    padding-left: 15px;
   }
 
   .font-medium {
@@ -557,7 +604,7 @@
   }
 
   .text-container p {
-    font-size: 12px; /* Adjust the font size for mobile screens */
+    font-size: 2px !important; /* Adjust the font size for mobile screens */
     box-sizing: border-box;
   }
 
@@ -567,56 +614,65 @@
     box-sizing: border-box;
   }
 
+  .college-search {
+    width: 100%;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    padding-top: 5px;
+    padding-left: 10px;
+    align-items: flex-start; 
+  }
 
 
   .text-container {
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
+    padding: 0px;
+    line-height: 1.6;
+    padding-inline-end: 0px;
+    font-weight: 100px;
+    padding-inline-start: 0px;
+
   }
 
 
   .css-6n9yju {
-    flex-direction: column;
+    flex-direction: row;
     align-items: stretch;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 0px;
+    margin-top: 5px;
     box-sizing: border-box;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .chakra-input.css-1pgcnou {
-    padding: 12px 16px;
-    font-size: var(--chakra-fontSizes-xs);
+    padding: 10px 16px;
+    font-size: 16px;
     border-radius: 10px;
     box-sizing: border-box;
+
+  
+  }
+
+  .chakra-button.css-gllksg {
+    width: 10px; /* Set a fixed width */
   }
 
   .chakra-button.css-gllksg,
   .chakra-button.css-reset {
-    height: 35px;
-    font-size: var(--chakra-fontSizes-xs);
+    height: 40px;
+    min-width: 10%;
+    font-size: 12px;
     padding: 0 12px;
     margin-bottom: 10px;
     border-radius: 10px;
-    min-width: 100%;
+  
     box-sizing: border-box;
   }
 
-  .school-container2 {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #fcfeff;
-    padding: 10px;
-    border-radius: 5px;
-    white-space: nowrap;
-    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-width: 100%; /* Ensure it doesn't exceed parent width */
-    width: 100%; /* Take up entire width of parent container */
-    min-height: 70px; /* Force min-height to be applied */
-  }
 
   .colum-left{
     padding: 0px;
@@ -626,19 +682,22 @@
 
 
   .school-container {
-  max-height: 100%; /* Adjust the height as needed */
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background: #fcfeff;
-  padding: 20px; /* Add some padding for better spacing */
-  border-radius: 5px; /* Optional: add rounded corners */
-  white-space: nowrap; /* Prevent wrapping */
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Proper box shadow syntax */
-  overflow-y: auto;
-  overflow-x: hidden;
-  width: 100%; /* Ensure it takes full width */
-}
+    max-height: 300px; /* Limit the container's maximum height */
+    display: flex;
+    flex-direction: column; /* Stack items vertically if needed */
+    justify-content: flex-start; /* Align items at the top */
+    align-items: flex-start; /* Align items to the left */
+    background: #fcfeff;
+    padding: 10px; /* Add some padding for better spacing */
+    border-radius: 5px; /* Optional: Add rounded corners */
+    white-space: normal; /* Allow wrapping inside if needed */
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    width: 100%; /* Ensure it takes full width */
+    box-sizing: border-box; /* Ensure padding is included in width/height */
+  }
+  
 
 
 }

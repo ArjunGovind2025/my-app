@@ -7,6 +7,11 @@ import { Sheet, SheetTrigger, SheetContent } from '/Users/arjungovind/Desktop/ai
 import { Package2, User, ChevronDown } from 'lucide-react'; 
 import logoImage from '/Users/arjungovind/Desktop/ai-D/my-app/src/PocketlyLogo.jpg'; 
 import { useCombined } from './Components/CollegeContext';
+import { doc, onSnapshot } from "firebase/firestore"; // Firestore functions
+import { db } from './firebaseConfig';
+import { Badge } from "./Components/ui/badge"; // Adjust the path based on your project setup
+
+
 
 const HeaderContainer = styled.header`
   display: flex;
@@ -112,6 +117,63 @@ const Header = () => {
   const { myColleges } = useCombined();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const [collegeCount, setCollegeCount] = useState(0);
+  const [scholarshipCount, setScholarshipCount] = useState(0);
+  const { uid , loading } = useCombined(); // Destructure myColleges from the context
+
+  
+
+  useEffect(() => {
+ 
+    if (loading) {
+      console.log("Waiting for auth state...");
+      return; // Don't run the effect until loading is false
+    }
+
+    if (!uid) {
+      console.warn("No user is signed in.");
+      return; // Exit early if uid is null
+    }
+    // Listen for updates in 'userData' collection (for colleges)
+    const unsubscribeColleges = onSnapshot(doc(db, "userData", uid), (docSnapshot) => {
+      if (docSnapshot.exists()) {
+        const colleges = docSnapshot.data()?.myColleges || {};
+        setCollegeCount(Object.keys(colleges).length);
+      }
+    });
+
+    // Listen for updates in 'userScholarships' collection (for scholarships)
+    const unsubscribeScholarships = onSnapshot(
+      doc(db, "userScholarships", uid),
+      (docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const schoolsMap = docSnapshot.data()?.scholarships || {};
+          console.log("Scholarships Map:", schoolsMap);
+    
+          // Count the total scholarships in all schools
+          const totalScholarships = Object.values(schoolsMap).reduce((count, schoolArray) => {
+            return count + (Array.isArray(schoolArray) ? schoolArray.length : 0);
+          }, 0);
+    
+          console.log("Total Scholarships:", totalScholarships);
+          setScholarshipCount(totalScholarships);
+        } else {
+          console.warn("No scholarships document found.");
+          setScholarshipCount(0);
+        }
+      },
+      (error) => {
+        console.error("Error fetching scholarships snapshot:", error);
+      }
+    );
+
+    // Cleanup listeners on component unmount
+    return () => {
+      
+      unsubscribeColleges();
+      unsubscribeScholarships();
+    };
+  }, [uid, loading]);
 
   const handleProfileClick = () => {
     navigate('/ProfileScreen');
@@ -162,8 +224,24 @@ const Header = () => {
             )}
           </DropdownContent>
         </DropdownContainer>
-        <NavLink to="/my-colleges-spreadsheet">College Spreadsheet</NavLink>
-        <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink>
+        <NavLink to="/my-colleges-spreadsheet">
+        College Spreadsheet
+          {collegeCount > 0 && (
+            <Badge className="ml-2 bg-[--color-accent] text-[#2C2A4A] text-[0.75rem] w-5 h-5  justify-center rounded-full shadow-md" >
+              {collegeCount}
+            </Badge>
+          )}
+        </NavLink>
+        <NavLink to="/my-scholarships-spreadsheet">
+          Scholarship Spreadsheet
+          {scholarshipCount > 0 && (
+            <Badge
+            className="ml-2 bg-[--color-accent] text-[#2C2A4A] text-[0.75rem] w-5 h-5  justify-center rounded-full shadow-md "
+            >
+            {scholarshipCount}
+          </Badge>
+          )}
+        </NavLink>
         <NavLink to="/upgrade">Upgrade</NavLink>
         <User className="h-5 w-5 cursor-pointer" onClick={handleProfileClick} />
       </Nav>
@@ -178,7 +256,7 @@ const Header = () => {
           <SheetContent side="left">
             <div className="grid gap-4 p-4">
               <Logo to="/" className="text-lg font-semibold">
-                <Package2 className="h-6 w-6" />
+                <img src={logoImage} alt="Pocketly Logo" className="h-6 w-6" />
                 Pocketly
               </Logo>
               <nav className="grid gap-2">
@@ -202,9 +280,14 @@ const Header = () => {
                     )}
                   </DropdownContent>
                 </DropdownContainer>
-                <NavLink to="/my-colleges-spreadsheet">College Spreadsheet</NavLink>
+                <NavLink to="/my-colleges-spreadsheet">
+                College Spreadsheet
+              
+                </NavLink>
+                
                 <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink>
                 <NavLink to="/upgrade">Upgrade</NavLink>
+                <User className="h-5 w-5 cursor-pointer" onClick={handleProfileClick} />
               </nav>
             </div>
           </SheetContent>

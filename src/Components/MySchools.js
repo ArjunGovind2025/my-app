@@ -7,6 +7,9 @@ import './MySchools.css';
 import ThreeDotsMenu from './ThreeDotsMenu';
 import { FaLock } from 'react-icons/fa'; 
 import { UpgradeTooltipNoBlur } from './UpgradeTooltip';
+import { Badge } from "./ui/badge"; // Adjust the path based on your project setup
+
+
 
 const MySchools = () => {
   const [mySchools, setMySchools] = useState([]);
@@ -137,7 +140,19 @@ const MySchools = () => {
           .sort((b, a) => visibleSchools.indexOf(a['IPEDS ID']) - visibleSchools.indexOf(b['IPEDS ID'])) // Sort to keep visible schools on top
           .map((school, index) => (
             <li key={index} className="school-item">
-              <div className="school-container2">
+              <div
+                className="school-container2 relative bg-opacity-50 hover:bg-gray-100 transition-colors"
+                // Add relative positioning
+               
+              >
+                {/* Pocketly Recommended Badge */}
+                {school.recommended && (
+                  <div className="absolute top-0 right-0 mr-1">
+                 {/* <span class="custom-star">
+  ★
+</span>*/}
+                </div>
+                )}
                 <div className="column-left2">
                   <Link to={`/school/${school['IPEDS ID']}`} className="school-link">
                     <strong>{school.Name}</strong>
@@ -145,6 +160,8 @@ const MySchools = () => {
                 </div>
 
                 <div className="column-right2">
+                  
+                  
                   {!visibleSchools.includes(school['IPEDS ID']) && (
                     <UpgradeTooltipNoBlur
                       uid={auth.currentUser.uid}
@@ -156,7 +173,6 @@ const MySchools = () => {
                       </div>
                     </UpgradeTooltipNoBlur>
                   )}
-
                   <span
                     className={`chakra-badge css-y5xvhi`}
                     style={{

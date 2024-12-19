@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 import { useNavigate } from "react-router-dom";
 import Modal from "./Modal";
+import './ProfileScreen.css'
 
 const ProfileScreen = () => {
   const { user, userDoc, handleLogout } = useCombined();

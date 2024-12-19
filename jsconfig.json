@@ -7,6 +7,6 @@
         "@/lib/utils/*": ["lib/utils/*"]
       }
     },
-    "include": ["src"]
+    "include": ["src", "functions/stripeWebhook.js"]
   }
   

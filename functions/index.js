@@ -4,16 +4,19 @@ const express = require("express");
 const admin = require("firebase-admin");
 const config = require("./config2.json");
 const cors = require("cors")({origin: true});
+const stripeWebhookHandler = require("./stripeWebhook"); // Import your separate webhook logic
 
 // Accessing the keys
 const stripe = require("stripe")(config.STRIPE_SECRET);
 
-admin.initializeApp(); // No need to specify credentials for production
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 const db = admin.firestore();
 const app = express();
 
-// Middleware
+// Middleware for main API
 app.use(express.json());
 app.use(cors);
 
@@ -49,8 +52,9 @@ app.post("/create-stripe-customer", async (req, res) => {
       customer: stripeCustomerId,
       line_items: [{price: priceId, quantity: 1}],
       mode: "subscription",
-      success_url: `https://pocketly.ai/success?accessLevel=
-      ${accessLevel}&tier=${priceId}`,
+      metadata: {uid},
+      allow_promotion_codes: true,
+      success_url: `https://pocketly.ai/success?accessLevel=${accessLevel}&tier=${priceId}`,
       cancel_url: "https://pocketly.ai/upgrade",
     });
 
@@ -70,8 +74,7 @@ app.post("/update-user-subscription", async (req, res) => {
 
   try {
     console.log("Updating Firestore document for UID:", uid);
-    await db.collection("userData").doc(uid).set({access: accessLevel},
-        {merge: true});
+    await db.collection("userData").doc(uid).set({access: accessLevel}, {merge: true});
     console.log("Successfully updated access level for UID:", uid);
     res.json({success: true});
   } catch (error) {
@@ -113,69 +116,19 @@ app.post("/create-billing-session", async (req, res) => {
   }
 });
 
-// Export the Express app as a Firebase Function
+// Export the main API
 exports.api = onRequest(app);
 
-const endpointSecret = require("./config2.json").STRIPE_WEBHOOK;
+// Set up a separate express instance for the Stripe webhook
+// Stripe requires the raw body for signature verification
+const webhookApp = express();
 
-exports.stripeWebhook = onRequest((req, res) => {
-  const sig = req.headers["stripe-signature"];
-  let event;
+webhookApp.use(
+    express.raw({
+      type: "application/json",
+    }),
+);
 
-  try {
-    console.log("Received Stripe webhook event");
-    event = stripe.webhooks.constructEvent(req.rawBody, sig, endpointSecret);
-    console.log("Webhook event verified successfully:", event.type);
-  } catch (err) {
-    console.error("⚠️  Webhook signature verification failed.", err.message);
-    return res.sendStatus(400);
-  }
+webhookApp.post("/", stripeWebhookHandler);
 
-  // Handle the event
-  switch (event.type) {
-    case "customer.subscription.deleted": {
-      const subscription = event.data.object;
-      console.log("Handling 'customer.subscription.deleted' event:",
-          subscription);
-
-      const uid = subscription.metadata ? subscription.metadata.uid : undefined;
-      console.log("Extracted UID from subscription metadata:", uid);
-
-      if (!uid) {
-        console.error("⚠️ UID is undefined. Cannot update Firestore document.");
-        return res.status(400).send({error: "UID is undefined"});
-      }
-
-      admin.firestore().collection("userData").doc(uid).update({
-        access: "Free",
-      })
-          .then(() => {
-            console.log(`Subscription canceled and access level updated to Free for UID: ${uid}`);
-          })
-          .catch((error) => {
-            console.error(`Error updating Firestore for UID ${uid}:`, error.message);
-          });
-
-      break;
-    }
-    case "customer.subscription.updated": {
-      const updatedSubscription = event.data.object;
-      console.log("Handling 'customer.subscription.updated' event:",
-          updatedSubscription);
-
-      if (updatedSubscription.status === "active") {
-        console.log("Subscription is active for customer:",
-            updatedSubscription.customer);
-      } else if (updatedSubscription.status === "canceled") {
-        console.log("Subscription is canceled for customer:",
-            updatedSubscription.customer);
-      }
-      break;
-    }
-    default: {
-      console.log(`Unhandled event type ${event.type}`);
-      break;
-    }
-  }
-  res.json({received: true});
-});
+exports.stripeWebhook = onRequest(webhookApp);

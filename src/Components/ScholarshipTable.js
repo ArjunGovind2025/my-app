@@ -5,6 +5,7 @@ import { useReactTable, flexRender, getCoreRowModel, getSortedRowModel, getFilte
 import { db, auth } from '../firebaseConfig'; 
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import '../global.css';
+import './ScholarshipTable.css';
 
 const parseCSV = (data) => {
   const lines = data.split('\n');

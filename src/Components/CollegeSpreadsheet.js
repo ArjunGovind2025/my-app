@@ -17,6 +17,7 @@ import * as XLSX from "xlsx";
 import Modal from "./Modal";
 import "../global.css";
 import { UpgradeTooltip } from "./UpgradeTooltip";
+import "./CollegeSpreadsheet.css"
 
 const CollegeSpreadsheet = () => {
   const { user, myColleges } = useCombined();
@@ -89,7 +90,7 @@ const CollegeSpreadsheet = () => {
       document.removeEventListener('selectstart', handleSelectStart);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, []); 
 
   const checkUserAccess = async (userId) => {
     try {
@@ -166,6 +167,18 @@ const CollegeSpreadsheet = () => {
           console.log('Processing row for IPEDS ID:', ipedsId);
           console.log('Is Visible:', isVisible);
           console.log('Row Data:', row.original);
+
+          return (
+            <span
+              className={`${
+                isVisible ? "text-green-600 font-bold" : "blurred-text"
+              }`}
+            >
+              {row.original.myPrice}
+            </span>
+          );
+
+    
   
           
         },
@@ -252,20 +265,29 @@ const CollegeSpreadsheet = () => {
               {table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className={row.index % 2 === 0 ? "bg-accent" : ""}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} style={{ wordBreak: "break-word" }}>
-                    {["myPrice", "Avg merit award for Freshman w/out need", "meritQualified","% Fresh w/out need Receiving Merit Aid"].includes(cell.column.id)
-                      ? (
-                        visibleColleges.includes(Number(row.original.ipedsId)) 
-                        ? <span>{cell.getValue()}</span>
-                        : (
-                          <UpgradeTooltip>
-                            <span>{cell.getValue()}</span>
-                          </UpgradeTooltip>
-                        )
+                    <TableCell key={cell.id}>
+                    {["myPrice", "Avg merit award for Freshman w/out need", "meritQualified", "% Fresh w/out need Receiving Merit Aid"].includes(cell.column.id) ? (
+                      visibleColleges.includes(Number(row.original.ipedsId)) ? (
+                        <span
+                          style={{
+                            backgroundColor: cell.column.id === "myPrice" ? "#ebfcf5" : "transparent", // Highlight "myPrice" column
+                            color: cell.column.id === "myPrice" ? "#1b202b" : "inherit", // Add green text for "myPrice"
+                            padding: "0.5rem",
+                            borderRadius: "0.5rem",
+                          }}
+                        >
+                          {cell.getValue()}
+                        </span>
+                      ) : (
+                        <UpgradeTooltip>
+                          <span style={{ color: "#9ca3af" }}>{cell.getValue()}</span>
+                        </UpgradeTooltip>
                       )
-                      : flexRender(cell.column.columnDef.cell, cell.getContext())
-                    }
+                    ) : (
+                      flexRender(cell.column.columnDef.cell, cell.getContext())
+                    )}
                   </TableCell>
+                  
 
                   ))}
                 </TableRow>

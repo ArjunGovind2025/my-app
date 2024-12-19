@@ -1,5 +1,6 @@
 /* Base button styles */
 
+
 /* Use the Tailwind-defined color variable */
 .standard-button, .premium-button {
     color: var(--color-text); /* Use the Chrome gradient */
@@ -9,4 +10,26 @@
 /* Hover effects */
 button:hover {
     opacity: 0.9;
+}
+
+.gradient-background {
+    background: linear-gradient(90deg, #b713db, #fb044c); /* Gradient */
+    width: 100%; /* Ensure full width */
+    height: 100%; /* Ensure full height */
+    padding: 20px; /* Optional: Adjust spacing */
+    box-sizing: border-box; /* Include padding in height/width */
+  }
+  
+
+@media (max-width: 912px) {
+.custom-class{
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 20px;
+}
+
+.mt-auto{
+    padding: 100px;
+}
+
 }

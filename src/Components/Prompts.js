@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button'; 
+import './Prompts.css';
+
 
 const promptsList = [
   { name: 'Top Merit Schools', prompt: 'What are the top merit schools?' },

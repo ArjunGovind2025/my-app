@@ -3,7 +3,7 @@
   justify-content: center;
   align-items: center;
   width: 100%; 
-  padding: 10px;
+  padding-top: 5px;
   box-sizing: border-box; 
 }
 
@@ -28,3 +28,14 @@
 }
 
 
+
+/* Media query for mobile screens */
+@media (max-width: 768px) {
+  .prompts-container .inline-flex {
+    font-size: 9px; /* Smaller font size on mobile */
+    padding: 4px 8px; /* Even more compact padding */
+    min-width: 60px; /* Further reduce width */
+    height: 30px; /* Smaller height */
+    border-radius: 35px; /* Keep rounded corners */
+  }
+}

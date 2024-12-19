@@ -5,15 +5,16 @@
 }
 
 .school-details-container {
-  display: flex; 
+  display: flex;
   padding: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  max-width: 100%; 
-  margin: 20px auto;
+  max-width: 1445px; /* Restrict the container's maximum width */
+  width: 100%; /* Make it responsive */
+  margin: 20px auto; /* Center it horizontally */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden; 
-
+  overflow: hidden;
+  box-sizing: border-box; /* Include padding in width calculations */
 }
 
 .school-details-content {
@@ -88,6 +89,7 @@ p {
   padding: 10px;
   background-color: #ffffff;
   box-shadow: rgba(112, 144, 176, 0.1) 14px 17px 40px 4px;
+  font-size: 15px;
 }
 
 .message {
@@ -136,6 +138,8 @@ p {
   color: white;
 }
 
+
+
 .submit-button:hover,
 .reset-button:hover {
   opacity: 0.9;
@@ -146,7 +150,7 @@ p {
   padding: 0.5em 1em;
   border-radius: 9999px;
   background-color: #f3f4f6;
-  color: #111827;
+  color: #111827; 
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -164,8 +168,21 @@ p {
 
 @media (max-width: 768px) {
   .school-details-container {
-    flex-direction: column; /* Stack the columns vertically on smaller screens */
+    display: flex; /* Ensure it behaves as a flex container */
+    flex-direction: column; /* Stack child elements vertically */
+    width: 100%; /* Take the full width of the parent container */
+    height: auto; /* Adjust height based on content */
+    max-width: 100%; /* Prevent any width constraints */
+    padding-left: 0; /* Remove left padding */
+    padding-right: 0; /* Remove right padding */
+    margin: 0; /* Remove any default margins */
+    box-sizing: border-box; /* Include padding and borders in size calculation */
   }
+  .school-details {
+    width: 100%; /* Slightly wider for mobile screens */
+    max-width: none; /* Remove max-width for smaller screens */
+  }
+  
 
   .school-details-content {
     order: -1; /* Move school-details-content to the top */
@@ -174,7 +191,16 @@ p {
     flex: none;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+
   }
+
+
+  .p-6.pt-0 {
+    padding: 0; /* Remove all padding on mobile */
+  }
+  
 
   .screen-container {
     order: 0; /* Ensure screen-container comes after school-details-content */
@@ -204,10 +230,11 @@ p {
 
   .custom-flex-wrap {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 10px; /* Adjust the gap as needed */
     overflow-x: auto; /* Enable horizontal scrolling */
     padding: 10px; /* Optional: add some padding */
+    justify-content: left;
   }
   
   .custom-flex-wrap::-webkit-scrollbar {
@@ -236,7 +263,7 @@ p {
     border-radius: 9999px;
     background-color: #f3f4f6;
     color: #111827;
-    font-size: 0.875rem;
+    font-size: 11px;
     font-weight: 500;
     white-space: nowrap; /* Prevent badges from wrapping to the next line */
   }
