@@ -97,7 +97,7 @@ useEffect(() => {
     'completeSAI': `Here is how much money you can expect to receive from your schools:\n`,
     'submitFAFSA': `Please submit your FAFSA and state-specific financial aid applications. Once done, review your financial aid offers and deduct the aid from your college list costs.`,
     'reviewAidOffers': `Review your financial aid offers and deduct the aid from your college list costs. Have you reviewed your offers yet? (Yes, No)`,
-    'Qualify for Merit Aid': `Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., 3.8).`,
+    'Qualify for Merit Aid': `Let's determine if you qualify for merit aid! Please start by entering your Unweighted GPA (e.g., 3.8).`,
     'applyMeritAid': `Great! Based on your academic achievements, let's explore other scholarships you might qualify for.`,
     'otherScholarships': `You have some other scholarships left to explore. Let's find more opportunities.`,
     'complete': `You've completed all the steps! Now you can ask me any questions you have.`,
@@ -609,7 +609,7 @@ const handleStepClick = (step) => {
               if (incomeMatch) {
                   const income = parseFloat(incomeMatch[1].replace(/,/g, ''));
                   user.tempSAIData = { income };
-                  botResponse = "Got it! Now, please provide your total assets (e.g., Assets: $60,000).";
+                  botResponse = "Got it! Now, please provide your total assets (e.g., $60,000). For FAFSA purposes, assets include savings, investments, and other valuable resources, but do not include retirement accounts or the value of your primary home.";
                   setCurrentStep('Assets'); // Move to Assets step
                   console.log("[DEBUG] Valid income received:", income);
                   console.log("[DEBUG] Transitioning to Assets step");
@@ -817,7 +817,7 @@ const handleStepClick = (step) => {
                   console.log("[DEBUG] GPA received in Qualify for Merit Aid step:", gpa);
                   console.log("[DEBUG] Transitioning to Enter Test Score step");
               } else {
-                  botResponse = "Let's determine if you qualify for merit aid! Please start by entering your GPA (e.g., 3.8).";
+                  botResponse = "Let's determine if you qualify for merit aid! Please start by entering your Unweighted GPA (e.g., 3.8).";
                   setCurrentStep('Enter GPA'); // Move to Enter GPA step
                   console.log("[DEBUG] Prompting for GPA in Qualify for Merit Aid step");
               }
@@ -836,7 +836,7 @@ const handleStepClick = (step) => {
                   console.log("[DEBUG] GPA received:", gpa);
                   console.log("[DEBUG] Transitioning to Enter Test Score step");
               } else {
-                  botResponse = "Please enter your GPA in the format '3.8'.";
+                  botResponse = "Please enter your Unweighted GPA in the format '3.8'.";
                   console.log("[DEBUG] Invalid GPA format received:", message);
               }
               break;

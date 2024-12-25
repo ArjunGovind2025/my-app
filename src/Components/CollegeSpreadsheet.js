@@ -155,7 +155,7 @@ const CollegeSpreadsheet = () => {
     () => [
 
       { accessorKey: "Name", header: "Name", enableSorting: true },
-      { accessorKey: "Total price for out-of-state students 2022-23", header: "Cost of Attendance", enableSorting: true },
+      { accessorKey: "Total_price_for_out_of_state_students_2022_23", header: "Cost of Attendance", enableSorting: true },
       {
         accessorKey: "myPrice",
         header: "My Estimated Net Cost",
@@ -177,15 +177,12 @@ const CollegeSpreadsheet = () => {
               {row.original.myPrice}
             </span>
           );
-
-    
-  
-          
         },
       },
       { accessorKey: "% Admitted-Total", header: "Acceptance Rate", cell: (info) => `${info.getValue()}%`, enableSorting: true },
-      { accessorKey: "Avg merit award for Freshman w/out need", header: "Avg Merit Aid Award", enableSorting: true },
-      { accessorKey: "% Fresh w/out need Receiving Merit Aid", header: "% Receiving Merit Aid", enableSorting: true },
+      { accessorKey: "Avg % of Need met for Freshman", header: "% Need Met", cell: (info) => `${info.getValue()}%`, enableSorting: true },
+      { accessorKey: "Avg_merit_award_for_Freshman_without_need", header: "Avg Merit Aid Award", enableSorting: true },
+      { accessorKey: "Percent_Freshman_without_need_receiving_merit_aid", header: "% Receiving Merit Aid", cell: (info) => `${info.getValue()}%`, enableSorting: true },
       { accessorKey: "SAT/ACT Required", header: "SAT/ACT Required", enableSorting: true },
       { accessorKey: "1st Early Decision Deadline", header: "ED Deadline", enableSorting: true },
       { accessorKey: "Early Decision Acceptance Rate", header: "ED Acceptance", enableSorting: true },
@@ -266,7 +263,7 @@ const CollegeSpreadsheet = () => {
                 <TableRow key={row.id} className={row.index % 2 === 0 ? "bg-accent" : ""}>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                    {["myPrice", "Avg merit award for Freshman w/out need", "meritQualified", "% Fresh w/out need Receiving Merit Aid"].includes(cell.column.id) ? (
+                    {["myPrice", "Avg_merit_award_for_Freshman_without_need", "meritQualified", "Percent_Freshman_without_need_receiving_merit_aid"].includes(cell.column.id) ? (
                       visibleColleges.includes(Number(row.original.ipedsId)) ? (
                         <span
                           style={{

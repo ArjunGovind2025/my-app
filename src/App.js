@@ -10,6 +10,7 @@ import ProfileScreen from "./Components/ProfileScreen";
 import Home2 from "./Components/Home2";
 import Login from "./Components/Login";
 import Terms from "./Components/Terms";
+import About from "./Components/About"
 import "./global.css";
 import { CombinedProvider } from "./Components/CollegeContext";
 import ProtectedRoute from "./Components/ProtectedRoute";
@@ -26,6 +27,7 @@ function App() {
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/about" element={<About />} />
 
           {/* Protected Home Route */}
           <Route
@@ -41,9 +43,7 @@ function App() {
           <Route
             path="/school/:ipedsId"
             element={
-              <ProtectedRoute>
                 <SchoolDetails />
-              </ProtectedRoute>
             }
           />
           <Route

@@ -48,7 +48,11 @@ const MySchools = () => {
         setMySchools(collegesArray);
         setLoading(false);
       } else {
-        setDoc(userDocRef, { myColleges: {}, visibleColleges: [] });
+        setDoc(userDocRef, { 
+          myColleges: {}, 
+          visibleColleges: [], 
+          access: "Free" // Add the access field here
+        });
         setMySchools([]);
         setLoading(false);
       }

@@ -34,12 +34,12 @@ const Checkout = () => {
 
   async function handleCheckout(priceId, accessLevel) {
     setIsLoading(true);
-
+  
     console.log("Price ID:", priceId);
-  console.log("Access Level:", accessLevel);
-  console.log("User UID:", user?.uid);
-  console.log("User Email:", user?.email);
-
+    console.log("Access Level:", accessLevel);
+    console.log("User UID:", user?.uid);
+    console.log("User Email:", user?.email);
+  
     try {
       const response = await fetch(
         'https://us-central1-ai-d-ce511.cloudfunctions.net/api/create-stripe-customer',
@@ -51,20 +51,27 @@ const Checkout = () => {
           body: JSON.stringify({ uid: user.uid, email: user.email, priceId, accessLevel }),
         }
       );
-
-      const { sessionId } = await response.json();
-
-      if (!sessionId) throw new Error("Session ID not returned");
-
-      // Use Stripe.js for redirection
-      const stripe = await getStripe();
-      await stripe.redirectToCheckout({ sessionId });
+  
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+  
+      const { url } = await response.json();
+  
+      if (!url) {
+        throw new Error("Stripe Checkout URL not returned");
+      }
+  
+      // Redirect to Stripe Checkout
+      console.log("Redirecting to Stripe Checkout:", url);
+      window.location.href = url;
     } catch (error) {
-      console.error('Error during checkout:', error);
+      console.error('Error during checkout:', error.message);
     } finally {
       setIsLoading(false);
     }
   }
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2 ">

@@ -54,9 +54,7 @@ const SchoolDetails = () => {
   
           console.log('School data fetched:', schoolDetails);
           
-          if (schoolDetails.Name) {
-            await fetchMeritData(false);
-          }
+        
         } 
          else {
           console.error('School data not found');
@@ -70,7 +68,9 @@ const SchoolDetails = () => {
   
     fetchSchoolDetails();
   }, [ipedsId]); // Add ipedsId as a dependency
+
   
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -92,7 +92,14 @@ const SchoolDetails = () => {
   
     fetchUserData();
   }, [user]);
-/*
+
+  useEffect(() => {
+    if (user && ipedsId) {
+      fetchMeritData(false);
+    }
+  }, [user, ipedsId]);
+
+
   useEffect(() => {
     const handleContextMenu = (e) => e.preventDefault();
     const handleSelectStart = (e) => e.preventDefault();
@@ -116,7 +123,7 @@ const SchoolDetails = () => {
       document.removeEventListener('selectstart', handleSelectStart);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); */
+  }, []); 
 
   const isCollegeVisible = Array.isArray(visibleColleges) && visibleColleges.includes(Number(ipedsId));
 
@@ -151,30 +158,51 @@ const SchoolDetails = () => {
   };
 
   const fetchMeritData = async (refresh = false) => {
+    console.log('🔄 Starting fetchMeritData with refresh:', refresh); // Log refresh state
     setLoading(true);
+  
     try {
+      console.log('📄 Attempting to fetch school document for IPEDS ID:', ipedsId); // Log IPEDS ID
       const schoolDocRef = doc(db, 'collegeData', ipedsId);
       const schoolDocSnap = await getDoc(schoolDocRef);
-
+  
       if (schoolDocSnap.exists()) {
+        console.log('✅ School document fetched successfully.');
         const schoolDetails = schoolDocSnap.data();
-
+        console.log('📋 School Details:', schoolDetails); // Log school details
+  
         if (schoolDetails?.meritDataTable && !refresh) {
+          console.log('🟢 Using cached meritDataTable from Firestore.');
           setScholarshipData(schoolDetails.meritDataTable);
         } else {
-          const response = await getChatResponseFree(user.uid, `Give me info on merit scholarships (non need) I can apply for at ${school.Name} in a CSV string but instead of commas to separate values use semicolons. DONT SAY "Sure, here is the requested information in CSV format!" Just give string to be parsed with headers. The headers should be scholarship name, aid amount, criteria, deadline, additional info, and link to scholarship.`, "", setShowModal);
+          console.log('🔄 Fetching merit data from ChatGPT API...');
+          const response = await getChatResponseFree(
+            user.uid,
+            `Give me info on merit scholarships (non need) I can apply for at ${school.Name} in a CSV string but instead of commas to separate values use semicolons. DONT SAY "Sure, here is the requested information in CSV format!" Just give string to be parsed with headers. The headers should be scholarship name, aid amount, criteria, deadline, additional info, and link to scholarship.`,
+            "",
+            setShowModal
+          );
+  
+          console.log('✅ Merit data fetched from API:', response); // Log API response
           setScholarshipData(response);
+  
+          console.log('🔄 Updating Firestore with new merit data...');
           await updateDoc(schoolDocRef, {
             meritDataTable: response,
           });
+          console.log('✅ Firestore updated with new merit data.');
         }
+      } else {
+        console.warn('⚠️ No school document found for IPEDS ID:', ipedsId); // Warn if document doesn't exist
       }
     } catch (err) {
-      //setError('Failed to fetch data');
+      console.error('🚨 Error in fetchMeritData:', err); // Log any errors
     } finally {
       setLoading(false);
+      console.log('🔚 Finished fetchMeritData.'); // Indicate completion
     }
   };
+  
 
   const fetchScholarshipData = async (refresh = false) => {
     setLoading(true);
@@ -234,19 +262,15 @@ const SchoolDetails = () => {
             </CardHeader>
             <CardContent>
             <div className="custom-flex-wrap">
-                <span className="badge badge-pill badge-college">
-                  In-state: {isNaN(Number(school['Total_price_for_in_state_students_2022_23']))
-                    ? 'NA'
-                    : school['Total_price_for_in_state_students_2022_23']}
-                </span>
-                <span className="badge badge-pill badge-college">
-                  Out-of-state: {isNaN(Number(school['Total_price_for_out_of_state_students_2022_23']))
-                    ? 'NA'
-                    : school['Total_price_for_out_of_state_students_2022_23']}
-                </span>
+            <span className="badge badge-pill badge-college">
+                In-state: {school['Total_price_for_in_state_students_2022_23']}
+              </span>
+              <span className="badge badge-pill badge-college">
+                Out-of-state: {school['Total_price_for_out_of_state_students_2022_23']}
+              </span>
                 <span className="badge badge-pill badge-college">
                   Percent receiving merit award: {isCollegeVisible ? (
-                    `${school['% Fresh w/out need Receiving Merit Aid'] || '15'}%`
+                    `${school['Percent_Freshman_without_need_receiving_merit_aid'] || '15'}`
                   ) : (
                     <UpgradeTooltip>
                       <span className="blurred-text">
@@ -261,7 +285,7 @@ const SchoolDetails = () => {
                   ) : (
                     <UpgradeTooltip>
                       <span className="blurred-text">
-                        {school['Avg merit award for Freshman w/out need'] || '$7,500'}
+                        {school['Avg_merit_award_for_Freshman_without_need'] || '$7,500'}
                       </span>
                     </UpgradeTooltip>
                   )}
@@ -300,12 +324,12 @@ const SchoolDetails = () => {
 
 
               {isCollegeVisible ? (
-    <TabsTrigger value="fetchScholarshipData">School Specific Scholarships</TabsTrigger>
+    <TabsTrigger value="fetchScholarshipData">Other Scholarships</TabsTrigger>
   ) : (
     <UpgradeTooltipNoBlur>
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', cursor: 'not-allowed' }}>
         <TabsTrigger value="fetchScholarshipData" disabled>
-          School Specific Scholarships
+          Other Scholarships
         </TabsTrigger>
         <div className="lock" style={{ position: 'absolute', right: '10px' }}>
           <FaLock style={{ fontSize: '.85em' }} />
@@ -351,6 +375,9 @@ const SchoolDetails = () => {
               </div>
               
             </CardContent>
+            <p className="text-xs text-gray-600 mt-2 text-center">
+  Disclaimer: Pocketly can make mistakes. Its best to verify the information shown here.
+</p>
           </Card>
         </div>
 

@@ -92,6 +92,11 @@ p {
   font-size: 15px;
 }
 
+.chat-box {
+  max-height: 500px; /* Choose any value you like */
+  overflow-y: auto;  /* Enables vertical scrolling if content is too tall */
+}
+
 .message {
   margin-bottom: 10px;
 }

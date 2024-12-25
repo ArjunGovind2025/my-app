@@ -201,7 +201,28 @@ const Terms = () => {
             your use of the Website will be resolved through binding arbitration or litigation in the courts located in New York County, New York.
             </p>
 
-            <h2 className="text-lg font-semibold text-gray-800">12. Contact Information</h2>
+            <h2 className="text-lg font-semibold text-gray-800">12. Consent to Receive Emails</h2>
+            <p className="text-gray-700">
+              By using Pocketly, you consent to receive emails from us related to your account, subscription, and the services
+              we provide. These emails may include:
+            </p>
+            <ul className="list-disc ml-6 text-gray-700">
+              <li>Account updates and notifications.</li>
+              <li>Promotional offers and newsletters.</li>
+              <li>Important updates about our Terms, Privacy Policy, or features.</li>
+            </ul>
+            <p className="text-gray-700">
+              You can opt out of receiving promotional emails at any time by clicking the “Unsubscribe” link provided in such emails. 
+              However, please note that certain transactional or essential emails (e.g., those related to account management) 
+              cannot be opted out of as they are necessary for using the platform.
+            </p>
+
+            <p className="text-gray-700">
+              For any questions regarding email preferences or to opt out of non-essential communications, please contact us at{" "}
+              <span className="font-medium">pocketly.ai@gmail.com</span>.
+            </p>
+
+            <h2 className="text-lg font-semibold text-gray-800">13. Contact Information</h2>
             <p className="text-gray-700">
               If you have questions or concerns about these Terms, please contact us at pocketly.ai@gmail.com.
             </p>

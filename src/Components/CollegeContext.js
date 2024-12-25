@@ -20,30 +20,52 @@ export const CombinedProvider = ({ children }) => {
 
   useEffect(() => {
     onAuthStateChanged(auth, async (currentUser) => {
+      console.log('Auth state changed:', currentUser ? `User signed in: ${currentUser.uid}` : 'No user signed in.');
+  
       setUser(currentUser);
       if (currentUser) {
-        console.log('User signed in:', currentUser.uid);
         const userDocRef = doc(db, 'userData', currentUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        console.log('Fetching user document:', userDocRef.path);
+  
+        let userDocSnap = await getDoc(userDocRef);
+        console.log('Initial userDocSnap exists:', userDocSnap.exists());
+  
         if (!userDocSnap.exists()) {
-          // Create the user document with default fields, including "access"
-          await setDoc(userDocRef, {
-            myColleges: {},
-            visibleColleges: [],
-            access: "Free", // Set the default access level
-          });
-        }if (userDocSnap.exists()) {
-          setUserDoc(userDocSnap.data());
-          setMyColleges(userDocSnap.data().myColleges || {});
-          setVisibleColleges(userDocSnap.data().visibleColleges || {});
-          setUID(currentUser.uid)
+          console.log('User document does not exist, creating with default fields...');
+          try {
+            await setDoc(userDocRef, {
+              myColleges: {},
+              visibleColleges: [],
+              access: "Free", // Set the default access level
+            });
+            console.log('User document successfully created with access: Free');
+  
+            // Re-fetch the document after creation
+            userDocSnap = await getDoc(userDocRef);
+            console.log('Re-fetched userDocSnap exists:', userDocSnap.exists());
+          } catch (error) {
+            console.error('Error creating user document:', error);
+          }
+        }
+  
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('Fetched user data:', userData);
+  
+          setUserDoc(userData);
+          setMyColleges(userData.myColleges || {});
+          setVisibleColleges(userData.visibleColleges || {});
+          setUID(currentUser.uid);
+          console.log('State updated with user data.');
+        } else {
+          console.warn('User document still does not exist after creation attempt.');
         }
       } else {
         console.log('No user signed in.');
       }
     });
   }, []);
-
+  
   const fetchUserDoc = async (currentUser) => {
     if (currentUser) {
       const userDocRef = doc(db, 'userData', currentUser.uid);
@@ -62,8 +84,24 @@ export const CombinedProvider = ({ children }) => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+  
+      // Set user state
       setUser(user);
       console.log("User signed in: ", user);
+  
+      // Reference to the user document in Firestore
+      const userDocRef = doc(db, "userData", user.uid);
+  
+      // Check if the user document exists
+      const userDocSnap = await getDoc(userDocRef);
+  
+      if (!userDocSnap.exists()) {
+        // Create the user document with `access = "Free"`
+        await setDoc(userDocRef, { access: "Free" });
+        console.log("User document created with access: Free");
+      } else {
+        console.log("User already exists, no changes made.");
+      }
     } catch (error) {
       console.error("Error signing in: ", error);
     }
@@ -147,7 +185,11 @@ export const CombinedProvider = ({ children }) => {
       
       // Check if we can add the new college to visibleColleges
       if (newVisibleColleges.length < maxVisible) {
-        newVisibleColleges.push(collegeData['IPEDS ID']);
+        if (!newVisibleColleges.includes(collegeData['IPEDS ID'])) {
+          newVisibleColleges.push(collegeData['IPEDS ID']);
+        } else {
+          console.log('College already visible, skipping:', collegeData['IPEDS ID']);
+        }
       }
       
       await updateDoc(userDocRef, {
@@ -285,9 +327,13 @@ export const CombinedProvider = ({ children }) => {
             const currentVisibleColleges = userData.visibleColleges || [];
             const accessLevel = userData.access
 
-            let newVisibleColleges = currentVisibleColleges;
-            if (currentVisibleColleges.length < (accessLevel === 'Free' ? 5 : accessLevel === 'Standard' ? 15 : Infinity)) {
-              newVisibleColleges = [...currentVisibleColleges, collegeData['IPEDS ID']];
+            let newVisibleColleges = [...currentVisibleColleges];
+            if (newVisibleColleges.length < (accessLevel === 'Free' ? 5 : accessLevel === 'Standard' ? 15 : Infinity)) {
+              if (!newVisibleColleges.includes(collegeData['IPEDS ID'])) {
+                newVisibleColleges.push(collegeData['IPEDS ID']);
+              } else {
+                console.log('College already visible, skipping:', collegeData['IPEDS ID']);
+              }
             }
 
             // Check if meritScore exists and compare it to the Merit Aid Cutoff Score

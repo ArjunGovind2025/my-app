@@ -12,7 +12,6 @@ import { db } from './firebaseConfig';
 import { Badge } from "./Components/ui/badge"; // Adjust the path based on your project setup
 
 
-
 const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
@@ -243,6 +242,7 @@ const Header = () => {
           )}
         </NavLink>
         <NavLink to="/upgrade">Upgrade</NavLink>
+        <NavLink to="/about">About</NavLink>
         <User className="h-5 w-5 cursor-pointer" onClick={handleProfileClick} />
       </Nav>
       <MobileNav>
@@ -287,6 +287,7 @@ const Header = () => {
                 
                 <NavLink to="/my-scholarships-spreadsheet">Scholarship Spreadsheet</NavLink>
                 <NavLink to="/upgrade">Upgrade</NavLink>
+                <NavLink to="/about">About</NavLink>
                 <User className="h-5 w-5 cursor-pointer" onClick={handleProfileClick} />
               </nav>
             </div>
